@@ -1,0 +1,58 @@
+{% comment %}
+  This extension controls RTL/LTR direction based on theme settings.
+  No visible elements are rendered on the page.
+{% endcomment %}
+
+<script>
+  (function() {
+    const htmlElement = document.documentElement;
+    const bodyElement = document.body;
+
+    function setRTL(isRTL) {
+      if (isRTL) {
+        htmlElement.setAttribute('dir', 'rtl');
+        htmlElement.setAttribute('lang', 'ar'); // or your RTL language
+        bodyElement.style.direction = 'rtl';
+        document.querySelector('html').style.direction = 'rtl';
+      } else {
+        htmlElement.setAttribute('dir', 'ltr');
+        htmlElement.setAttribute('lang', 'en'); // or your LTR language
+        bodyElement.style.direction = 'ltr';
+        document.querySelector('html').style.direction = 'ltr';
+      }
+    }
+
+    // Set initial state based on theme setting
+    setRTL({{ block.settings.enable_rtl }});
+
+    // Listen for changes from the Shopify Theme Editor
+    document.addEventListener('shopify:block:select', function(event) {
+      if (event.detail.blockId === {{ block.id | json }}) {
+        setRTL({{ block.settings.enable_rtl }});
+      }
+    });
+  })();
+</script>
+
+<style>
+  html[dir="rtl"],
+  body[dir="rtl"] {
+    direction: rtl !important;
+    text-align: right !important;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "RTL Control",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_rtl",
+      "label": "Enable RTL",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "86154af1674159ac797f5767f244100c"
+application_url = "https://faculty-harvard-describes-advantage.trycloudflare.com"
+embedded = true
+name = "TheHebrewAppReactNode"
+handle = "thehebrewappreactnode"
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "dev-store-emmy.myshopify.com"
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-01"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_themes,write_products"
+
+[auth]
+redirect_urls = [
+  "https://faculty-harvard-describes-advantage.trycloudflare.com/auth/callback",
+  "https://faculty-harvard-describes-advantage.trycloudflare.com/auth/shopify/callback",
+  "https://faculty-harvard-describes-advantage.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
