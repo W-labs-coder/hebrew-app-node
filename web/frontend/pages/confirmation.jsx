@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { Layout, Page, SkeletonBodyText } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
@@ -8,6 +8,7 @@ import { Redirect } from "@shopify/app-bridge/actions";
 export default function Confirmation() {
   const location = useLocation();
   const appBridge = useAppBridge();
+  const navigate = useNavigate()
 
   const shopify = useMemo(() => {
     if (appBridge) {
@@ -32,7 +33,7 @@ export default function Confirmation() {
       console.warn(
         "App Bridge navigation not available. Using fallback method."
       );
-      window.location.href = "/dashboard";
+      navigate("dashboard");
     }
   }, [shopify]);
 

@@ -1,4 +1,5 @@
 import Subscription from "../models/Subscription.js";
+import User from "../models/User.js";
 import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
 
@@ -154,6 +155,8 @@ export const confirmSubscription = async (req, res) => {
       trialEndDate,
       chargeId: charge_id,
     });
+
+    await User.create({shop})
 
     return res.status(200).json({url:`/?shop=${shop}&host=${host}&subscriptionActive=true`});
   } catch (error) {

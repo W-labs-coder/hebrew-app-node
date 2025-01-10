@@ -8,7 +8,8 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import billingRoutes from "./routes/billingRoutes.js";
-import themesRoutes from "./routes/themesRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
+
 
 // console.log(process.env)
 
@@ -78,7 +79,8 @@ app.use("/api/billing", shopify.validateAuthenticatedSession());
 
 // Then add your billing routes
 app.use("/api/billing", billingRoutes);
-app.use("/api/themes", shopify.validateAuthenticatedSession(), themesRoutes);
+app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
+
 
 
 

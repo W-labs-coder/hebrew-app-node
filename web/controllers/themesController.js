@@ -1,3 +1,4 @@
+import User from "../models/User.js";
 import shopify from "../shopify.js";
 
 export const fetchTheme = async (req, res) => {
@@ -49,5 +50,34 @@ export const fetchTheme = async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to fetch themes", details: error.message });
+  }
+};
+
+
+
+export const addSelectedTheme = async (req, res) => {
+  try {
+    const { themeId } = req.body;
+     const session = res.locals.shopify.session;
+
+     if (!session) {
+       return res
+         .status(401)
+         .json({ error: "Unauthorized: Session not found" });
+     }
+
+
+     const shopId = session.shop
+
+    const shop = await User.findOneAndUpdate(
+      { shop: shopId },
+      { $set: { selectedTheme: themeId } },
+      { new: true, upsert: true }
+    );
+
+    res.status(200).json({ message: "Theme added successfully", shop });
+  } catch (error) {
+    console.error("Error adding theme:", error);
+    res.status(500).json({ message: "Error adding theme" });
   }
 };

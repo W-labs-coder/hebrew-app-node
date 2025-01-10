@@ -8,6 +8,7 @@ const Button = ({
   variant = "primary",
   type = "button",
   disabled = false,
+  loading = false
 }) => {
   const baseStyle =
     "transition-colors duration-200";
@@ -27,9 +28,15 @@ const Button = ({
       className={buttonClass}
       onClick={onClick}
       type={type}
-      disabled={disabled}
+      disabled={disabled || loading}
     >
-      {children}
+      {loading ? (
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      ) : (
+        children
+      )}
     </button>
   );
 };

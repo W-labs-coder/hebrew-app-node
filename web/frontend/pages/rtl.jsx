@@ -17,7 +17,7 @@ export default function Rtl() {
 
   const fetchThemes = async () => {
     try {
-      const response = await fetch("/api/themes/get-themes", {
+      const response = await fetch("/api/settings/get-themes", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -55,15 +55,49 @@ export default function Rtl() {
 
 const RTLSection = ({ themes }) => {
   const [selectedTheme, setSelectedTheme] = useState("");
+  const [shop, setShop] = useState("");
+  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const handleThemeChange = (e) => {
     setSelectedTheme(e.target.value);
+    setIsSubmitSuccessful(false); // Reset when theme changes
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Selected theme:", selectedTheme);
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch("/api/settings/add-selected-theme", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ themeId: selectedTheme }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const theme = data.shop.selectedTheme;
+      console.log("Theme added successfully", data.shop);
+      setSelectedTheme(theme);
+      setShop(data.shop.shop);
+      setIsSubmitSuccessful(true);
+    } else {
+      console.error("Failed to add theme");
+      setIsSubmitSuccessful(false);
+    }
+  } catch (error) {
+    console.error("Error adding theme:", error);
+    setIsSubmitSuccessful(false);
+  }
+};
+
+const getThemeEditorUrl = () => {
+  const shopifyAdmin = "https://admin.shopify.com/store";
+  const themeIdMatch = selectedTheme.match(/\/(\d+)$/);
+  const themeId = themeIdMatch ? themeIdMatch[1] : "";
+  return `${shopifyAdmin}/${shop.replace(
+    ".myshopify.com"
+  , '')}/themes/${themeId}/editor?context=apps`;
+};
 
   return (
     <section className="rtl-section">
@@ -184,13 +218,46 @@ const RTLSection = ({ themes }) => {
               value={selectedTheme}
               onChange={handleThemeChange}
             />
-            <p>
-              ערכת נושא נוכחית: <span>{selectedTheme}</span>
+            <p
+              className="fs14 fw500"
+              style={{ marginTop: "10px", color: "#333" }}
+            >
+              ערכת נושא נוכחית:{" "}
+              <span className="fw700">
+                {themes.find((theme) => theme.id === selectedTheme)?.name ||
+                  "לא נבחרה ערכת נושא"}
+              </span>
             </p>
+
             <Button type="submit">הגדרת אמצעי תשלום</Button>
           </form>
           <RtlImage />
         </div>
+
+        {isSubmitSuccessful && (
+          <a
+            href={getThemeEditorUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="button"
+            style={{
+              display: "inline-block",
+              marginTop: "10px",
+              padding: "10px 20px",
+              backgroundColor: "#007bff",
+              color: "#ffffff",
+              textDecoration: "none",
+              borderRadius: "5px",
+              fontWeight: "bold",
+            }}
+          >
+            עבור לערכת הנושא
+          </a>
+        )}
+        <p class="fs14" style={{ marginTop: "10px" }}>
+          נתקלים בקושי למצוא את חבילת הנושא שלכם? צרו קשר ואנחנו נדאג להוסיף
+          אותה עבורכם.
+        </p>
       </div>
 
       <div className="steps">

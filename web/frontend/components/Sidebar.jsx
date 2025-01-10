@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import DashboardIcon from "./svgs/DashboardIcon";
 import RtlIcon from "./svgs/RtlIcon";
 import LanguageIcon from "./svgs/LanguageIcon";
@@ -31,7 +31,7 @@ const mainMenu = [
     permissions: "rtl",
   },
   {
-    title: "כפתור שפה ודינאמי",
+    title: "שפה",
     slug: "language",
     link: "/language",
     icon: LanguageIcon,
@@ -119,8 +119,10 @@ const mainMenu = [
 const Sidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const navigate = useNavigate();
   const handleNav = (link) => {
-    window.location.href = link;
+    navigate(link)
+    // window.location.href = link;
   };
 
   return (

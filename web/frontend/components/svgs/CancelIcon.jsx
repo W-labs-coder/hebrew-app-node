@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function CancelIcon() {
+export default function CancelIcon({ color = "#FBFBFB" }) {
   return (
     <svg
       width="12"
@@ -11,7 +11,7 @@ export default function CancelIcon() {
     >
       <path
         d="M10.6673 1.33325L1.33398 10.6666M1.33398 1.33325L10.6673 10.6666"
-        stroke="#FBFBFB"
+        stroke={color}
         stroke-width="1.5"
         stroke-linecap="round"
         stroke-linejoin="round"
