@@ -1,12 +1,19 @@
 {% comment %}
-  This extension controls RTL/LTR direction based on theme settings.
+  This extension controls RTL/LTR direction, Buy Now text, and theme font based on settings and metafields.
   No visible elements are rendered on the page.
 {% endcomment %}
+
+{% assign buyNowText = shop.metafields.custom.buy_now_button_text.value | default: 'Buy Now' %}
+{% assign alternativeFont = shop.metafields.custom.font.value | default: "'Arial', sans-serif" %}
 
 <script>
   (function () {
     const htmlElement = document.documentElement;
     const bodyElement = document.body;
+    const buyNowText = {{ buyNowText | json }};
+    const alternativeFont = {{ alternativeFont | json }};
+    const enableBuyNowText = {{ block.settings.enable_buy_now_text }};
+    const enableAlternativeFont = {{ block.settings.enable_alternative_font }};
 
     function setRTL(isRTL) {
       if (isRTL) {
@@ -20,52 +27,37 @@
       }
     }
 
-    async function updateBuyNowText() {
-      try {
-        // Get the shop domain from the Liquid variable
-        const shopDomain = "{{ shop.myshopify_domain }}";
-
-        // Send the shop domain dynamically to your backend
-        const response = await fetch('/api/settings/fetch-user', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ shop: shopDomain }),
-        });
-
-        if (!response.ok) {
-          console.error('Failed to fetch Buy Now text');
-          return;
-        }
-
-        const data = await response.json();
-        const buyNowText = data.buyNowText || 'Buy Now'; // Default fallback
-
-        // Update all Buy Now buttons on the page
+    function updateBuyNowText() {
+      if (enableBuyNowText) {
         document.querySelectorAll('.buy-now-button').forEach((button) => {
           button.textContent = buyNowText;
         });
-      } catch (error) {
-        console.error('Error fetching Buy Now text:', error);
       }
     }
 
-    // Set initial state
-    setRTL({{ block.settings.enable_rtl }});
+    function setAlternativeFont(enable) {
+      if (enable) {
+        bodyElement.style.fontFamily = alternativeFont;
+      } else {
+        bodyElement.style.fontFamily = ''; // Reset to theme default
+      }
+    }
 
-    // Fetch and update "Buy Now" button text
+    // Set initial states
+    setRTL({{ block.settings.enable_rtl }});
     updateBuyNowText();
+    setAlternativeFont(enableAlternativeFont);
 
     // Listen for changes from the Shopify Theme Editor
     document.addEventListener('shopify:block:select', function (event) {
       if (event.detail.blockId === {{ block.id | json }}) {
         setRTL({{ block.settings.enable_rtl }});
+        updateBuyNowText();
+        setAlternativeFont({{ block.settings.enable_alternative_font }});
       }
     });
   })();
 </script>
-
 
 <style>
   html[dir="rtl"],
@@ -77,13 +69,25 @@
 
 {% schema %}
 {
-  "name": "RTL Control",
+  "name": "Theme Customization",
   "target": "body",
   "settings": [
     {
       "type": "checkbox",
       "id": "enable_rtl",
       "label": "Enable RTL",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_buy_now_text",
+      "label": "Enable Custom Buy Now Text",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_alternative_font",
+      "label": "Enable Alternative Font",
       "default": false
     }
   ]

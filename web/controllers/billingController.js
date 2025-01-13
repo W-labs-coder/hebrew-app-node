@@ -191,7 +191,8 @@ export const checkSubscriptions = async (req, res) => {
     console.log('my shop',shop)
   try {
     const subscription = await UserSubscription.findOne({ shop }).sort({createdAt : -1});
-    res.status(200).json({subscription});
+    const user = await User.findOne({shop})
+    res.status(200).json({subscription, user});
   } catch (error) {
     console.error("Error fetching subscriptions:", error);
     res.status(500).send({ success: false, message: error.message });

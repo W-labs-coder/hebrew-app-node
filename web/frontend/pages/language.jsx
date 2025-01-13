@@ -11,6 +11,7 @@ import AlertDangerIcon from "../components/svgs/AlertDangerIcon";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/slices/authSlice";
+import FontsImage from "../components/svgs/FontsImage";
 
 export default function Language() {
   const [themes, setThemes] = useState([]);
@@ -30,6 +31,106 @@ export default function Language() {
       id: "arimo",
       name: "Arimo",
       value: "arimo",
+    },
+    {
+      id: "assistant",
+      name: "Assistant",
+      value: "assistant",
+    },
+    {
+      id: "bellefair",
+      name: "Bellefair",
+      value: "bellefair",
+    },
+    {
+      id: "bona nova",
+      name: "Bona Nova",
+      value: "bona nova",
+    },
+    {
+      id: "cousine",
+      name: "Cousine",
+      value: "cousine",
+    },
+    {
+      id: "david libre",
+      name: "David Libre",
+      value: "david libre",
+    },
+    {
+      id: "frank ruhl lible",
+      name: "Frank Ruhl Lible",
+      value: "frank ruhl lible",
+    },
+    {
+      id: "fredoka",
+      name: "Fredoka",
+      value: "fredoka",
+    },
+    {
+      id: "heebo",
+      name: "Heebo",
+      value: "heebo",
+    },
+    {
+      id: "ibm plex sans hebrew",
+      name: "IBM Plex Sans Hebrew",
+      value: "ibm plex sans hebrew",
+    },
+    {
+      id: "karantina",
+      name: "Karantina",
+      value: "karantina",
+    },
+    {
+      id: "miriam libre",
+      name: "Miriam Libre",
+      value: "miriam libre",
+    },
+    {
+      id: "noto rashi hebrew",
+      name: "Noto Rashi Hebrew",
+      value: "noto rashi hebrew",
+    },
+    {
+      id: "noto sans hebrew",
+      name: "Noto Sans Hebrew",
+      value: "noto sans hebrew",
+    },
+    {
+      id: "open sans",
+      name: "Open Sans",
+      value: "open sans",
+    },
+    {
+      id: "rubik",
+      name: "Rubik",
+      value: "rubik",
+    },
+    {
+      id: "secular one",
+      name: "Secular One",
+      value: "secular one",
+    },
+    {
+      id: "suez one",
+      name: "Suez One",
+      value: "suez one",
+    },
+    {
+      id: "tinos",
+      name: "Tinos",
+      value: "tinos",
+    },
+    {
+      id: "varela round",
+      name: "Varela Round",
+      value: "varela round",
+    },
+    {
+      id: "greycliff hebrew cf",
+      name: "Greycliff Hebrew CF",
+      value: "greycliff hebrew cf",
     },
   ];
   const languages = [
@@ -51,6 +152,7 @@ export default function Language() {
               <div>
                 <LanguageSection languages={languages} />
                 <BuyNow languages={languages} />
+                <Fonts fonts={fonts} />
               </div>
             </Layout.Section>
           </Layout>
@@ -357,6 +459,146 @@ const BuyNow = () => {
             עבור לערכת הנושא
           </a>
         )}
+      </div>
+    </section>
+  );
+};
+
+
+const Fonts = ({fonts}) => {
+  const user = useSelector((state) => state.auth.user);
+  const [font, setFont] = useState(
+    user?.font || "",
+  );
+
+  const dispatch = useDispatch();
+
+  const [isFontSubmitSuccessful, setIsFontSubmitSuccessful] =
+    useState(false);
+  const [isFontLoading, setIsFontLoading] = useState(false);
+
+  const handleFontChange = (e) => {
+    const { name, value } = e.target;
+    setFont(value)
+  };
+   
+
+  const saveFont = async (e) => {
+    e.preventDefault();
+    setIsFontLoading(true);
+    try {
+      const response = await fetch("/api/settings/add-font", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ font }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        dispatch(login({ user: data.user }));
+        setIsFontSubmitSuccessful(true);
+
+        toast.success("Font Added Successfully");
+      } else {
+        console.error("Failed to update Font");
+      }
+    } catch (error) {
+      console.error("Error updating Font:", error);
+      toast.error("Could not add Font");
+    } finally {
+      setIsFontLoading(false);
+    }
+  };
+
+  const getFontEditor = () => {
+    const shopifyAdmin = "https://admin.shopify.com/store";
+    const themeIdMatch = user?.selectedTheme.match(/\/(\d+)$/);
+    const themeId = themeIdMatch ? themeIdMatch[1] : "";
+    return `${shopifyAdmin}/${user?.shop.replace(
+      ".myshopify.com",
+      ""
+    )}/themes/${themeId}/editor?context=apps`;
+  };
+
+  return (
+    <section className="rtl-section">
+      <div
+        className="d-flex jcb"
+        style={{
+          margin: "16px 0",
+          border: "1px solid #C6C6C6",
+          borderRadius: "16px",
+          padding: "16px",
+          gap: "16px",
+          backgroundColor: "#FBFBFB",
+        }}
+      >
+        <div className="d-flex flex-column">
+          <p className="fs14 fw700 mb-0">בחר שפה וגופן:</p>
+          <p className="fs14 fw500 mb-0" style={{ color: "#777" }}>
+            "בחר את השפה שלך, בחר סגנון גופן, ואז לחץ על 'שמור'"
+          </p>
+          <form onSubmit={saveFont}>
+            <Input
+              type="select"
+              label=""
+              id="font"
+              name="font"
+              options={fonts}
+              placeholder="בחר גופן"
+              value={font}
+              onChange={handleFontChange}
+            />
+
+            <Button type="submit" loading={isFontLoading}>
+              שמור
+            </Button>
+          </form>
+          {isFontSubmitSuccessful && (
+            <a
+              href={getFontEditor()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="button bg-yellow"
+              style={{
+                display: "inline-block",
+                marginTop: "10px",
+                padding: "10px 20px",
+                color: "#0D0D0D",
+                textDecoration: "none",
+                borderRadius: "5px",
+                fontWeight: "bold",
+              }}
+            >
+              עבור לערכת הנושא
+            </a>
+          )}
+
+          <div className="steps mt-4">
+            {/* <h4>הדרכה לשימוש במסך זה:</h4> */}
+
+            {[
+              "שלב 1 - כתבו את הטקסט שאתם מעוניינים שיופיע על כפתור קנייה.",
+              'שלב 2 - לחצו "שמירה"',
+              'שלב 3 - הכנסו ל"הגדרות האפליקציה בהערכת נושא"',
+              'שלב 4 - וודאו שהאפליקציה מופעלת ושמסומן "Translation"',
+            ].map((item) => (
+              <div
+                className="d-flex aic gap-3 mb-2"
+                style={{ justifyContent: "flex-start" }}
+                key={item}
+              >
+                <CheckLightIcon />
+                <p className="fs14" style={{ color: "#FBFBFB !important" }}>
+                  {item}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <FontsImage />
       </div>
     </section>
   );

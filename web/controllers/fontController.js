@@ -1,9 +1,9 @@
 import User from "../models/User.js";
 import shopify from "../shopify.js";
 
-export const addBuyNow = async (req, res) => {
+export const addFont = async (req, res) => {
   try {
-    const { buyNowSize, buyNowText } = req.body;
+    const { font } = req.body;
     const session = res.locals.shopify.session;
 
     if (!session) {
@@ -15,7 +15,7 @@ export const addBuyNow = async (req, res) => {
     // Update user data in MongoDB
     const user = await User.findOneAndUpdate(
       { shop: shopId },
-      { $set: { buyNowText, buyNowSize } },
+      { $set: { font } },
       { new: true, upsert: true }
     );
 
@@ -58,11 +58,11 @@ export const addBuyNow = async (req, res) => {
       variables: {
         metafields: [
           {
-            key: "buy_now_button_text",
+            key: "font",
             namespace: "custom",
             ownerId: shopGid,
             type: "single_line_text_field",
-            value: buyNowText,
+            value: font,
           },
         ],
       },
@@ -96,28 +96,5 @@ export const addBuyNow = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error adding buy now details", error: error.message });
-  }
-};
-
-export const fetchUser = async (req, res) => {
-  const { shop } = req.body;
-
-  if (!shop) {
-    return res.status(400).json({ error: "Shop is required" });
-  }
-
-  try {
-    const shopData = await User.findOne({ shop });
-
-    if (!shopData) {
-      return res.status(404).json({ error: "Shop not found" });
-    }
-
-
-
-    res.json({ buyNowText: shopData.buyNowText });
-  } catch (error) {
-    console.error("Error fetching Buy Now text:", error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 };
