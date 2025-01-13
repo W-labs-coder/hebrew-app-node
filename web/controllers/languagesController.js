@@ -17,13 +17,13 @@ export const addSelectedLanguage = async (req, res) => {
 
      const shopId = session.shop
 
-    const lang = await User.findOneAndUpdate(
+    const user = await User.findOneAndUpdate(
       { shop: shopId },
       { $set: { selectedLanguage: language } },
       { new: true, upsert: true }
     );
 
-    res.status(200).json({ message: "Language added successfully", lang });
+    res.status(200).json({ message: "Language added successfully", user });
   } catch (error) {
     console.error("Error adding language:", error);
     res.status(500).json({ message: "Error adding language" });

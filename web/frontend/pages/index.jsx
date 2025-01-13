@@ -19,13 +19,13 @@ import { ProductsCard } from "../components";
 import Subscription from "../components/Subscription";
 import { getSessionToken } from "@shopify/app-bridge-utils";
 import { useAuthenticatedFetch } from "../hooks/useAuthenticatedFetch";
-
+import {useNavigate} from 'react-router-dom'
 
 export default function HomePage() {
   const { t } = useTranslation();
   const app = useAppBridge();
   const redirect = Redirect.create(app);
-
+  const navigate = useNavigate();
   const authenticatedFetch = useAuthenticatedFetch();
   const [subscriptions, setSubscriptions] = useState([]);
   const appBridge = useAppBridge();
@@ -56,8 +56,9 @@ export default function HomePage() {
       if (response.ok) {
         const data = await response.json();
 
-        if (data) {
-            window.location.href = "/dashboard";
+        if (data.subscription) {
+          console.log(data)
+          navigate("dashboard");
         }
       } else {
         console.error("Failed to fetch subscriptions");

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import { Frame, Layout, Page } from "@shopify/polaris";
 import VideoSvg from "../components/svgs/VideoSvg";
@@ -13,12 +13,17 @@ import Alert2 from "../components/svgs/Alert2";
 import Accessibility2 from "../components/svgs/Accessibility2";
 import AutomaticFocus2 from "../components/svgs/AutomaticFocus2";
 import Css2 from "../components/svgs/Css2";
+import Training2 from "../components/svgs/Training2";
+import { useDispatch } from "react-redux";
+import { login } from "../store/slices/authSlice";
+import { Navigate, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const categoryContents = [
   {
     name: "ימין לשמאל",
     icon: Rtl2,
-    content: "שנו את היישור של האתר שלכם מימין לשמאל - בלחיצת כפתור!",
+    content: "שנה את כיוון התצוגה של האתר שלך מימין לשמאל בלחיצה אחת!",
     button: "הגדרת RTL",
     link: "rtl",
   },
@@ -26,38 +31,31 @@ const categoryContents = [
     name: "כפתור שפה ודינאמי",
     icon: Language2,
     content:
-      "תרגמו את האתר שלכם לעברית במהירות ותאפשרו לקהל שלכם לקרוא באתר באופן שהם מכירים ורגילים אליו.",
+      "תרגם את האתר שלך לעברית באופן מיידי, כך שהקהל שלך יוכל לגלוש בשפה המועדפת עליו.",
     button: "שפת הגדרה",
     link: "language",
   },
   {
-    name: "אמצעי תשלום",
+    name: "שיטות תשלום",
     icon: Payment2,
     content:
-      "הוסיפו לאתר את סמלי אמצעי התשלום המקומיים (ויזה, ביט וכו') בהתאם לאופן התשלום שאתם מקבלים בהזמנות - בכמה קליקים בודדים!",
+      "שילוב סמלי שיטות תשלום מקומיות (ויזה, ביט, וכו') לאתר שלך, בהתאמה לאופציות התשלום המתקבלות - הכל בלחיצה אחת!",
     button: "הגדרת אמצעי תשלום",
     link: "payment",
   },
   {
-    name: "גופנים",
-    icon: Fonts2,
-    content:
-      "הוכח כי הפונט של האתר עשוי לגרום ללמעלה מ-15% מהגולשים להישאר באתר. כדאי לשנות את הפונט שלכם! יש תמיכה בפונטים בעברית.",
-    button: "הגדרת גופן",
-    link: "fonts",
-  },
-  {
-    name: "תצורת WhatsApp",
+    name: "מדריך להגדרת WhatsApp",
     icon: Whatsapp2,
-    content: "הגדר הודעת פתיחה של WhatsApp כדי לברך מבקרים בחזית החנות שלך.",
+    content:
+      "ברוכים הבאים לחנות שלנו! אנחנו כאן כדי לעזור לכם בכל שאלה. אל תהססו לפנות אלינו. שתהיה לכם חווית קנייה מהנה!",
     button: "הגדר עכשיו",
     link: "whatsapp",
   },
   {
-    name: "שַׁבָּת",
+    name: "מצב שבת",
     icon: Sabbath2,
     content:
-      "הגדר את שעות השבת של החנות שלך כך שייסגרו ויפתחו מחדש באופן אוטומטי, תוך עדכון ללקוחות לגבי שעות הפעילות שלך",
+      "הגדר את שעות השבת של החנות שלך לסגירה ופתיחה אוטומטית, תוך שמירה על לקוחות מעודכנים לגבי לוח הזמנים שלך.",
     button: "קבע שבת",
     link: "sabbath",
   },
@@ -65,7 +63,7 @@ const categoryContents = [
     name: "התראות",
     icon: Alert2,
     content:
-      "אין סיבה שהלקוחות שלכם יקבלו התראות למייל באנגלית - שנו עכשיו והתאימו את המלל לשפה ולמותג שלכם!",
+      "ודאו שהלקוחות שלכם מקבלים התראות בעברית - התאימו את הטקסט לשפה ולמותג שלכם!",
     button: "הגדרות הודעות",
     link: "alert",
   },
@@ -73,43 +71,80 @@ const categoryContents = [
     name: "נגישות",
     icon: Accessibility2,
     content:
-      "הפעילו תוסף נגישות על מנת לשפר את ידידותיות השימוש באתר שלכם לגולשים בעלי מוגבלויות. יש אפשרות גם להצהרת נגישות בקליק!",
+      "הפעל תוסף נגישות כדי לשפר את השימושיות של האתר שלך עבור משתמשים עם מוגבלויות. אפשרות בלחיצה אחת להצהרת נגישות כלולה!",
     button: "הגדרת נגישות",
     link: "accessibility",
   },
   {
-    name: "מיקוד אוטומטי",
+    name: "כתובת אוטומטית",
     icon: AutomaticFocus2,
     content:
-      "באמצעות כלי המיקוד האוטומטי, המערכת שלנו יכולה לעדכן אוטומטית את המיקוד בהזמנות הנכנסות בהתאם לכתובת שהלקוח הזין.",
+      "הכלי שלנו לכתובת אוטומטית מעדכן את כתובות ההזמנה הנכנסות בהתאם לקלט של הלקוח, ומייעל את תהליך עיבוד ההזמנות שלך.",
     button: "הגדרת מיקוד אוטומטי",
     link: "automatic-focus",
   },
   {
     name: "CSS",
     icon: Css2,
-    content: "שינוי הגדרות עיצוב מתקדמות - למשתמשים בעלי יידע טכני בלבד.",
+    content: "שנה את הגדרות העיצוב המתקדמות - למשתמשים עם מומחיות טכנית בלבד.",
     button: "הגדרת CSS מותאם",
     link: "css",
+  },
+  {
+    name: "Training",
+    icon: Training2,
+    content:
+      "התאמת הגדרות עיצוב מתקדמות - מיועדות למשתמשים בעלי ידע טכני בלבד.",
+    button: "עבור לדף ההנחיות",
+    link: "training",
   },
 ];
 
 export default function dashboard() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
+  useEffect(() => {
+      checkSubscription();
+    }, []);
+  
+    const checkSubscription = async () => {
+      try {
+        const response = await fetch("/api/billing/check-subscription", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const subscription = data.subscription;
+          if(!subscription){
+             toast.warning("No Subscription Found!");
+            navigate('/')
+          }
+          
+        } else {
+          console.error("Failed to fetch subscription");
+        }
+      } catch (error) {
+        console.error("Error fetching subscription:", error);
+      }
+    };
   return (
     <div className="dashboard-container">
       <Sidebar />
       <div className="main-content">
-      <Page fullWidth>
-        <Layout>
-          <Layout.Section>
-            <div>
-              <WelcomeSection />
-              <VideoIntroSection />
-              <SettingsCategorySection />
-            </div>
-          </Layout.Section>
-        </Layout>
-      </Page>
+        <Page fullWidth>
+          <Layout>
+            <Layout.Section>
+              <div className="rtl-section">
+                <WelcomeSection />
+                <VideoIntroSection />
+                <SettingsCategorySection />
+              </div>
+            </Layout.Section>
+          </Layout>
+        </Page>
       </div>
     </div>
   );
@@ -169,8 +204,8 @@ const SettingsCategorySection = () => (
     <div>
       <p className="fs18 fw700">קטגוריית הגדרות</p>
       <p className="fs14" style={{ color: "#777" }}>
-        בלחיצה אחת על כל קטגוריה, תוכל בקלות להתאים את חנות ה-Shopify שלך לחוויה
-        הייחודית שלך בישראל.
+        התאימו את חנות ה-Shopify שלכם לחוויית קנייה ייחודית בישראל בלחיצה אחת על
+        כל קטגוריה.
       </p>
     </div>
     <div className="row aic" style={{ gap: "16px", marginTop: "16px" }}>
@@ -188,13 +223,13 @@ const CategoryCard = ({ content }) => {
   };
   return (
     <div
-      className="col-lg-5 col-md-5 col-12 d-flex flex-column jcs flex-fill"
+      className="col-lg-5 col-md-5 col-12 d-flex flex-column jcb flex-fill"
       style={{
         border: "1px solid #C6C6C6",
         backgroundColor: "#FBFBFB",
-        gap: "45px",
+        gap: "15px",
         borderRadius: "16px",
-        padding: "16px",
+        padding: "16px", height:'200px'
       }}
     >
       <div className="d-flex gap-2 aic">

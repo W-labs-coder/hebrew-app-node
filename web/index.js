@@ -74,6 +74,8 @@ app.use(
 app.use(express.json());
 
 
+
+
 // Add this line before your billing routes
 app.use("/api/billing", shopify.validateAuthenticatedSession());
 

@@ -69,13 +69,13 @@ export const addSelectedTheme = async (req, res) => {
 
      const shopId = session.shop
 
-    const shop = await User.findOneAndUpdate(
+    const user = await User.findOneAndUpdate(
       { shop: shopId },
       { $set: { selectedTheme: themeId } },
       { new: true, upsert: true }
     );
 
-    res.status(200).json({ message: "Theme added successfully", shop });
+    res.status(200).json({ message: "Theme added successfully", user });
   } catch (error) {
     console.error("Error adding theme:", error);
     res.status(500).json({ message: "Error adding theme" });

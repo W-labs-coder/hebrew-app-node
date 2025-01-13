@@ -156,9 +156,14 @@ export const confirmSubscription = async (req, res) => {
       chargeId: charge_id,
     });
 
-    await User.create({shop})
+    const user = await User.create({shop})
 
-    return res.status(200).json({url:`/?shop=${shop}&host=${host}&subscriptionActive=true`});
+    return res
+      .status(200)
+      .json({
+        url: `/?shop=${shop}&host=${host}&subscriptionActive=true`,
+        user,
+      });
   } catch (error) {
     console.error("Detailed error:", error);
     return res.status(500).json({error: error});
@@ -186,7 +191,7 @@ export const checkSubscriptions = async (req, res) => {
     console.log('my shop',shop)
   try {
     const subscription = await UserSubscription.findOne({ shop }).sort({createdAt : -1});
-    res.status(200).json(subscription);
+    res.status(200).json({subscription});
   } catch (error) {
     console.error("Error fetching subscriptions:", error);
     res.status(500).send({ success: false, message: error.message });

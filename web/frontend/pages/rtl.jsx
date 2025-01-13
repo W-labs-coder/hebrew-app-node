@@ -7,6 +7,9 @@ import CheckLightIcon from "../components/svgs/CheckLightIcon";
 import CancelIcon from "../components/svgs/CancelIcon";
 import AlertIcon3 from "../components/svgs/AlertIcon3";
 import RtlImage from "../components/svgs/RtlImage";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/slices/authSlice";
+import { toast } from "react-toastify";
 
 export default function Rtl() {
   const [themes, setThemes] = useState([]);
@@ -25,7 +28,6 @@ export default function Rtl() {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         setThemes(data.themes);
       } else {
         console.error("Failed to fetch themes");
@@ -54,50 +56,62 @@ export default function Rtl() {
 }
 
 const RTLSection = ({ themes }) => {
-  const [selectedTheme, setSelectedTheme] = useState("");
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.auth.user);
+  const [selectedTheme, setSelectedTheme] = useState(user?.selectedTheme || "");
   const [shop, setShop] = useState("");
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [themeLoading, setThemeLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleThemeChange = (e) => {
     setSelectedTheme(e.target.value);
     setIsSubmitSuccessful(false); // Reset when theme changes
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await fetch("/api/settings/add-selected-theme", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ themeId: selectedTheme }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const theme = data.shop.selectedTheme;
-      console.log("Theme added successfully", data.shop);
-      setSelectedTheme(theme);
-      setShop(data.shop.shop);
-      setIsSubmitSuccessful(true);
-    } else {
-      console.error("Failed to add theme");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setThemeLoading(true);
+    try {
+      const response = await fetch("/api/settings/add-selected-theme", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ themeId: selectedTheme }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const theme = data.user.selectedTheme;
+        setSelectedTheme(theme);
+        setShop(data.user.shop);
+        dispatch(login({ user: data.user }));
+        setThemeLoading(false);
+        setIsSubmitSuccessful(true);
+        toast.success('Theme Selected Successfully')
+      } else {
+        console.error("Failed to add theme");
+        setIsSubmitSuccessful(false);
+        setThemeLoading(false);
+        toast.error("Error Adding Theme");
+      }
+    } catch (error) {
+      console.error("Error adding theme:", error);
       setIsSubmitSuccessful(false);
+      setThemeLoading(false);
+      toast.error("Error Adding Theme");
     }
-  } catch (error) {
-    console.error("Error adding theme:", error);
-    setIsSubmitSuccessful(false);
-  }
-};
+  };
 
-const getThemeEditorUrl = () => {
-  const shopifyAdmin = "https://admin.shopify.com/store";
-  const themeIdMatch = selectedTheme.match(/\/(\d+)$/);
-  const themeId = themeIdMatch ? themeIdMatch[1] : "";
-  return `${shopifyAdmin}/${shop.replace(
-    ".myshopify.com"
-  , '')}/themes/${themeId}/editor?context=apps`;
-};
+  const getThemeEditorUrl = () => {
+    const shopifyAdmin = "https://admin.shopify.com/store";
+    const themeIdMatch = user?.selectedTheme.match(/\/(\d+)$/);
+    const themeId = themeIdMatch ? themeIdMatch[1] : "";
+    return `${shopifyAdmin}/${shop.replace(
+      ".myshopify.com",
+      ""
+    )}/themes/${themeId}/editor?context=apps`;
+  };
 
   return (
     <section className="rtl-section">
@@ -224,12 +238,13 @@ const getThemeEditorUrl = () => {
             >
               ערכת נושא נוכחית:{" "}
               <span className="fw700">
-                {themes.find((theme) => theme.id === selectedTheme)?.name ||
-                  "לא נבחרה ערכת נושא"}
+                {themes.find((theme) => theme.id === selectedTheme)?.name || ""}
               </span>
             </p>
 
-            <Button type="submit">הגדרת אמצעי תשלום</Button>
+            <Button loading={themeLoading} type="submit">
+              הגדרת אמצעי תשלום
+            </Button>
           </form>
           <RtlImage />
         </div>

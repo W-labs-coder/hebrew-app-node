@@ -8,6 +8,9 @@ import CancelIcon from "../components/svgs/CancelIcon";
 import AlertIcon3 from "../components/svgs/AlertIcon3";
 import RtlImage from "../components/svgs/RtlImage";
 import AlertDangerIcon from "../components/svgs/AlertDangerIcon";
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/slices/authSlice";
 
 export default function Language() {
   const [themes, setThemes] = useState([]);
@@ -59,9 +62,9 @@ export default function Language() {
 
 const LanguageSection = ({  languages }) => {
   
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const user = useSelector((state) => state.auth.user);
+  const [selectedLanguage, setSelectedLanguage] = useState(user?.selectedLanguage || "");
   const [shop, setShop] = useState("");
-  
   const [isLanguageSubmitSuccessful, setIsLanguageSubmitSuccessful] = useState(false);
   const [isLangaugeLoading, setIsLanguageLoading] = useState(false)
 
@@ -70,8 +73,7 @@ const LanguageSection = ({  languages }) => {
     setIsLanguageSubmitSuccessful(false); // Reset when theme changes
   };
  
-
-
+const dispatch = useDispatch() 
 const saveLanguage = async (e) => {
   e.preventDefault();
   setIsLanguageLoading(true)
@@ -85,28 +87,31 @@ const saveLanguage = async (e) => {
     });
     if (response.ok) {
       const data = await response.json();
-      const language = data.lang.selectedLanguage;
-      console.log("Language added successfully", data.lang);
+      const language = data.user.selectedLanguage;
       setSelectedLanguage(language);
-      setShop(data.lang.shop);
+      setShop(data.user.shop);
+      dispatch(login({ user: data.user }));
       setIsLanguageSubmitSuccessful(true);
       setIsLanguageLoading(false)
+      toast.success("Language Added Successfully")
     } else {
       console.error("Failed to add theme");
       setIsLanguageSubmitSuccessful(false);
       setIsLanguageLoading(false);
+      toast.error("Error Adding Language");
     }
   } catch (error) {
     console.error("Error adding theme:", error);
     setIsLanguageSubmitSuccessful(false);
     setIsLanguageLoading(false)
+    toast.error("Error Adding Language");
   }
 };
 
 const getLanguageEditorUrl = () => {
   const shopifyAdmin = "https://admin.shopify.com/store";
-  const themeIdMatch = selectedTheme.match(/\/(\d+)$/);
-  const themeId = themeIdMatch ? themeIdMatch[1] : "";
+  // const themeIdMatch = selectedTheme.match(/\/(\d+)$/);
+  // const themeId = themeIdMatch ? themeIdMatch[1] : "";
   return `${shopifyAdmin}/${shop.replace(
     ".myshopify.com",
     ""
@@ -235,11 +240,14 @@ const getLanguageEditorUrl = () => {
 
 
 const BuyNow = () => {
+  const user = useSelector((state) => state.auth.user);
   const [buyNow, setBuyNow] = useState({
-    buyNowText: "",
-    buyNowSize: "",
+    buyNowText: user?.buyNowText || "",
+    buyNowSize: user?.buyNowSize || "",
   });
-  const [user, setUser] = useState("");
+  
+  const dispatch = useDispatch();
+  
   const [isBuyNowSubmitSuccessful, setIsBuyNowSubmitSuccessful] =
     useState(false);
   const [isBuyNowLoading, setIsBuyNowLoading] = useState(false);
@@ -252,6 +260,7 @@ const BuyNow = () => {
     }));
     setIsBuyNowSubmitSuccessful(false);
   };
+  
 
   const saveBuyNow = async (e) => {
     e.preventDefault();
@@ -267,14 +276,16 @@ const BuyNow = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Buy Now updated successfully:", data);
-        setUser(data.user); // Assuming 'shop' is returned from the API
+        dispatch(login({ user: data.user }));
         setIsBuyNowSubmitSuccessful(true);
+        
+        toast.success('Buy Now Text Added Successfully')
       } else {
         console.error("Failed to update Buy Now");
       }
     } catch (error) {
       console.error("Error updating Buy Now:", error);
+      toast.error('Could not add buy now text')
     } finally {
       setIsBuyNowLoading(false);
     }
@@ -282,12 +293,12 @@ const BuyNow = () => {
 
   const getBuyNowEditor = () => {
     const shopifyAdmin = "https://admin.shopify.com/store";
-    // const themeIdMatch = themes?.[0]?.match(/\/(\d+)$/); // Assuming themes is an array
-    // const themeId = themeIdMatch ? themeIdMatch[1] : "";
-    return `${shopifyAdmin}/${user.shop.replace(
-      ".myshopify.com",
-      ""
-    )}/settings/languages`;
+     const themeIdMatch = user?.selectedTheme.match(/\/(\d+)$/);
+     const themeId = themeIdMatch ? themeIdMatch[1] : "";
+     return `${shopifyAdmin}/${user?.shop.replace(
+       ".myshopify.com",
+       ""
+     )}/themes/${themeId}/editor?context=apps`;
   };
 
   return (

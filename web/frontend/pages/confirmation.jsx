@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Layout, Page, SkeletonBodyText } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { Redirect } from "@shopify/app-bridge/actions";
+import { useDispatch } from "react-redux";
+import { login } from "../store/slices/authSlice";
 
 export default function Confirmation() {
   const location = useLocation();
@@ -21,8 +23,10 @@ export default function Confirmation() {
   }, [appBridge]);
 
   const [status, setStatus] = useState("pending");
+  const dispatch = useDispatch()
 
   const navigateToDashboard = useCallback(() => {
+    
     if (
       shopify &&
       shopify.navigate &&
@@ -33,7 +37,7 @@ export default function Confirmation() {
       console.warn(
         "App Bridge navigation not available. Using fallback method."
       );
-      navigate("dashboard");
+      navigate("/dashboard");
     }
   }, [shopify]);
 
@@ -60,8 +64,10 @@ export default function Confirmation() {
         }
       );
       const data = await response.json();
+      const user = data.user
 
       console.log("Subscription confirmation response:", data);
+      dispatch(login({ user }));
 
       setStatus("success");
 

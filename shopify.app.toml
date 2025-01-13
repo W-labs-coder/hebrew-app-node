@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "86154af1674159ac797f5767f244100c"
-application_url = "https://eve-cradle-chamber-requests.trycloudflare.com"
+application_url = "https://unsigned-fired-armed-identify.trycloudflare.com"
 embedded = true
 name = "TheHebrewAppReactNode"
 handle = "thehebrewappreactnode"
@@ -20,9 +20,9 @@ scopes = "read_themes,write_products"
 
 [auth]
 redirect_urls = [
-  "https://eve-cradle-chamber-requests.trycloudflare.com/auth/callback",
-  "https://eve-cradle-chamber-requests.trycloudflare.com/auth/shopify/callback",
-  "https://eve-cradle-chamber-requests.trycloudflare.com/api/auth/callback"
+  "https://unsigned-fired-armed-identify.trycloudflare.com/auth/callback",
+  "https://unsigned-fired-armed-identify.trycloudflare.com/auth/shopify/callback",
+  "https://unsigned-fired-armed-identify.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
