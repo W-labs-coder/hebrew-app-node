@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "86154af1674159ac797f5767f244100c"
-application_url = "https://installed-stakeholders-listings-adjustment.trycloudflare.com"
+application_url = "https://shows-hi-qatar-earrings.trycloudflare.com"
 embedded = true
 name = "TheHebrewAppReactNode"
 handle = "thehebrewappreactnode"
@@ -20,9 +20,9 @@ scopes = "read_themes,write_products"
 
 [auth]
 redirect_urls = [
-  "https://installed-stakeholders-listings-adjustment.trycloudflare.com/auth/callback",
-  "https://installed-stakeholders-listings-adjustment.trycloudflare.com/auth/shopify/callback",
-  "https://installed-stakeholders-listings-adjustment.trycloudflare.com/api/auth/callback"
+  "https://shows-hi-qatar-earrings.trycloudflare.com/auth/callback",
+  "https://shows-hi-qatar-earrings.trycloudflare.com/auth/shopify/callback",
+  "https://shows-hi-qatar-earrings.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

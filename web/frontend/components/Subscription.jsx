@@ -161,7 +161,7 @@ const handleSelectPlan = async (id) => {
                 cursor: "pointer",
               }}
             >
-              <p className="fs14 text-center" style={{ padding: "26px 0px" }}>
+              <p className="fs14 text-center" style={{ padding: "10px 26px" }}>
                 {subscription.name.toLowerCase() === "pro" ? "הכי פופולרי" : ""}
               </p>
               <div
@@ -198,9 +198,15 @@ const handleSelectPlan = async (id) => {
                   className="d-flex aic jcc subscribe-button"
                   onClick={() => handleSelectPlan(subscription._id)}
                 >
-                  {!loading ? <p className="fs14 text-center">
-                    התחל ניסיון של 8 ימים בחינם
-                  </p> : ( selected == subscription?._id && <p className="fs14 text-center">Loading... Please wait</p>)}
+                  {!loading ? (
+                    <p className="fs14 text-center">
+                      התחל ניסיון של 8 ימים בחינם
+                    </p>
+                  ) : (
+                    selected == subscription?._id && (
+                      <p className="fs14 text-center">Loading... Please wait</p>
+                    )
+                  )}
                 </div>
                 <p className="fw600 fs16">{subscription.name} Plan</p>
 

@@ -1,62 +1,169 @@
 {% comment %}
-  This extension controls RTL/LTR direction, Buy Now text, and theme font based on settings and metafields.
+  This extension controls RTL/LTR direction, Buy Now text, theme font, and footer banners based on settings and metafields.
   No visible elements are rendered on the page.
 {% endcomment %}
 
 {% assign buyNowText = shop.metafields.custom.buy_now_button_text.value | default: 'Buy Now' %}
 {% assign alternativeFont = shop.metafields.custom.font.value | default: "'Arial', sans-serif" %}
+{% assign enableFooterBanners = block.settings.enable_footer_banners %}
+
+{%- capture payment_processor_images -%}
+  {%- for processor in shop.metafields.custom.payment_processors.value -%}
+    {%- assign image_name = processor | downcase | replace: ' ', '_' | append: '.png' -%}
+    <img src="{{ image_name | asset_url }}" alt="{{ processor }}">
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- capture payment_features_images -%}
+  {%- for feature in shop.metafields.custom.payment_features.value -%}
+    {%- assign image_name = feature | downcase | replace: ' ', '-' | append: '-svg.svg' -%}
+    <img src="{{ image_name | asset_url }}" alt="{{ feature }}">
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- capture selected_calendars -%}
+  {%- for calendar in shop.metafields.custom.selected_calendars.value -%}
+    {%- assign image_name = calendar | downcase | replace: ' ', '-' | append: '-icon-svg.svg' -%}
+    <img src="{{ image_name | asset_url }}" alt="{{ calendar }}">
+  {%- endfor -%}
+{%- endcapture -%}
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&family=Amatic+SC:wght@400;700&family=Arimo:wght@400;700&family=Assistant:wght@200;300;400;500;600;700;800&family=Bellefair&family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Cousine:ital,wght@0,400;0,700;1,400;1,700&family=David+Libre:wght@400;500;700&family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Fredoka:wght@300;400;500;600;700&family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans+Hebrew:wght@100;200;300;400;500;600;700&family=Karantina:wght@300;400;700&family=Miriam+Libre:wght@400;700&family=Noto+Rashi+Hebrew:wght@200;300;400;500;600;700;800;900&family=Noto+Sans+Hebrew:wght@100;200;300;400;500;600;700;800;900&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Secular+One&family=Suez+One&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Varela+Round&display=swap" rel="stylesheet">
 
 <script>
-  (function () {
-    const htmlElement = document.documentElement;
-    const bodyElement = document.body;
-    const buyNowText = {{ buyNowText | json }};
-    const alternativeFont = {{ alternativeFont | json }};
-    const enableBuyNowText = {{ block.settings.enable_buy_now_text }};
-    const enableAlternativeFont = {{ block.settings.enable_alternative_font }};
+  document.addEventListener('DOMContentLoaded', function () {
+    (function () {
+      const htmlElement = document.documentElement;
+      const bodyElement = document.body;
+      const buyNowText = {{ buyNowText | json }};
+      const alternativeFont = {{ alternativeFont | json }};
+      const enableBuyNowText = {{ block.settings.enable_buy_now_text }};
+      const enableAlternativeFont = {{ block.settings.enable_alternative_font }};
+      const enableFooterBanners = {{ enableFooterBanners | json }};
+      const paymentProcessorImages = {{ payment_processor_images | json }};
+      const paymentFeatureImages = {{ payment_features_images | json }};
+      const selectedCalendarImage = {{ selected_calendars | json }};
+      const shippingOption = {{ shop.metafields.custom.shipping_option.value | json }};
+      const warrantyDays = {{ shop.metafields.custom.warranty_days.value | json }};
 
-    function setRTL(isRTL) {
-      if (isRTL) {
-        htmlElement.setAttribute('dir', 'rtl');
-        htmlElement.setAttribute('lang', 'ar'); // or your RTL language
-        bodyElement.style.direction = 'rtl';
-      } else {
-        htmlElement.setAttribute('dir', 'ltr');
-        htmlElement.setAttribute('lang', 'en'); // or your LTR language
-        bodyElement.style.direction = 'ltr';
+      function setRTL(isRTL) {
+        if (isRTL) {
+          htmlElement.setAttribute('dir', 'rtl');
+          htmlElement.setAttribute('lang', 'ar');
+          bodyElement.style.direction = 'rtl';
+        } else {
+          htmlElement.setAttribute('dir', 'ltr');
+          htmlElement.setAttribute('lang', 'en');
+          bodyElement.style.direction = 'ltr';
+        }
       }
-    }
 
-    function updateBuyNowText() {
-      if (enableBuyNowText) {
-        document.querySelectorAll('.buy-now-button').forEach((button) => {
-          button.textContent = buyNowText;
-        });
-      }
-    }
-
-    function setAlternativeFont(enable) {
-      if (enable) {
-        bodyElement.style.fontFamily = alternativeFont;
-      } else {
-        bodyElement.style.fontFamily = ''; // Reset to theme default
-      }
-    }
-
-    // Set initial states
-    setRTL({{ block.settings.enable_rtl }});
-    updateBuyNowText();
-    setAlternativeFont(enableAlternativeFont);
-
-    // Listen for changes from the Shopify Theme Editor
-    document.addEventListener('shopify:block:select', function (event) {
-      if (event.detail.blockId === {{ block.id | json }}) {
-        setRTL({{ block.settings.enable_rtl }});
-        updateBuyNowText();
-        setAlternativeFont({{ block.settings.enable_alternative_font }});
+     function updateBuyNowText() {
+  if (enableBuyNowText) {
+    document.querySelectorAll('.shopify-payment-button').forEach((container) => {
+      // Locate the button within the container
+      const button = container.querySelector('button.shopify-payment-button__button');
+      if (button) {
+        button.innerHTML = buyNowText; // Update the button's innerHTML
       }
     });
-  })();
+  }
+}
+
+
+
+      function setAlternativeFont(enable) {
+        if (enable && alternativeFont) {
+          document.documentElement.style.setProperty('--custom-font', alternativeFont);
+          document.body.classList.add('custom-font-applied');
+          
+          // Apply font to all elements
+          const allElements = document.getElementsByTagName('*');
+          for (let i = 0; i < allElements.length; i++) {
+            if (!allElements[i].classList.contains('fa') && 
+                !allElements[i].classList.contains('fas') && 
+                !allElements[i].classList.contains('far') && 
+                !allElements[i].classList.contains('fal') && 
+                !allElements[i].classList.contains('fab')) {
+              allElements[i].style.fontFamily = `var(--custom-font, 'Rubik'), sans-serif`;
+            }
+          }
+          
+          // Force a reflow to ensure the font is applied
+          document.body.style.display = 'none';
+          document.body.offsetHeight; // Trigger a reflow
+          document.body.style.display = '';
+        } else {
+          document.documentElement.style.setProperty('--custom-font', '');
+          document.body.classList.remove('custom-font-applied');
+          
+          // Remove inline font-family style from all elements
+          const allElements = document.getElementsByTagName('*');
+          for (let i = 0; i < allElements.length; i++) {
+            allElements[i].style.removeProperty('font-family');
+          }
+        }
+      }
+
+    function displayFooterBanners() {
+  console.log("displayFooterBanners called");
+  console.log("enableFooterBanners:", enableFooterBanners);
+
+  const footerElement = document.querySelector('footer');
+  if (footerElement) {
+    const pageWidthDivs = footerElement.querySelectorAll('.page-width');
+
+    if (pageWidthDivs.length > 1) {
+      const secondPageWidthDiv = pageWidthDivs[1];
+
+      if (enableFooterBanners) {
+        const footerBanner = document.createElement('div');
+        footerBanner.classList.add('footer-banners');
+
+        footerBanner.innerHTML = `
+          <h4>Payment Options</h4>
+          <div>${paymentProcessorImages}</div>
+          <div>${paymentFeatureImages}</div>
+          <div>${selectedCalendarImage}</div>
+          <p>Shipping: ${shippingOption}</p>
+          <p>Warranty: ${warrantyDays} days</p>
+        `;
+
+        // Replace the second page-width div with the footer banner
+        secondPageWidthDiv.replaceWith(footerBanner);
+        console.log("Footer banner replaced the second page-width div");
+      } else {
+        console.log("Footer banners are disabled. Keeping the original content.");
+      }
+    } else {
+      console.error("The second .page-width div was not found in the footer.");
+    }
+  } else {
+    console.error("Footer element not found.");
+  }
+}
+
+
+      // Set initial states
+      setRTL({{ block.settings.enable_rtl }});
+      updateBuyNowText();
+      setAlternativeFont({{ block.settings.enable_alternative_font }});
+      displayFooterBanners(); // Call to display footer banners
+
+      // Listen for changes from the Shopify Theme Editor
+      document.addEventListener('shopify:block:select', function (event) {
+        if (event.detail.blockId === {{ block.id | json }}) {
+          setRTL({{ block.settings.enable_rtl }});
+          updateBuyNowText();
+          setAlternativeFont({{ block.settings.enable_alternative_font }});
+          displayFooterBanners(); 
+        }
+      });
+    })();
+  });
 </script>
 
 <style>
@@ -64,6 +171,50 @@
   body[dir="rtl"] {
     direction: rtl !important;
     text-align: right !important;
+  }
+   
+  body.custom-font-applied,
+  body.custom-font-applied *:not(i):not(.fa):not(.fas):not(.far):not(.fal):not(.fab) {
+    font-family: var(--custom-font, 'Rubik'), sans-serif !important;
+  }
+
+  /* Apply font to specific elements that might be overriding our styles */
+  body.custom-font-applied h1,
+  body.custom-font-applied h2,
+  body.custom-font-applied h3,
+  body.custom-font-applied h4,
+  body.custom-font-applied h5,
+  body.custom-font-applied h6,
+  body.custom-font-applied p,
+  body.custom-font-applied span,
+  body.custom-font-applied a,
+  body.custom-font-applied button,
+  body.custom-font-applied input,
+  body.custom-font-applied select,
+  body.custom-font-applied textarea {
+    font-family: var(--custom-font, 'Rubik'), sans-serif !important;
+  }
+
+  /* Add styles for footer banners */
+  .footer-banners {
+  background-color: transparent;
+  padding: 20px;
+  text-align: center;
+  width: 100vw; /* Ensures it takes up the full width */
+  display: block; /* Ensures it's a block element */
+  clear: both; /* Forces other elements to appear below */
+}
+
+
+  .footer-banners img {
+    max-width: 50px;
+    margin: 0 10px;
+  }
+
+  .footer__content-bottom-wrapper{
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: center;
   }
 </style>
 
@@ -82,12 +233,18 @@
       "type": "checkbox",
       "id": "enable_buy_now_text",
       "label": "Enable Custom Buy Now Text",
-      "default": true
+      "default": false
     },
     {
       "type": "checkbox",
       "id": "enable_alternative_font",
       "label": "Enable Alternative Font",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_footer_banners",
+      "label": "Enable Footer Banners",
       "default": false
     }
   ]

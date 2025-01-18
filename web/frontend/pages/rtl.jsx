@@ -254,13 +254,12 @@ const RTLSection = ({ themes }) => {
             href={getThemeEditorUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="button"
+            className="button bg-yellow"
             style={{
               display: "inline-block",
               marginTop: "10px",
               padding: "10px 20px",
-              backgroundColor: "#007bff",
-              color: "#ffffff",
+              color: "#0D0D0D",
               textDecoration: "none",
               borderRadius: "5px",
               fontWeight: "bold",

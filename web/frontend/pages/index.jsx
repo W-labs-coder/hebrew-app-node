@@ -78,6 +78,13 @@ export default function HomePage() {
       });
       if (response.ok) {
         const data = await response.json();
+         const order = ["basic", "pro", "premium"];
+
+         // Sort the subscriptions based on the defined order
+         data = data.sort(
+           (a, b) => order.indexOf(a.name) - order.indexOf(b.name)
+         );
+
         setSubscriptions(data);
       } else {
         console.error("Failed to fetch subscriptions");
