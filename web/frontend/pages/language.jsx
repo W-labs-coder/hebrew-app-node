@@ -146,7 +146,7 @@ export default function Language() {
     <div className="dashboard-container">
       <Sidebar />
       <div className="main-content">
-        <Page fullWidth>
+        <Page >
           <Layout>
             <Layout.Section>
               <div>

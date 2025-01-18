@@ -569,15 +569,14 @@ input[type="date"] {
 .main-content {
   flex-grow: 1;
   overflow-y: auto;
-  padding-right: 240px; /* Adjust this value based on your sidebar width */
+  padding-right: 260px; /* Adjust this value based on your sidebar width */
 }
 
 
 /* RTLSection.css */
 
 .rtl-section {
-  font-family: Arial, sans-serif;
-  max-width: 800px;
+  font-family: Inter, serif;
   margin: 0 auto;
   padding: 20px;
 }
@@ -662,7 +661,7 @@ input[type="date"] {
   position: fixed;
   top: 0;
   left: 1000;
-  width: 240px !important; /* Adjust as needed */
+  width: 260px !important; /* Adjust as needed */
   height: 100vh;
   overflow-y: auto;
   background-color: #f5f5f5; /* Adjust as needed */

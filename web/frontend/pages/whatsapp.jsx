@@ -10,12 +10,12 @@ import { toast } from "react-toastify";
 import { login } from "../store/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
-export default function Payment() {
+export default function Whatsapp() {
   return (
     <div className="dashboard-container">
       <Sidebar />
       <div className="main-content">
-        <Page fullWidth>
+        <Page >
           <Layout>
             <Layout.Section>
               <div>
