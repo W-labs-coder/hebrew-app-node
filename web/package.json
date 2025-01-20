@@ -10,7 +10,7 @@
   },
   "type": "module",
   "engines": {
-    "node": ">=16.13.0"
+    "node": ">=23.6.0"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.0",
