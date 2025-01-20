@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "86154af1674159ac797f5767f244100c"
-application_url = "https://qui-stood-julian-five.trycloudflare.com"
+application_url = "https://beijing-spring-nat-lauderdale.trycloudflare.com"
 embedded = true
 name = "TheHebrewAppReactNode"
 handle = "thehebrewappreactnode"
@@ -20,9 +20,9 @@ scopes = "read_themes,write_products"
 
 [auth]
 redirect_urls = [
-  "https://qui-stood-julian-five.trycloudflare.com/auth/callback",
-  "https://qui-stood-julian-five.trycloudflare.com/auth/shopify/callback",
-  "https://qui-stood-julian-five.trycloudflare.com/api/auth/callback"
+  "https://beijing-spring-nat-lauderdale.trycloudflare.com/auth/callback",
+  "https://beijing-spring-nat-lauderdale.trycloudflare.com/auth/shopify/callback",
+  "https://beijing-spring-nat-lauderdale.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
