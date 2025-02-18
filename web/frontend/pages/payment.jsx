@@ -9,6 +9,7 @@ import CheckLightIcon from "../components/svgs/CheckLightIcon";
 import { toast } from "react-toastify";
 import { login } from "../store/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { Form } from 'react-bootstrap';
 
 export default function Payment() {
   return (
@@ -107,7 +108,10 @@ const PaymentSection = () => {
     customShipping: user?.customShipping || "",
     warranty: user?.warranty || "",
     selectedCalendars: user?.selectedCalendars || [],
+    paymentBackgroundColor: 'transparent',
   });
+
+  const [selectedBackground, setSelectedBackground] = useState(user?.paymentBackgroundColor || 'transparent');
 
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -147,8 +151,13 @@ const PaymentSection = () => {
     }
   };
 
-
-  
+  const handleBackgroundChange = (e) => {
+    setSelectedBackground(e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      paymentBackground: e.target.value
+    }));
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -160,7 +169,10 @@ const PaymentSection = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          paymentBackgroundColor: selectedBackground
+        }),
       });
 
       if (!response.ok) {
@@ -225,6 +237,51 @@ const PaymentSection = () => {
           >
             <div>
               <div>
+                <div className="d-flex flex-column justify-content-end align-items-start mb-2">
+                  <p className="fs14 fw700">בחירת צבע רקע:</p>
+                  <div className="background-options">
+                    <div className="form-check rtl">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        id="transparent-background"
+                        name="paymentBackgroundColor"
+                        value="transparent"
+                        checked={selectedBackground === 'transparent'}
+                        onChange={(e) => {
+                          setSelectedBackground(e.target.value);
+                          setFormData(prev => ({
+                            ...prev,
+                            paymentBackgroundColor: e.target.value
+                          }));
+                        }}
+                      />
+                      <label className="form-check-label" htmlFor="transparent-background">
+                        צבע רקע שקוף
+                      </label>
+                    </div>
+                    <div className="form-check rtl">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        id="white-background"
+                        name="paymentBackgroundColor"
+                        value="white"
+                        checked={selectedBackground === 'white'}
+                        onChange={(e) => {
+                          setSelectedBackground(e.target.value);
+                          setFormData(prev => ({
+                            ...prev,
+                            paymentBackgroundColor: e.target.value
+                          }));
+                        }}
+                      />
+                      <label className="form-check-label" htmlFor="white-background">
+                        צבע רקע לבן
+                      </label>
+                    </div>
+                  </div>
+                </div>
                 <p className="fw700 fs14">בחירת אמצעי תשלום מותאם אישית:</p>
                 <div>
                   <Input

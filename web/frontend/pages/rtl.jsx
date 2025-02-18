@@ -118,80 +118,18 @@ const RTLSection = ({ themes }) => {
       <div className="rtl-header">
         <h2 className="rtl-title">RTL</h2>
         <p className="rtl-description">
-          התאם בקלות את הפריסה שלך לנוחות ונגישות בקריאה מימין לשמאל
+          אופטימיזציה של העיצוב שלך לשיפור הקריאות והנגישות כאשר אתה משתמש בטקסט
+          מימין לשמאל.
         </p>
-      </div>
-
-      <div
-        class="d-flex flex-column jcs"
-        style={{
-          margin: "16px 0",
-          border: "1px solid #C6C6C6",
-          borderRadius: "16px",
-          padding: "16px",
-          gap: "16px",
-          backgroundColor: "#FBFBFB",
-        }}
-      >
-        <div
-          style={{
-            background: "#021341",
-            borderRadius: "10px",
-            padding: "16px",
-          }}
-        >
-          <div class="d-flex jcb aic">
-            <div class="d-flex aic gap-2">
-              <AlertIcon3 />
-              <p class="fs14" style={{ color: "#FFF" }}>
-                לקוחות יקרים, הוספנו עבורכם תמיכה לתבניות הבאות:
-              </p>
-            </div>
-            <CancelIcon />
-          </div>
-        </div>
-
-        <div
-          style={{ backgroundColor: "#FBFBFB", lineHeight: "21px !important" }}
-        >
-          <p class="fs14" style={{ color: "#777" }}>
-            Alchemy, Alpha, Area, Aronic, Artz, Athens, August, Aurora, Aurum,
-            Avone, Ayush, Baseline, Be, Belliza, Berlin, Beyond, Bioearth,
-            Biona, Blockshop, Blum, Boost, Booster, Broadcast, Broccoli,
-            Brooklyn, Cafesa, Camamas, Canopy, Canyon, Capital, Caros, Cartior,
-            Classy, Colorblock, Combine, Concept, ContentIL, Copenhagen,
-            CornerStone, Craft, Crave, Dawn, Debut, Debutify, Denim, Digital,
-            District, Ecom, Ecomify, Ecomprofithub, Ecomus, Ecomwithmichael,
-            Editions, Electro, ElectroElectronics, Electronics, Ella, Emerge,
-            Empire, Enterprise, Envy, Esrar, Essence, Exclusive, Expanse, FKX,
-            Fashionopolism, Fastor, Fetch, Flexion, Flow, Focal, Forge, Foxic,
-            Frame, Furniture, Furrie, Gain, Gecko, Gravity, Habitat, Halo,
-            Harmic, Honey, Housei, Impact, Impulse, Influence, Kabbalah, Kala,
-            Kalles, Kidxtore, Kodo, Koka, Krismotion, LeanDawn, Lezada, Local,
-            Loft, Lumia, Lushy, Lusion, Luxe, Mate, Mavon, Milton, Minimalin,
-            Minimalista, Minimog, Minion, Modular, Mojave, Mojuri, Morata,
-            Motion, MrParker, Neat, Neytiri, NfDigital, North, Odora, Origin,
-            Oworganic, PaloAlto, Paper, Parallax, PerchFashion, Pesto, Petshop,
-            Pop, PoseTheme, Prestige, ProfitParadise, Publisher, Pukabop,
-            Pursuit, Rebel, Reformation, Refresh, Ride, Sahara, Sense, Shapes,
-            Shovalstudio, Showcase, Shrine, ShrinePro, Slumberhome, Sofine,
-            Spark, Split, Spotlight, Spozy, Stark, Starlite, Startup, Stella,
-            Stellar, Stiletto, Story, Streamline, Studio, SuitUp, Sunrise,
-            Suruchi, Sweeny, Symmetry, TJ, Taste, Tifaret, Toykio, Toyqo, Trade,
-            Tritiya, Turbo, Umino, Unsen, Upscale, VeanVision, Veena, Venture,
-            Venue, Vogue, Warehouse, Wokiee,
-          </p>
-        </div>
       </div>
 
       <div className="theme-selector">
         <p className="fs18 fw700">
-          התאם בקלות את יישור האתר שלך מימין לשמאל (RTL) כדי להבטיח תאימות מלאה
-          עם השפה שבחרת.
+          יישר את האתר שלך מימין לשמאל כדי לשלב בצורה חלקה את השפה העברית.
         </p>
         <p className="fs14 fw500" style={{ color: "#777" }}>
-          במידה וערכת הנושא שלכם לא נמצאת כאן, צרו איתנו קשר ואנחנו נדאג להעלות
-          אותה עבורכם.
+          אם התבנית שלך שלך לא מופיע כאן, אנא צור קשר ואנחנו נדאג להוסיף אותו
+          עבורך.
         </p>
 
         <div
@@ -207,16 +145,15 @@ const RTLSection = ({ themes }) => {
               <AlertIcon3 />
               <div>
                 <p class="fs14 fw700" style={{ color: "#FBFBFB" }}>
-                  כדי להתאים אישית את הנושא שלך כראוי, שם התבנית חייב להתחיל בשם
+                  כדי להתאים אישית את התבנית כראוי, ודא ששם התבנית שלך מתחיל בשם
                   התבנית המקורי.
                 </p>
                 <p class="fs14 fw500" style={{ color: "#C6C6C6" }}>
-                  דוגמה: עבור תבנית "שחר", שם התבנית שלך חייב להתחיל ב"שחר".
-                  עדכן את שם התבנית במסך הגדרות החנות לפי הצורך.
+                  דוגמה: עבור תבנית dawn, התחל את השם ב"dawn". תוכל לשנות את שם
+                  התבנית בהגדרות החנות שלך.
                 </p>
               </div>
             </div>
-            <CancelIcon />
           </div>
         </div>
 
@@ -224,7 +161,7 @@ const RTLSection = ({ themes }) => {
           <form onSubmit={handleSubmit}>
             <Input
               type="select"
-              label="רשימת ערכות הנושא:"
+              label="התבנית:"
               id="theme"
               name="theme"
               options={themes}
@@ -236,14 +173,14 @@ const RTLSection = ({ themes }) => {
               className="fs14 fw500"
               style={{ marginTop: "10px", color: "#333" }}
             >
-              ערכת נושא נוכחית:{" "}
+              תבנית נוכחית:{" "}
               <span className="fw700">
                 {themes.find((theme) => theme.id === selectedTheme)?.name || ""}
               </span>
             </p>
 
             <Button loading={themeLoading} type="submit">
-              הגדרת אמצעי תשלום
+              שמור
             </Button>
           </form>
           <RtlImage />
@@ -269,8 +206,8 @@ const RTLSection = ({ themes }) => {
           </a>
         )}
         <p class="fs14" style={{ marginTop: "10px" }}>
-          נתקלים בקושי למצוא את חבילת הנושא שלכם? צרו קשר ואנחנו נדאג להוסיף
-          אותה עבורכם.
+          לא מצליחים למצוא את התבנית שלכם? צרו קשר, ונוסיף אותה במהירות לרשימת
+          התבניות שלנו.
         </p>
       </div>
 

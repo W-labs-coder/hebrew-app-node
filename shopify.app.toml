@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "86154af1674159ac797f5767f244100c"
-application_url = "https://trash-hr-aud-bike.trycloudflare.com"
+application_url = "https://sleeps-gathering-tu-nominated.trycloudflare.com"
 embedded = true
 name = "TheHebrewAppReactNode"
 handle = "thehebrewappreactnode"
@@ -20,9 +20,9 @@ scopes = "read_themes,write_products"
 
 [auth]
 redirect_urls = [
-  "https://trash-hr-aud-bike.trycloudflare.com/auth/callback",
-  "https://trash-hr-aud-bike.trycloudflare.com/auth/shopify/callback",
-  "https://trash-hr-aud-bike.trycloudflare.com/api/auth/callback"
+  "https://sleeps-gathering-tu-nominated.trycloudflare.com/auth/callback",
+  "https://sleeps-gathering-tu-nominated.trycloudflare.com/auth/shopify/callback",
+  "https://sleeps-gathering-tu-nominated.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

@@ -13,6 +13,7 @@ export const updatePaymentSettings = async (req, res) => {
       customShipping,
       warranty,
       selectedCalendars,
+      paymentBackgroundColor,
     } = req.body;
 
     const session = res.locals.shopify.session;
@@ -51,6 +52,7 @@ export const updatePaymentSettings = async (req, res) => {
           customShipping,
           warranty,
           selectedCalendars,
+          paymentBackgroundColor,
         },
       },
       { new: true, upsert: true }
@@ -99,6 +101,13 @@ export const updatePaymentSettings = async (req, res) => {
         ownerId: shopGid,
         type: "single_line_text_field",
         value: warranty,
+      },
+      {
+        key: "payment_background_color",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: paymentBackgroundColor,
       },
       {
         key: "selected_calendars",

@@ -147,7 +147,7 @@ const Sidebar = () => {
               cursor: "pointer",
             }}
           >
-            <div style={{ width: "40px" }}>
+            <div style={{ width: "40px" }} onClick={() => handleNav(item.link)}>
               <SvgIcon style={{ fill: isActive ? "#0C449B" : "#000" }} />
             </div>
             <a

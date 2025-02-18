@@ -634,9 +634,15 @@ input[type="date"] {
 .steps {
   background-color: #021341;
   color: #FBFBFB;
+   padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
 }
 
 .steps h4 {
+    color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
   margin-bottom: 16px;
 }
 
@@ -655,6 +661,10 @@ input[type="date"] {
   content: '✓';
   margin-right: 8px;
   color: #FBB105;
+}
+.steps p {
+  color: #FBFBFB;
+  margin: 0;
 }
 
 .sidebar {
@@ -828,9 +838,432 @@ button{
 .bg-yellow{
     background-color: #FBB105;
 }
+.background-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
 
+.form-check.rtl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.form-check.rtl .form-check-input {
+  margin: 0;
+  cursor: pointer;
+}
+
+.form-check.rtl .form-check-label {
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.form-check-input:checked {
+  background-color: #021341;
+  border-color: #021341;
+}
+
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+
+.whatsapp-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.section-header {
+  margin-bottom: 32px;
+}
+
+.form-section {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.custom-radio input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #021341;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.custom-radio input[type="radio"]:checked {
+  background-color: #021341;
+  border-color: #021341;
+}
+
+.radio-label {
+  font-size: 14px;
+  color: #333;
+}
+
+.whatsapp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.settings-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.settings-card.preview-card {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.card-header {
+  padding: 16px;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+.custom-radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.custom-radio input[type="radio"] {
+  margin-right: 8px;
+}
+
+.custom-radio input[type="radio"]:checked {
+  background-color: #021341;
+  border-color: #021341;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.phone-preview {
+  aspect-ratio: 9/16;
+  background: #F5F5F5;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.whatsapp-button {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #25D366;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.whatsapp-button.round {
+  width: 60px;
+  height: 60px;
+}
+
+.whatsapp-button.square {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+}
 /* End Button */
 
+
+.color-picker-group {
+  min-width: 200px;
+}
+
+.form-control-color {
+  width: 50px;
+  height: 40px;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.color-value {
+  color: #777;
+  font-family: monospace;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+
+.color-pickers-container {
+  background-color: #FBFBFB;
+  
+}
+
+.color-picker-wrapper {
+  width: 151px;
+  height: 40px;
+  border-radius: 5px;
+  border: 1px solid #C6C6C6;
+  padding: 8px 16px 8px 16px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #FFFFFF;
+}
+
+.color-picker-group {
+  margin-bottom: 16px;
+}
+
+.form-control-color {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #C6C6C6;
+  border-radius: 100%;
+  cursor: pointer;
+  margin: 0;
+}
+
+.color-value {
+  font-size: 14px;
+  color: #777;
+  font-family: monospace;
+}
+
+.color-pickers-flex {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.custom-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-checkbox .form-check-input {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #C6C6C6;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.custom-checkbox .form-check-input:checked {
+  background-color: #FBB105;
+  border-color: #FBB105;
+}
+
+.custom-checkbox .form-check-label {
+  color: #333;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.primary-button:hover {
+  background-color: #FBB105 !important;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+.primary-button:active {
+  transform: translateY(0);
+}
+
+.primary-button:disabled {
+  background-color: #9e9e9e !important;
+  cursor: not-allowed;
+}
+
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}
+
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 253px;
+  height: auto;
+  background: #FFFFFF;
+  box-shadow: 0px 4px 10px -8px rgba(0, 0, 0, 0.2), 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  position: sticky;
+  top: 20px;
+}
+
+.preview-frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  box-shadow: 0px 4px 10px -8px rgba(0, 0, 0, 0.2), 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.preview-content {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 70px 80px;
+  gap: 10px;
+  width: 100%;
+  height: 180px;
+  background: #FBFBFB;
+  border: 1px solid #C6C6C6;
+  border-radius: 10px 10px 0px 0px;
+  position: relative;
+}
+
+.whatsapp-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  width: 40px;
+  height: 40px;
+  background: #05B457;
+  border-radius: 10px;
+  z-index: 2;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  direction: rtl;
+  font-family: 'Inter', sans-serif;
+}
+
+.whatsapp-button.text_and_icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.whatsapp-button.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-color-row {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  width: 253px;
+  height: 41px;
+  background: #E1E1E1;
+  border-width: 0px 1px 1px 1px;
+  border-style: solid;
+  border-color: #C6C6C6;
+}
+
+.preview-color-row.bottom {
+  border-radius: 0px 0px 10px 10px;
+}
+
+.color-square {
+  width: 25px;
+  height: 25px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.preview-color-row span {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 21px;
+  text-align: right;
+  color: #000000;
+}
+
+/* Welcome Message Preview Styles */
+.preview-section textarea {
+  direction: rtl;
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid #C6C6C6;
+  border-radius: 8px;
+  resize: vertical;
+  width: 100%;
+}
+
+.preview-section textarea:disabled {
+  background-color: #F5F5F5;
+  cursor: not-allowed;
+}
+
+/* Switch styles */
+.form-switch {
+  padding-right: 2.5em;
+  padding-left: 0 !important;
+}
+
+.form-switch .form-check-input {
+  margin-right: -2.5em;
+  margin-left: 0;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 1%29'/%3e%3c/svg%3e");
+}
+
+.form-switch .form-check-input:checked {
+  background-color: #FBB105;
+  border-color: #FBB105;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+.form-switch .form-check-input:focus {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255, 255, 255, 1%29'/%3e%3c/svg%3e");
+  box-shadow: 0 0 0 0.25rem rgba(251, 177, 5, 0.25);
+}
 
 @media screen and (max-width: 900px) {
 
@@ -854,4 +1287,38 @@ button{
     .sm100 {
         width: 100%;
     }
+}
+
+/* Form switch styles */
+.form-switch {
+  padding-right: 2.5em;
+  padding-left: 0 !important;
+}
+
+.form-switch .form-check-input {
+  margin-right: -2.5em;
+  margin-left: 0;
+  float: right;
+}
+
+.form-switch .form-check-input:checked {
+  background-color: #FBB105;
+  border-color: #FBB105;
+}
+
+/* Form controls in RTL */
+.rtl .form-control {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Disabled state */
+.form-control:disabled {
+  background-color: #F5F5F5;
+  cursor: not-allowed;
 }

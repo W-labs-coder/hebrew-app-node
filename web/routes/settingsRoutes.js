@@ -4,6 +4,7 @@ import { addSelectedLanguage } from "../controllers/languagesController.js";
 import { addBuyNow, fetchUser } from "../controllers/buyNowController.js";
 import { addFont } from "../controllers/fontController.js";
 import { updatePaymentSettings } from "../controllers/paymentController.js";
+import { updateWhatsappSettings } from "../controllers/whatsappController.js";
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.post("/add-buy-now", addBuyNow);
 router.post("/add-font", addFont);
 router.post("/update-payment-settings", updatePaymentSettings);
 router.post("/fetch-user", fetchUser);
+router.post("/update-whatsapp-settings", updateWhatsappSettings);
 
 
 

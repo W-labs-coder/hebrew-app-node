@@ -223,9 +223,10 @@ const getLanguageEditorUrl = () => {
   return (
     <section className="rtl-section">
       <div className="rtl-header">
-        <h2 className="rtl-title">שפה</h2>
-        <p className="rtl-description">
-          הפוך את החנות שלך לנגישה יותר על ידי התאמת אפשרויות שפה ותרגום.
+        <h2 className="rtl-title">כפתור שפה ודינמי</h2>
+        <p className="rtl-description fw500 fs14">
+          שפרו את חוויית המשתמש בחנות שלכם על ידי התאמה אישית של הגדרות תרגום
+          השפה.
         </p>
       </div>
 
@@ -251,8 +252,8 @@ const getLanguageEditorUrl = () => {
             <div class="d-flex aic gap-2">
               <AlertDangerIcon />
               <p class="fs14 fw500" style={{ color: "#0D0D0D" }}>
-                חשוב: התקנת הגדרות שפה חדשות תחליף את התצורה הנוכחית שלך. אנא
-                גבה את הגדרות השפה הקיימות שלך לפני שתמשיך.
+                שימו לב: תרגום השפה יחליף את ערכת השפה הקיימת באתר וידרוס אותה.
+                לשם בטיחות, אנא גבו את ערכת השפה הנוכחית שלכם.
               </p>
             </div>
             <CancelIcon color="#0D0D0D" />
@@ -262,7 +263,6 @@ const getLanguageEditorUrl = () => {
         <div
           class="d-flex flex-column jcs"
           style={{
-            
             border: "1px solid #C6C6C6",
             borderRadius: "16px",
             padding: "16px",
@@ -270,72 +270,72 @@ const getLanguageEditorUrl = () => {
             backgroundColor: "#FBFBFB",
           }}
         >
-          <p className="fs14 fw700">בחרו את שפת האתר המועדפת עליכם:</p>
-          <p className="fs14 fw500" style={{ color: "#777" }}>
-            בחרו את השפה שברצונכם להחיל על החנות שלכם ואז לחצו. פעולה זו לא תשנה
-            את השפה באופן מיידי - ראו הוראות נוספות בהמשך.
-          </p>
-          <form onSubmit={saveLanguage}>
-            <Input
-              type="select"
-              label="רשימת ערכות הנושא:"
-              id="language"
-              name="language"
-              options={languages}
-              placeholder="בחר נושא"
-              value={selectedLanguage}
-              onChange={handleLanguageChange}
-            />
+          <div style={{ width: "70%" }}>
+            <p className="fs14 fw700">בחרו את שפת האתר המועדפת עליכם:</p>
+            <p className="fs14 fw500" style={{ color: "#777" }}>
+              בחרו את השפה שברצונכם להחיל על החנות שלכם ואז בחרו אותה. פעולה זו
+              לא תשנה את השפה באופן מיידי - ראו הוראות נוספות בהמשך.
+            </p>
+            <form onSubmit={saveLanguage} style={{ marginBottom: "16px" }}>
+              <Input
+                type="select"
+                label=""
+                id="language"
+                name="language"
+                options={languages}
+                placeholder="בחר נושא"
+                value={selectedLanguage}
+                onChange={handleLanguageChange}
+              />
 
-            <Button type="submit" loading={isLangaugeLoading}>
-              שמור
-            </Button>
-          </form>
-          {isLanguageSubmitSuccessful && (
-            <a
-              href={getLanguageEditorUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="button bg-yellow"
-              style={{
-                display: "inline-block",
-                marginTop: "10px",
-                padding: "10px 20px",
-                color: "#0D0D0D",
-                textDecoration: "none",
-                borderRadius: "5px",
-                fontWeight: "bold",
-              }}
-            >
-              עבור לערכת הנושא
-            </a>
-          )}
-          <div className="steps">
-            <h4>הדרכה לשימוש במסך זה:</h4>
-
-            {[
-              'שלב 1 - בחרו את בשפה העברית ולחצו על כפתור ה"שמירה" באפליקציה.',
-              "שלב 2 - לחצו על הכפתור התחתון (הגדרת שפות) כדי לנווט למסך הגדרות השפה.",
-              "שלב 3 - לחצו על הכפתור של ה-3 נקודות ליד השפה המוגדרת כברירת מחדל, ובחרו ב-'Change Default'",
-              "שלב 4 - בחר את השפה העברית מהרשימה.",
-              'שלב 5 - לחץ על כפתור "שמור".',
-            ].map((item) => (
-              <div
-                className="d-flex aic gap-3 mb-2"
-                style={{ justifyContent: "flex-start" }}
-                key={item}
+              <Button type="submit" loading={isLangaugeLoading}>
+                שמור
+              </Button>
+            </form>
+            {isLanguageSubmitSuccessful && (
+              <a
+                href={getLanguageEditorUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="button bg-yellow"
+                style={{
+                  display: "inline-block",
+                  marginTop: "10px",
+                  padding: "10px 20px",
+                  color: "#0D0D0D",
+                  textDecoration: "none",
+                  borderRadius: "5px",
+                  fontWeight: "bold",
+                }}
               >
-                <CheckLightIcon />
-                <p className="fs14" style={{ color: "#FBFBFB !important" }}>
-                  {item}
-                </p>
-              </div>
-            ))}
+                עבור לערכת הנושא
+              </a>
+            )}
+            <div className="steps">
+              <h4>הדרכה לשימוש במסך זה:</h4>
+
+              {[
+                'שלב 1 - בחרו את בשפה העברית ולחצו על כפתור ה"שמירה" באפליקציה.',
+                "שלב 2 - לחצו על הכפתור התחתון (הגדרת שפות) כדי לנווט למסך הגדרות השפה.",
+                "שלב 3 - לחצו על הכפתור של ה-3 נקודות ליד השפה המוגדרת כברירת מחדל, ובחרו ב-'Change Default'",
+                "שלב 4 - בחר את השפה העברית מהרשימה.",
+                'שלב 5 - לחץ על כפתור "שמור".',
+              ].map((item) => (
+                <div
+                  className="d-flex aic gap-3 mb-2"
+                  style={{ justifyContent: "flex-start" }}
+                  key={item}
+                >
+                  <CheckLightIcon />
+                  <p className="fs14" style={{ color: "#FBFBFB !important" }}>
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-
-     
     </section>
   );
 };
@@ -416,6 +416,7 @@ const BuyNow = () => {
           backgroundColor: "#FBFBFB",
         }}
       >
+        
         <form onSubmit={saveBuyNow}>
           <Input
             type="text"
@@ -524,6 +525,10 @@ const Fonts = ({fonts}) => {
 
   return (
     <section className="rtl-section">
+      <p className="fw700 fs18">התאמת גופנים</p>
+      <p className="fw500 fs14" style={{color : '#777 !important'}}>
+        בחר את סגנון הגופן המועדף עליך לקריאה אופטימלית
+      </p>
       <div
         className="d-flex jcb"
         style={{

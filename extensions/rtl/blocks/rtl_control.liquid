@@ -6,6 +6,25 @@
 {% assign buyNowText = shop.metafields.custom.buy_now_button_text.value | default: 'Buy Now' %}
 {% assign alternativeFont = shop.metafields.custom.font.value | default: "'Arial', sans-serif" %}
 {% assign enableFooterBanners = block.settings.enable_footer_banners %}
+{% assign payment_background_color = shop.metafields.custom.payment_background_color %}
+{% assign payment_background = shop.metafields.custom.payment_background | default: 'transparent' %}
+{% assign whatsapp_phone = shop.metafields.custom.whatsapp_number.value %}
+{% assign whatsapp_position = shop.metafields.custom.whatsapp_position.value | default: 'right' %}
+{% assign whatsapp_style = shop.metafields.custom.whatsapp_style.value | default: 'text_and_icon' %}
+{% assign whatsapp_text = shop.metafields.custom.whatsapp_text.value %}
+{% assign whatsapp_bg_color = shop.metafields.custom.whatsapp_bg_color.value | default: '#25D366' %}
+{% assign whatsapp_text_color = shop.metafields.custom.whatsapp_text_color.value | default: '#FFFFFF' %}
+{% assign whatsapp_icon_color = shop.metafields.custom.whatsapp_icon_color.value | default: '#FFFFFF' %}
+{% assign button_label = shop.metafields.custom.whatsapp_button_label.value | default: 'Contact Us' %}
+
+{% assign whatsapp_icon_position = shop.metafields.custom.whatsapp_icon_position %}
+{% assign whatsapp_icon_style = shop.metafields.custom.whatsapp_icon_style %}
+{% assign whatsapp_welcome_message = shop.metafields.custom.whatsapp_welcome_message %}
+
+{% assign enable_welcome_message = shop.metafields.custom.whatsapp_welcome_enabled.value | default: false %}
+{% assign welcome_message = shop.metafields.custom.whatsapp_welcome_message.value | default: "היי! איך אפשר לעזור היום?" %}
+{% assign message_frequency = shop.metafields.custom.whatsapp_message_frequency.value | default: 1 %}
+{% assign message_delay = shop.metafields.custom.whatsapp_message_delay.value | default: 0 %}
 
 {%- capture payment_processor_images -%}
   {%- for processor in shop.metafields.custom.payment_processors.value -%}
@@ -25,13 +44,139 @@
   {%- for calendar in shop.metafields.custom.selected_calendars.value -%}
     {%- assign image_name = calendar | downcase | replace: ' ', '-' | append: '-icon-svg.svg' -%}
     <img src="{{ image_name | asset_url }}" alt="{{ calendar }}">
-  {%- endfor -%}
+ {%- endfor -%}
 {%- endcapture -%}
 
+<div class="payment-section" style="background: {{ payment_background }};">
+  {{ payment_features_images }}
+</div>
 
+{% if whatsapp_phone != blank and block.settings.enable_whatsapp %}
+  <div 
+    class="whatsapp-button {{ whatsapp_style }}"
+    style="position: fixed; {{ whatsapp_position }}: 20px; bottom: 20px; z-index: 1000; background-color: {{ whatsapp_bg_color }};"
+    onclick="openWhatsApp()"
+  >
+    {% if whatsapp_style == 'text_and_icon' %}
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style="margin-right: 8px;"
+      >
+        <path
+          d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.3789 2.27907 14.6926 2.78382 15.8877C3.06278 16.5481 3.20226 16.8784 3.21953 17.128C3.2368 17.3776 3.16334 17.6521 3.01642 18.2012L2 22L5.79877 20.9836C6.34788 20.8367 6.62244 20.7632 6.87202 20.7805C7.12161 20.7977 7.45185 20.9372 8.11235 21.2162C9.30745 21.7209 10.6211 22 12 22Z"
+          stroke="{{ whatsapp_icon_color }}"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M8.58815 12.3773L9.45909 11.2956C9.82616 10.8397 10.2799 10.4153 10.3155 9.80826C10.3244 9.65494 10.2166 8.96657 10.0008 7.58986C9.91601 7.04881 9.41086 7 8.97332 7C8.40314 7 8.11805 7 7.83495 7.12931C7.47714 7.29275 7.10979 7.75231 7.02917 8.13733C6.96539 8.44196 7.01279 8.65187 7.10759 9.07169C7.51023 10.8548 8.45481 12.6158 9.91948 14.0805C11.3842 15.5452 13.1452 16.4898 14.9283 16.8924C15.3481 16.9872 15.558 17.0346 15.8627 16.9708C16.2477 16.8902 16.7072 16.5229 16.8707 16.165C17 15.8819 17 15.5969 17 15.0267C17 14.5891 16.9512 14.084 16.4101 13.9992C15.0334 13.7834 14.3451 13.6756 14.1917 13.6845C13.5847 13.7201 13.1603 14.1738 12.7044 14.5409L11.6227 15.4118"
+          stroke="{{ whatsapp_icon_color }}"
+          stroke-width="1.5"
+        />
+      </svg>
+      <span style="color: {{ whatsapp_text_color }};">{{ button_label }}</span>
+    {% else %}
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.3789 2.27907 14.6926 2.78382 15.8877C3.06278 16.5481 3.20226 16.8784 3.21953 17.128C3.2368 17.3776 3.16334 17.6521 3.01642 18.2012L2 22L5.79877 20.9836C6.34788 20.8367 6.62244 20.7632 6.87202 20.7805C7.12161 20.7977 7.45185 20.9372 8.11235 21.2162C9.30745 21.7209 10.6211 22 12 22Z"
+          stroke="{{ whatsapp_icon_color }}"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M8.58815 12.3773L9.45909 11.2956C9.82616 10.8397 10.2799 10.4153 10.3155 9.80826C10.3244 9.65494 10.2166 8.96657 10.0008 7.58986C9.91601 7.04881 9.41086 7 8.97332 7C8.40314 7 8.11805 7 7.83495 7.12931C7.47714 7.29275 7.10979 7.75231 7.02917 8.13733C6.96539 8.44196 7.01279 8.65187 7.10759 9.07169C7.51023 10.8548 8.45481 12.6158 9.91948 14.0805C11.3842 15.5452 13.1452 16.4898 14.9283 16.8924C15.3481 16.9872 15.558 17.0346 15.8627 16.9708C16.2477 16.8902 16.7072 16.5229 16.8707 16.165C17 15.8819 17 15.5969 17 15.0267C17 14.5891 16.9512 14.084 16.4101 13.9992C15.0334 13.7834 14.3451 13.6756 14.1917 13.6845C13.5847 13.7201 13.1603 14.1738 12.7044 14.5409L11.6227 15.4118"
+          stroke="{{ whatsapp_icon_color }}"
+          stroke-width="1.5"
+        />
+      </svg>
+    {% endif %}
+  </div>
+{% endif %}
 
+  <script>
+    function openWhatsApp() {
+      try {
+        const phone = "{{ whatsapp_phone | escape }}".replace(/[^0-9]/g, '');
+        const welcomeEnabled = {{ enable_welcome_message }};
+        const welcomeMessage = "{{ welcome_message | escape }}";
+        const lastMessageTime = localStorage.getItem('lastWhatsAppMessage');
+        const currentTime = new Date().getTime();
+        const frequency = {{ message_frequency }} * 24 * 60 * 60 * 1000;
+        
+        if (!lastMessageTime || currentTime - parseInt(lastMessageTime) >= frequency) {
+          if (welcomeEnabled) {
+            setTimeout(() => {
+              // Use wa.me format instead of API
+              const url = `https://wa.me/${phone}${welcomeMessage ? `?text=${encodeURIComponent(welcomeMessage)}` : ''}`;
+              window.open(url, '_blank');
+              localStorage.setItem('lastWhatsAppMessage', currentTime);
+            }, {{ message_delay }} * 1000);
+          } else {
+            const url = `https://wa.me/${phone}`;
+            window.open(url, '_blank');
+          }
+        } else {
+          const url = `https://wa.me/${phone}`;
+          window.open(url, '_blank');
+        }
+      } catch (error) {
+        console.error('WhatsApp open error:', error);
+        // Fallback to basic WhatsApp link if there's an error
+        const phone = "{{ whatsapp_phone | escape }}".replace(/[^0-9]/g, '');
+        window.open(`https://wa.me/${phone}`, '_blank');
+      }
+    }
+  </script>
 
-<link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&family=Amatic+SC:wght@400;700&family=Arimo:wght@400;700&family=Assistant:wght@200;300;400;500;600;700;800&family=Bellefair&family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Cousine:ital,wght@0,400;0,700;1,400;1,700&family=David+Libre:wght@400;500;700&family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Fredoka:wght@300;400;500;600;700&family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans+Hebrew:wght@100;200;300;400;500;600;700&family=Karantina:wght@300;400;700&family=Miriam+Libre:wght@400;700&family=Noto+Rashi+Hebrew:wght@200;300;400;500;600;700;800;900&family=Noto+Sans+Hebrew:wght@100;200;300;400;500;600;700;800;900&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Secular+One&family=Suez+One&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Varela+Round&display=swap" rel="stylesheet">
+  <style>
+    .whatsapp-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      border-radius: 10px;
+      padding: 8px 16px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .whatsapp-button:hover {
+      transform: scale(1.05);
+    }
+
+    .whatsapp-button.text_and_icon {
+      min-width: 160px;
+    }
+
+    .whatsapp-button.icon {
+      width: 60px;
+      height: 60px;
+      padding: 10px;
+      border-radius: 50%;
+    }
+
+    .whatsapp-button span {
+      font-family: var(--custom-font, 'Rubik'), sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .whatsapp-button img {
+      filter: brightness(0) invert(1);
+    }
+  </style>
+
+<link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&family=Amatic+SC:wght@400;700&family=Arimo:wght@400;700&family=Assistant:wght@200;300;400;500;600;700;800&family=Bellefair&family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Cousine:ital,wght@0,400;0,700;1,400;1,700&family=David+Libre:wght@400;500;700&family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Fredoka:wght@300;400;500;600;700&family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans+Hebrew:wght@100;200;300;400;500;600;700&family=Karantina:wght@300;400;700&family=Miriam+Libre:wght@400;700&family=Noto+Rashi+Hebrew:wght@200;300;400;500;600;700;800;900&family=Noto+Sans+Hebrew:wght@100;200;300;400;500;600;700;800;900&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Secular+One&family=Suez+One&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Varela+Round&display=swap" rel="stylesheet">
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -48,6 +193,7 @@
       const selectedCalendarImage = {{ selected_calendars | json }};
       const shippingOption = {{ shop.metafields.custom.shipping_option.value | json }};
       const warrantyDays = {{ shop.metafields.custom.warranty_days.value | json }};
+      const enableWhatsApp = {{ block.settings.enable_whatsapp }};
 
       function setRTL(isRTL) {
         if (isRTL) {
@@ -152,6 +298,12 @@
       updateBuyNowText();
       setAlternativeFont({{ block.settings.enable_alternative_font }});
       displayFooterBanners(); // Call to display footer banners
+      
+      // Update WhatsApp visibility based on setting
+      const whatsappButton = document.querySelector('.whatsapp-button');
+      if (whatsappButton) {
+        whatsappButton.style.display = enableWhatsApp ? 'flex' : 'none';
+      }
 
       // Listen for changes from the Shopify Theme Editor
       document.addEventListener('shopify:block:select', function (event) {
@@ -160,6 +312,9 @@
           updateBuyNowText();
           setAlternativeFont({{ block.settings.enable_alternative_font }});
           displayFooterBanners(); 
+          if (whatsappButton) {
+            whatsappButton.style.display = enableWhatsApp ? 'flex' : 'none';
+          }
         }
       });
     })();
@@ -175,7 +330,9 @@
    
   body.custom-font-applied,
   body.custom-font-applied *:not(i):not(.fa):not(.fas):not(.far):not(.fal):not(.fab) {
-    font-family: var(--custom-font, 'Rubik'), sans-serif !important;
+    font-family: var(--custom-font, 'Rubik'), sans-serif !important;    # Create WhatsApp icon in the assets folder
+    cd /Users/emmy/projects/bles/labs/the-hebrew-app-react-node/assets
+    curl -o whatsapp-icon.svg https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/whatsapp.svg
   }
 
   /* Apply font to specific elements that might be overriding our styles */
@@ -216,6 +373,16 @@
     align-items: center;
     justify-content: center;
   }
+
+  .payment-section {
+    padding: 16px;
+    border-radius: 10px;
+    {% if payment_background == 'transparent' %}
+      background: transparent;
+    {% else %}
+      background: white;
+    {% endif %}
+  }
 </style>
 
 {% schema %}
@@ -245,6 +412,18 @@
       "type": "checkbox",
       "id": "enable_footer_banners",
       "label": "Enable Footer Banners",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_whatsapp",
+      "label": "Enable WhatsApp Button",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_welcome_message",
+      "label": "Enable Welcome Message",
       "default": false
     }
   ]

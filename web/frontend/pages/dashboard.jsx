@@ -21,27 +21,19 @@ import { toast } from "react-toastify";
 
 const categoryContents = [
   {
-    name: "ימין לשמאל",
+    name: "מימין לשמאל",
     icon: Rtl2,
     content: "שנה את כיוון התצוגה של האתר שלך מימין לשמאל בלחיצה אחת!",
     button: "הגדרת RTL",
     link: "rtl",
   },
   {
-    name: "כפתור שפה ודינאמי",
+    name: "כפתור שפה דינמי",
     icon: Language2,
     content:
       "תרגם את האתר שלך לעברית באופן מיידי, כך שהקהל שלך יוכל לגלוש בשפה המועדפת עליו.",
     button: "שפת הגדרה",
     link: "language",
-  },
-  {
-    name: "שיטות תשלום",
-    icon: Payment2,
-    content:
-      "שילוב סמלי שיטות תשלום מקומיות (ויזה, ביט, וכו') לאתר שלך, בהתאמה לאופציות התשלום המתקבלות - הכל בלחיצה אחת!",
-    button: "הגדרת אמצעי תשלום",
-    link: "payment",
   },
   {
     name: "מדריך להגדרת WhatsApp",
@@ -52,13 +44,14 @@ const categoryContents = [
     link: "whatsapp",
   },
   {
-    name: "מצב שבת",
-    icon: Sabbath2,
+    name: "שיטות תשלום",
+    icon: Payment2,
     content:
-      "הגדר את שעות השבת של החנות שלך לסגירה ופתיחה אוטומטית, תוך שמירה על לקוחות מעודכנים לגבי לוח הזמנים שלך.",
-    button: "קבע שבת",
-    link: "sabbath",
+      "שילוב סמלי שיטות תשלום מקומיות (ויזה, ביט, וכו') לאתר שלך, בהתאמה לאופציות התשלום המתקבלות - הכל בלחיצה אחת!",
+    button: "הגדרת אמצעי תשלום",
+    link: "payment",
   },
+
   {
     name: "התראות",
     icon: Alert2,
@@ -66,6 +59,23 @@ const categoryContents = [
       "ודאו שהלקוחות שלכם מקבלים התראות בעברית - התאימו את הטקסט לשפה ולמותג שלכם!",
     button: "הגדרות הודעות",
     link: "alert",
+  },
+  {
+    name: "מצב שבת",
+    icon: Sabbath2,
+    content:
+      "הגדר את שעות השבת של החנות שלך לסגירה ופתיחה אוטומטית, תוך שמירה על לקוחות מעודכנים לגבי לוח הזמנים שלך.",
+    button: "קבע שבת",
+    link: "sabbath",
+  },
+
+  {
+    name: "כתובת אוטומטית",
+    icon: AutomaticFocus2,
+    content:
+      "הכלי שלנו לכתובת אוטומטית מעדכן את כתובות ההזמנה הנכנסות בהתאם לקלט של הלקוח, ומייעל את תהליך עיבוד ההזמנות שלך.",
+    button: "הגדרת מיקוד אוטומטי",
+    link: "automatic-focus",
   },
   {
     name: "נגישות",
@@ -76,12 +86,12 @@ const categoryContents = [
     link: "accessibility",
   },
   {
-    name: "כתובת אוטומטית",
-    icon: AutomaticFocus2,
+    name: "הגדרות מתקדמות",
+    icon: Training2,
     content:
-      "הכלי שלנו לכתובת אוטומטית מעדכן את כתובות ההזמנה הנכנסות בהתאם לקלט של הלקוח, ומייעל את תהליך עיבוד ההזמנות שלך.",
-    button: "הגדרת מיקוד אוטומטי",
-    link: "automatic-focus",
+      "התאמת הגדרות עיצוב מתקדמות - מיועדות למשתמשים בעלי ידע טכני בלבד.",
+    button: "עבור לדף ההנחיות",
+    link: "training",
   },
   {
     name: "CSS",
@@ -89,14 +99,6 @@ const categoryContents = [
     content: "שנה את הגדרות העיצוב המתקדמות - למשתמשים עם מומחיות טכנית בלבד.",
     button: "הגדרת CSS מותאם",
     link: "css",
-  },
-  {
-    name: "Training",
-    icon: Training2,
-    content:
-      "התאמת הגדרות עיצוב מתקדמות - מיועדות למשתמשים בעלי ידע טכני בלבד.",
-    button: "עבור לדף ההנחיות",
-    link: "training",
   },
 ];
 
@@ -155,7 +157,7 @@ const WelcomeSection = () => (
   <section>
     <div>
       <p className="fw700 fs18">ברוכים הבאים לאפליקציה בעברית</p>
-      <p className="fs14 me-lg-5" style={{ color: "#777" }}>
+      <p className="fs14 ms-lg-5" style={{ color: "#777" }}>
         ברוכים הבאים לאפליקציה בעברית! האפליקציה המובילה בשוק שנותנת לכם את כל
         האפשרויות לגרום לאתר שלכם לדבר עם הלקוח הישראלי בשפתו המקומית.
         לנוחיותכם, האפליקציה מתעדכנת מעת לעת. תהנה! 🙂
@@ -178,7 +180,7 @@ const VideoIntroSection = () => (
     >
       <p className="fw700 fs18">וידאו מבוא</p>
       <p className="fs14" style={{ color: "#777" }}>
-        צפו בווידאו המבוא הקצר הזה שיעזור לכם לנווט בקלות באפליקציה
+        צפו במדריך הקצר הזה כדי להשתמש באפליקציה בקלות
       </p>
       <div
         style={{
