@@ -70,19 +70,26 @@
 {% if block.settings.enable_whatsapp %}
   {% if whatsapp_widget_enabled and contacts.size > 0 %}
     <div class="whatsapp-floating-widget" style="position: fixed; {{ whatsapp_position }}: 20px; bottom: 20px; z-index: 999999;">
-      <div class="whatsapp-widget-container">
+      <div class="whatsapp-widget-container" data-state="expanded">
         <!-- Widget Header -->
         <div class="whatsapp-widget-header" style="background-color: {{ whatsapp_title_bg_color }};">
           <div class="whatsapp-widget-controls">
-            <!-- Controls remain unchanged -->
+            <button class="whatsapp-minimize-button" aria-label="Minimize widget" style="color: {{ whatsapp_title_text_color }}">
+              <svg width="12" height="12" viewBox="0 0 12 12">
+                <path stroke="{{ whatsapp_title_text_color }}" d="M2 6l4 4 4-4" stroke-width="2" fill="none"/>
+              </svg>
+            </button>
+            <button class="whatsapp-close-button" aria-label="Close widget" style="color: {{ whatsapp_title_text_color }}">
+              <svg width="12" height="12" viewBox="0 0 12 12">
+                <path stroke="{{ whatsapp_title_text_color }}" d="M1 1l10 10m0-10L1 11" stroke-width="2" fill="none"/>
+              </svg>
+            </button>
           </div>
-          <div class="whatsapp-header-content">
-            <h2 style="color: {{ whatsapp_title_text_color }}">!היי</h2>
-            <p style="color: {{ whatsapp_title_text_color }}">.אנחנו כאן כדי לעזור. שוחח איתנו בווטסאפ לכל שאלה</p>
+          <div class="whatsapp-header-content" style="color: {{ whatsapp_title_text_color }};">
+            <h2>!היי</h2>
+            <p>.אנחנו כאן כדי לעזור. שוחח איתנו בווטסאפ לכל שאלה</p>
           </div>
         </div>
-
-        <!-- Widget Body - Contacts List -->
         <div class="whatsapp-widget-body">
           {% for contact in contacts %}
             <div class="whatsapp-contact" 
@@ -407,61 +414,58 @@
   overflow: hidden;
 }
 
+.whatsapp-widget-header {
+  position: relative;
+  padding: 20px;
+  border-radius: 10px 10px 0 0;
+}
+
+.whatsapp-widget-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 26px;
+  line-height: 31px;
+  font-weight: 600;
+}
+
+.whatsapp-widget-header p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 500;
+}
+
 .whatsapp-widget-body {
   padding: 16px;
+  background: white;
 }
 
 .whatsapp-contact {
   display: flex;
   align-items: center;
-  padding: 5px;
+  padding: 12px;
   border-radius: 8px;
   transition: background-color 0.3s;
   margin-bottom: 8px;
+  background: white;
 }
 
 .whatsapp-contact:hover {
   background-color: #f5f5f5;
 }
 
-.whatsapp-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-right: 12px;
+.whatsapp-header-content {
+  padding-left: 60px;
+  padding-right: 16px;
 }
 
-.whatsapp-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.whatsapp-contact-info {
-  flex: 1;
+/* Ensure controls are visible against any background */
+.whatsapp-widget-controls {
   display: flex;
-  flex-direction: column;
-}
-
-.contact-name {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.contact-role {
-  font-size: 12px;
-  color: #666;
-}
-
-.contact-status {
-  font-size: 12px;
-  color: #25D366;
-}
-
-.contact-hours {
-  font-size: 12px;
-  color: #999;
+  gap: 8px;
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 1;
 }
 </style>
 
@@ -1323,6 +1327,7 @@ function initializeWhatsApp() {
   // Handle floating widget
   const floatingWidget = document.querySelector('.whatsapp-floating-widget');
   if (config.widgetEnabled && floatingWidget) {
+    // Force show the widget with important flags
     floatingWidget.style.cssText = `
       position: fixed !important;
       bottom: 20px !important;
@@ -1332,32 +1337,70 @@ function initializeWhatsApp() {
       visibility: visible !important;
       opacity: 1 !important;
       pointer-events: auto !important;
+      transform: none !important;
       width: 300px;
       max-width: 100%;
     `;
+
+    // Ensure the container is also visible
+    const widgetContainer = floatingWidget.querySelector('.whatsapp-widget-container');
+    if (widgetContainer) {
+      widgetContainer.style.cssText = `
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+      `;
+    }
   }
 
-  // Handle simple button
-  const simpleButton = document.querySelector('.whatsapp-widget');
-  if (!config.widgetEnabled && simpleButton) {
-    simpleButton.style.cssText = `
-      position: fixed !important;
-      bottom: 20px !important;
-      ${config.position}: 20px !important;
-      z-index: 999999 !important;
-      display: flex !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
-    `;
-  }
+  // Log visibility state
+  console.log('WhatsApp Widget State:', {
+    widget: floatingWidget,
+    display: floatingWidget ? getComputedStyle(floatingWidget).display : 'not found',
+    visibility: floatingWidget ? getComputedStyle(floatingWidget).visibility : 'not found',
+    opacity: floatingWidget ? getComputedStyle(floatingWidget).opacity : 'not found',
+    zIndex: floatingWidget ? getComputedStyle(floatingWidget).zIndex : 'not found'
+  });
 }
 
-// Initialize on load and after a delay
+// Call initialization on DOMContentLoaded and after a delay
 document.addEventListener('DOMContentLoaded', function() {
   initializeWhatsApp();
+  // Add a delayed call to handle any dynamic loading issues
   setTimeout(initializeWhatsApp, 1000);
 });
+
+// Add a CSS fix to ensure widget visibility
+const styleTag = document.createElement('style');
+styleTag.textContent = `
+  .whatsapp-floating-widget {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    z-index: 999999 !important;
+    pointer-events: auto !important;
+  }
+
+  .whatsapp-widget-container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .whatsapp-widget-container[data-state="minimized"] {
+    height: auto !important;
+  }
+
+  .whatsapp-widget-container[data-state="minimized"] .whatsapp-widget-body {
+    display: none !important;
+  }
+`;
+document.head.appendChild(styleTag);
 </script>
 
 <script>
@@ -1410,6 +1453,51 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('shopify:block:select', function(event) {
   if (event.detail.blockId === {{ block.id | json }}) {
     initializeFeatures();
+  }
+});
+</script>
+
+<script>
+// Add to your existing JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+  const container = document.querySelector('.whatsapp-widget-container');
+  const minimizeButton = document.querySelector('.whatsapp-minimize-button');
+  const closeButton = document.querySelector('.whatsapp-close-button');
+
+  if (minimizeButton) {
+    minimizeButton.addEventListener('click', function() {
+      const isMinimized = container.getAttribute('data-state') === 'minimized';
+      container.setAttribute('data-state', isMinimized ? 'expanded' : 'minimized');
+      
+      // Store state in localStorage
+      localStorage.setItem('whatsappWidgetState', isMinimized ? 'expanded' : 'minimized');
+    });
+  }
+
+  if (closeButton) {
+    closeButton.addEventListener('click', function() {
+      container.style.display = 'none';
+      // Store closed state in localStorage
+      localStorage.setItem('whatsappWidgetClosed', 'true');
+      
+      // Show widget again after 24 hours
+      setTimeout(() => {
+        container.style.display = 'block';
+        localStorage.removeItem('whatsappWidgetClosed');
+      }, 24 * 60 * 60 * 1000);
+    });
+  }
+
+  // Restore previous state on page load
+  const savedState = localStorage.getItem('whatsappWidgetState');
+  const isClosed = localStorage.getItem('whatsappWidgetClosed');
+  
+  if (savedState === 'minimized') {
+    container.setAttribute('data-state', 'minimized');
+  }
+  
+  if (isClosed === 'true') {
+    container.style.display = 'none';
   }
 });
 </script>
