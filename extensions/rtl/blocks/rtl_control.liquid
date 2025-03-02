@@ -74,16 +74,16 @@
         <!-- Widget Header -->
         <div class="whatsapp-widget-header" style="background-color: {{ whatsapp_title_bg_color }};">
           <div class="whatsapp-widget-controls">
-            <button class="whatsapp-minimize-button" aria-label="Minimize widget" style="color: {{ whatsapp_title_text_color }}">
+            <div class="whatsapp-minimize-button" aria-label="Minimize widget" style="color: {{ whatsapp_title_text_color }}">
               <svg width="12" height="12" viewBox="0 0 12 12">
                 <path stroke="{{ whatsapp_title_text_color }}" d="M2 6l4 4 4-4" stroke-width="2" fill="none"/>
               </svg>
-            </button>
-            <button class="whatsapp-close-button" aria-label="Close widget" style="color: {{ whatsapp_title_text_color }}">
+            </div>
+            <div class="whatsapp-close-button" aria-label="Close widget" style="color: {{ whatsapp_title_text_color }}">
               <svg width="12" height="12" viewBox="0 0 12 12">
                 <path stroke="{{ whatsapp_title_text_color }}" d="M1 1l10 10m0-10L1 11" stroke-width="2" fill="none"/>
               </svg>
-            </button>
+            </div>
           </div>
           <div class="whatsapp-header-content" style="color: {{ whatsapp_title_text_color }};">
             <h2>!היי</h2>
@@ -453,8 +453,13 @@
   background-color: #f5f5f5;
 }
 
+.whatsapp-contact-info{
+display:flex; 
+flex-direction: column;
+}
+
 .whatsapp-header-content {
-  padding-left: 60px;
+ 
   padding-right: 16px;
 }
 
@@ -462,10 +467,59 @@
 .whatsapp-widget-controls {
   display: flex;
   gap: 8px;
-  position: absolute;
   left: 12px;
   top: 12px;
   z-index: 1;
+}
+
+.whatsapp-floating-widget {
+  max-height: 90vh !important;
+  display: flex !important;
+}
+
+.whatsapp-widget-container {
+  width: 300px;
+  max-height: 90vh !important;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.whatsapp-widget-header {
+  position: relative;
+  padding: 20px;
+  border-radius: 10px 10px 0 0;
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.whatsapp-widget-body {
+  padding: 16px;
+  background: white;
+  overflow-y: auto; /* Make contacts scrollable */
+  flex-grow: 1; /* Allow body to take remaining space */
+  max-height: calc(90vh - 120px); /* Account for header height */
+}
+
+/* Add smooth scrolling to the contacts area */
+.whatsapp-widget-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.whatsapp-widget-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.whatsapp-widget-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.whatsapp-widget-body::-webkit-scrollbar-thumb:hover {
+  background: #666;
 }
 </style>
 
@@ -1259,8 +1313,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   .whatsapp-widget-header {
-    display: flex;
-    flex-direction: row-reverse;
     padding: 16px;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
