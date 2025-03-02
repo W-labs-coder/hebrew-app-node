@@ -4,11 +4,14 @@ import { readFileSync } from "fs";
 import express from "express";
 import serveStatic from "serve-static";
 
+
 import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
+import User from "./models/User.js";
+
 
 
 // console.log(process.env)
@@ -138,5 +141,7 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
         .replace("%VITE_SHOPIFY_API_KEY%", apiKey)
     );
 });
+
+
 
 app.listen(PORT);
