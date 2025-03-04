@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import { Frame, Layout, Page } from "@shopify/polaris";
 import Input from "../components/form/Input";
@@ -63,6 +63,17 @@ const SabbathSection = ({ themes }) => {
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [themeLoading, setThemeLoading] = useState(false);
   const [isSabbathMode, setIsSabbathMode] = useState(false);
+  const [isAutoSabbathMode, setIsAutoSabbathMode] = useState(false);
+  const [closingDay, setClosingDay] = useState('Friday');
+  const [openingDay, setOpeningDay] = useState('Saturday');
+  const [closingTime, setClosingTime] = useState('00:00');
+  const [openingTime, setOpeningTime] = useState('00:00');
+  const [file, setFile] = useState(null);
+  const [bannerText, setBannerText] = useState('');
+  const [socialLinks, setSocialLinks] = useState([]);
+  const [currentLink, setCurrentLink] = useState('');
+  const [bannerBgColor, setBannerBgColor] = useState('#FFFFFF');
+  const [bannerTextColor, setBannerTextColor] = useState('#000000');
   const dispatch = useDispatch();
 
   const handleThemeChange = (e) => {
@@ -187,6 +198,458 @@ const SabbathSection = ({ themes }) => {
               </div>
             </div>
           </div>
+
+          <div>
+            <p className="fs14 fw700">מצב שבת באופן אוטומטי</p>
+            <div className="sabbath-switch">
+              <div
+                onClick={() => setIsAutoSabbathMode(!isAutoSabbathMode)}
+                className="switch-container"
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: "2px",
+                  width: "44px",
+                  height: "24px",
+                  background: isAutoSabbathMode ? "#FBB105" : "#E1E1E1",
+                  borderRadius: "24px",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s ease",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    background: "#FBFBFB",
+                    borderRadius: "24px",
+                    transform: `translateX(${
+                      isAutoSabbathMode ? "-20px" : "0"
+                    })`,
+                    transition: "transform 0.3s ease",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="d-flex flex-column gap-4 mt-4">
+          <div className="d-flex gap-4 align-items-center">
+            <div style={{ width: "150px" }}>
+              <p className="fs14 fw700 mb-2">יום הסגירה</p>
+              <select
+                value={closingDay}
+                onChange={(e) => setClosingDay(e.target.value)}
+                className="form-select"
+                style={{
+                  padding: "8px 16px",
+                  border: "1px solid #C6C6C6",
+                  borderRadius: "10px",
+                  width: "100%",
+                  direction: "rtl",
+                }}
+              >
+                <option value="Friday">שישי</option>
+                <option value="Saturday">שבת</option>
+              </select>
+            </div>
+
+            <div style={{ width: "269px" }}>
+              <p className="fs14 fw700 mb-2">החנות נסגרת (שעה - HH:MM)</p>
+              <select
+                value={closingTime}
+                onChange={(e) => setClosingTime(e.target.value)}
+                className="form-select"
+                style={{
+                  padding: "8px 16px",
+                  border: "1px solid #C6C6C6",
+                  borderRadius: "10px",
+                  width: "100%",
+                  direction: "rtl",
+                }}
+              >
+                {[...Array(24)].map((_, hour) =>
+                  [...Array(4)].map((_, minute) => {
+                    const time = `${hour.toString().padStart(2, "0")}:${(
+                      minute * 15
+                    )
+                      .toString()
+                      .padStart(2, "0")}`;
+                    return (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    );
+                  })
+                )}
+              </select>
+            </div>
+          </div>
+
+          <div className="d-flex gap-4 align-items-center">
+            <div style={{ width: "150px" }}>
+              <p className="fs14 fw700 mb-2">יום הפתיחה</p>
+              <select
+                value={openingDay}
+                onChange={(e) => setOpeningDay(e.target.value)}
+                className="form-select"
+                style={{
+                  padding: "8px 16px",
+                  border: "1px solid #C6C6C6",
+                  borderRadius: "10px",
+                  width: "100%",
+                  direction: "rtl",
+                }}
+              >
+                <option value="Saturday">שבת</option>
+                <option value="Sunday">ראשון</option>
+              </select>
+            </div>
+
+            <div style={{ width: "269px" }}>
+              <p className="fs14 fw700 mb-2">החנות נפתחת (שעה - HH:MM)</p>
+              <select
+                value={openingTime}
+                onChange={(e) => setOpeningTime(e.target.value)}
+                className="form-select"
+                style={{
+                  padding: "8px 16px",
+                  border: "1px solid #C6C6C6",
+                  borderRadius: "10px",
+                  width: "100%",
+                  direction: "rtl",
+                }}
+              >
+                {[...Array(24)].map((_, hour) =>
+                  [...Array(4)].map((_, minute) => {
+                    const time = `${hour.toString().padStart(2, "0")}:${(
+                      minute * 15
+                    )
+                      .toString()
+                      .padStart(2, "0")}`;
+                    return (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    );
+                  })
+                )}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="d-flex flex-column gap-4 mt-4"
+          style={{ width: "489px" }}
+        >
+          <div>
+            <p className="fs14 fw700 mb-2">העלאת קובץ</p>
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const droppedFile = e.dataTransfer.files[0];
+                if (droppedFile && droppedFile.size <= 5 * 1024 * 1024) {
+                  // 5MB limit
+                  setFile(droppedFile);
+                }
+              }}
+              style={{
+                border: "1px dashed #C6C6C6",
+                borderRadius: "10px",
+                padding: "16px",
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                width: "100%",
+                height: "56px",
+                cursor: "pointer",
+              }}
+              onClick={() => document.getElementById("fileInput").click()}
+            >
+              <input
+                id="fileInput"
+                type="file"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const selectedFile = e.target.files[0];
+                  if (selectedFile && selectedFile.size <= 5 * 1024 * 1024) {
+                    setFile(selectedFile);
+                  }
+                }}
+                accept=".jpeg,.jpg,.pdf,.xlsx,.png"
+              />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z"
+                  stroke="#0D0D0D"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M12 8V16M12 8L9 11M12 8L15 11"
+                  stroke="#0D0D0D"
+                  strokeWidth="1.5"
+                />
+              </svg>
+              <p className="fs14 fw500" style={{ color: "#0D0D0D" }}>
+                גרור ושחרר קובץ כאן או בחר קובץ
+              </p>
+            </div>
+            <div className="d-flex justify-content-between mt-2">
+              <p className="fs14 fw500" style={{ color: "#777777" }}>
+                גודל מקסימלי: 5MB
+              </p>
+              <p className="fs14 fw500" style={{ color: "#777777" }}>
+                קבצים נתמכים: JPEG, PDF, XLSX, PNG
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="d-flex flex-column gap-4 mt-4"
+          style={{ width: "486px" }}
+        >
+          <div>
+            <p className="fs14 fw700">לינקים לרשתות חברתיות:</p>
+
+            {socialLinks.map((link, index) => (
+              <div
+                key={index}
+                className="d-flex flex-row-reverse justify-content-end align-items-center gap-2 mt-2"
+              >
+                <div className="d-flex gap-2">
+                  <button
+                    onClick={() => setCurrentLink(link)}
+                    style={{
+                      height: "36px",
+                      background: "#FBB105",
+                      borderRadius: "10px",
+                      border: "none",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <svg
+                      width="16"
+                      height="17"
+                      viewBox="0 0 16 17"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M9.38214 3.08997C9.87894 2.55173 10.1273 2.28261 10.3913 2.12563C11.0281 1.74685 11.8124 1.73507 12.4599 2.09455C12.7283 2.24354 12.9843 2.50509 13.4963 3.02818C14.0084 3.55127 14.2645 3.81282 14.4103 4.08696C14.7622 4.74842 14.7507 5.54953 14.3799 6.20014C14.2262 6.46978 13.9627 6.72353 13.4359 7.23101L7.16674 13.2692C6.16826 14.2309 5.66901 14.7118 5.04505 14.9555C4.42109 15.1992 3.73514 15.1813 2.36325 15.1454L2.1766 15.1405C1.75895 15.1296 1.55012 15.1241 1.42874 14.9863C1.30734 14.8486 1.32392 14.6359 1.35706 14.2105L1.37506 13.9795C1.46835 12.782 1.51499 12.1833 1.74882 11.6451C1.98264 11.1069 2.38597 10.67 3.19263 9.79601L9.38214 3.08997Z"
+                        stroke="#0D0D0D"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M8.66699 3.16699L13.3337 7.83366"
+                        stroke="#0D0D0D"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M9.33301 15.167H14.6663"
+                        stroke="#0D0D0D"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const newLinks = [...socialLinks];
+                      newLinks.splice(index, 1);
+                      setSocialLinks(newLinks);
+                    }}
+                    style={{
+                   
+                      height: "36px",
+                      background: "#BE0A19",
+                      borderRadius: "10px",
+                      border: "none",
+                   
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M13.3337 3.99996H2.66699"
+                        stroke="#FBFBFB"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M6.66699 6.66663V11.3333"
+                        stroke="#FBFBFB"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M9.33301 6.66663V11.3333"
+                        stroke="#FBFBFB"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M12 3.99996L11.2807 12.5333C11.2807 12.8 11.1474 13.0666 10.9474 13.2666C10.7474 13.4666 10.4807 13.6 10.214 13.6H5.78737C5.52071 13.6 5.25404 13.4666 5.05404 13.2666C4.85404 13.0666 4.72071 12.8 4.72071 12.5333L4 3.99996"
+                        stroke="#FBFBFB"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <input
+                  type="text"
+                  value={link}
+                  onChange={(e) => {
+                    const newLinks = [...socialLinks];
+                    newLinks[index] = e.target.value;
+                    setSocialLinks(newLinks);
+                  }}
+                  placeholder={`לינק ${index + 1}`}
+                  style={{
+                    padding: "8px 16px",
+                    border: "1px solid #C6C6C6",
+                    borderRadius: "10px",
+                    width: "398px",
+                    height: "37px",
+                    direction: "rtl",
+                    fontSize: "14px",
+                    fontFamily: "Inter",
+                    fontWeight: "500",
+                    color: "#777777",
+                  }}
+                />
+              </div>
+            ))}
+
+            <button
+              onClick={() => setSocialLinks([...socialLinks, ""])}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "8px 24px",
+                gap: "10px",
+                width: "250px",
+                height: "37px",
+                background: "#FBB105",
+                borderRadius: "24px",
+                border: "none",
+                marginTop: "16px",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontFamily: "Inter",
+                fontWeight: "500",
+                color: "#0D0D0D",
+              }}
+            >
+              הוסף קישור לרשתות חברתיות
+            </button>
+          </div>
+        </div>
+
+        <div className="d-flex flex-column gap-4 mt-4" style={{ width: "486px" }}>
+          <div>
+            <p className="fs14 fw700 mb-2">טקסט באנר</p>
+            <input
+              type="text"
+              value={bannerText}
+              onChange={(e) => setBannerText(e.target.value)}
+              placeholder="היי, שיהיה לכם שבת שלום! נראה אתכם אחרי צאת שבת"
+              style={{
+                padding: "8px 16px",
+                border: "1px solid #C6C6C6",
+                borderRadius: "10px",
+                width: "488px",
+                height: "37px",
+                direction: "rtl",
+                fontSize: "14px",
+                fontFamily: "Inter",
+                fontWeight: "500",
+                lineHeight: "21px",
+                color: "#777777",
+                "::placeholder": {
+                  color: "#777777",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                },
+              }}
+            />
+
+            <div className="color-pickers-container mt-4">
+              <p className="fw700 fs14 mb-3">צבעי באנר:</p>
+              <div className="d-flex gap-1 flex-wrap">
+                <div className="color-picker-group rtl">
+                  <label htmlFor="bannerBgColor" className="form-label fs14 mb-2">
+                    צבע רקע
+                  </label>
+                  <div className="color-picker-wrapper">
+                    <span className="color-value">
+                      {bannerBgColor.toUpperCase()}
+                    </span>
+                    <input
+                      type="color"
+                      className="form-control form-control-color"
+                      id="bannerBgColor"
+                      name="bannerBgColor"
+                      value={bannerBgColor}
+                      onChange={(e) => setBannerBgColor(e.target.value)}
+                      title="בחר צבע רקע"
+                    />
+                  </div>
+                </div>
+
+                <div className="color-picker-group rtl">
+                  <label htmlFor="bannerTextColor" className="form-label fs14 mb-2">
+                    צבע טקסט
+                  </label>
+                  <div className="color-picker-wrapper">
+                    <span className="color-value">
+                      {bannerTextColor.toUpperCase()}
+                    </span>
+                    <input
+                      type="color"
+                      className="form-control form-control-color"
+                      id="bannerTextColor"
+                      name="bannerTextColor"
+                      value={bannerTextColor}
+                      onChange={(e) => setBannerTextColor(e.target.value)}
+                      title="בחר צבע טקסט"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {isSubmitSuccessful && (
@@ -208,10 +671,6 @@ const SabbathSection = ({ themes }) => {
             עבור לערכת הנושא
           </a>
         )}
-        <p class="fs14" style={{ marginTop: "10px" }}>
-          לא מצליחים למצוא את התבנית שלכם? צרו קשר, ונוסיף אותה במהירות לרשימת
-          התבניות שלנו.
-        </p>
       </div>
 
       <div className="steps">
