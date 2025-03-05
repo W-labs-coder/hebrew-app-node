@@ -31,6 +31,15 @@
 {% assign whatsapp_title_bg_color = shop.metafields.custom.whatsapp_title_bg_color.value | default: '#05B457' %}
 {% assign whatsapp_title_text_color = shop.metafields.custom.whatsapp_title_text_color.value | default: '#FFFFFF' %}
 
+{% assign is_sabbath_mode = shop.metafields.custom.sabbath_mode.value | default: false %}
+{% assign opening_day = shop.metafields.custom.opening_day.value | default: 'Saturday' %}
+{% assign opening_time = shop.metafields.custom.opening_time.value | default: '20:00' %}
+{% assign banner_text = shop.metafields.custom.banner_text.value %}
+{% assign banner_bg_color = shop.metafields.custom.banner_bg_color.value | default: '#FFFFFF' %}
+{% assign banner_text_color = shop.metafields.custom.banner_text_color.value | default: '#000000' %}
+{% assign social_links = shop.metafields.custom.social_links.value | default: '[]' | parse_json %}
+{% assign sabbath_file = shop.metafields.custom.sabbath_file.value %}
+
 {%- capture payment_processor_images -%}
   {%- for processor in shop.metafields.custom.payment_processors.value -%}
     {%- assign image_name = processor | downcase | replace: ' ', '_' | append: '.png' -%}
@@ -1553,6 +1562,173 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+
+{% if is_sabbath_mode %}
+<div class="sabbath-overlay">
+  <div class="sabbath-content">
+    <h1>{{ shop.name }}</h1>
+    
+    <div class="sabbath-banner" 
+         style="background-color: {{ banner_bg_color }}; color: {{ banner_text_color }}">
+      {% if sabbath_file %}
+        <img src="{{ sabbath_file }}" alt="Sabbath Banner">
+      {% endif %}
+      <p>{{ banner_text }}</p>
+    </div>
+
+    <div class="countdown-container">
+      <h2>Store Opens In:</h2>
+      <div class="countdown" 
+           data-opening-day="{{ opening_day }}" 
+           data-opening-time="{{ opening_time }}">
+      </div>
+    </div>
+
+    {% if social_links.size > 0 %}
+    <div class="social-links">
+      {% for link in social_links %}
+        <a href="{{ link }}" target="_blank" rel="noopener noreferrer">
+          {% case link %}
+            {% when contains "facebook" %}
+              {% render 'facebook-icon' %}
+            {% when contains "twitter" %}
+              {% render 'twitter-icon' %}
+            {% else %}
+              {% render 'link-icon' %}
+          {% endcase %}
+        </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.sabbath-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FBFBFB;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sabbath-content {
+  max-width: 800px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.sabbath-banner {
+  margin: 2rem 0;
+  padding: 2rem;
+  border-radius: 16px;
+}
+
+.sabbath-banner img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.countdown-container {
+  margin: 2rem 0;
+}
+
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.social-links a {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+
+<script>
+function calculateTimeLeft(openingDay, openingTime) {
+  const now = new Date();
+  const [hours, minutes] = openingTime.split(':');
+  const target = new Date();
+  
+  const days = {
+    'Saturday': 6,
+    'Sunday': 0
+  };
+  
+  let targetDay = days[openingDay];
+  let daysUntil = targetDay - now.getDay();
+  if (daysUntil <= 0) daysUntil += 7;
+  
+  target.setDate(target.getDate() + daysUntil);
+  target.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+  const difference = target - now;
+  
+  if (difference > 0) {
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60)
+    };
+  }
+  
+  return null;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const countdownEl = document.querySelector('.countdown');
+  if (!countdownEl) return;
+
+  const openingDay = countdownEl.dataset.openingDay;
+  const openingTime = countdownEl.dataset.openingTime;
+
+  function updateCountdown() {
+    const timeLeft = calculateTimeLeft(openingDay, openingTime);
+    if (!timeLeft) return;
+
+    countdownEl.innerHTML = `
+      <div class="time-box">
+        <span class="number">${timeLeft.days}</span>
+        <span class="label">Days</span>
+      </div>
+      <div class="time-box">
+        <span class="number">${timeLeft.hours}</span>
+        <span class="label">Hours</span>
+      </div>
+      <div class="time-box">
+        <span class="number">${timeLeft.minutes}</span>
+        <span class="label">Minutes</span>
+      </div>
+      <div class="time-box">
+        <span class="number">${timeLeft.seconds}</span>
+        <span class="label">Seconds</span>
+      </div>
+    `;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+});
+</script>
+{% endif %}
 
 {% schema %}
 {

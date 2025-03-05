@@ -30,3 +30,7 @@ web/database.sqlite
 # Ignore shopify files created during app dev
 .shopify/*
 .shopify.lock
+
+# Ignore web uploads except .gitkeep
+web/uploads/*
+!web/uploads/.gitkeep

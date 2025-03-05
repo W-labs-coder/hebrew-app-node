@@ -1,9 +1,9 @@
-
 import { join } from "path";
 import { readFileSync } from "fs";
 import express from "express";
 import serveStatic from "serve-static";
-
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
@@ -12,7 +12,9 @@ import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import User from "./models/User.js";
 
-
+// Add these lines after imports to define __dirname equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // console.log(process.env)
 
@@ -86,6 +88,7 @@ app.use("/api/billing", shopify.validateAuthenticatedSession());
 app.use("/api/billing", billingRoutes);
 app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
 
+app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
 

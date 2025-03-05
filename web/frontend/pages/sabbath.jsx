@@ -10,6 +10,63 @@ import RtlImage from "../components/svgs/RtlImage";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/slices/authSlice";
 import { toast } from "react-toastify";
+import SabbathPreview from "../components/SabbathPreview";
+
+// Add these functions after your imports
+const uploadToCloudflare = async (file) => {
+  try {
+    const response = await fetch("/api/settings/get-upload-url", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to get upload URL");
+    }
+
+    const { uploadUrl, imageId, key } = await response.json();
+
+    // Upload to R2
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      body: file,
+      headers: {
+        "Content-Type": file.type,
+        "x-amz-acl": "public-read",
+      },
+      mode: "cors", // Explicitly set CORS mode
+    });
+
+    console.log("this error", uploadResponse.json());
+
+    return false;
+
+    if (!uploadResponse.ok) {
+      throw new Error("Failed to upload to R2");
+    }
+
+    // Get the delivery URL
+    const deliveryResponse = await fetch(
+      `/api/settings/get-image-url/${imageId}`
+    );
+    if (!deliveryResponse.ok) {
+      throw new Error("Failed to get delivery URL");
+    }
+
+    const { url } = await deliveryResponse.json();
+    return url;
+  } catch (error) {
+    console.error("Error uploading to R2:", error);
+    throw error;
+  }
+};
 
 export default function Sabbath() {
   const [themes, setThemes] = useState([]);
@@ -41,7 +98,7 @@ export default function Sabbath() {
     <div className="dashboard-container">
       <Sidebar />
       <div className="main-content">
-        <Page >
+        <Page>
           <Layout>
             <Layout.Section>
               <div>
@@ -64,54 +121,114 @@ const SabbathSection = ({ themes }) => {
   const [themeLoading, setThemeLoading] = useState(false);
   const [isSabbathMode, setIsSabbathMode] = useState(false);
   const [isAutoSabbathMode, setIsAutoSabbathMode] = useState(false);
-  const [closingDay, setClosingDay] = useState('Friday');
-  const [openingDay, setOpeningDay] = useState('Saturday');
-  const [closingTime, setClosingTime] = useState('00:00');
-  const [openingTime, setOpeningTime] = useState('00:00');
+  const [closingDay, setClosingDay] = useState("Friday");
+  const [openingDay, setOpeningDay] = useState("Saturday");
+  const [closingTime, setClosingTime] = useState("00:00");
+  const [openingTime, setOpeningTime] = useState("00:00");
   const [file, setFile] = useState(null);
-  const [bannerText, setBannerText] = useState('');
+  const [bannerText, setBannerText] = useState("");
   const [socialLinks, setSocialLinks] = useState([]);
-  const [currentLink, setCurrentLink] = useState('');
-  const [bannerBgColor, setBannerBgColor] = useState('#FFFFFF');
-  const [bannerTextColor, setBannerTextColor] = useState('#000000');
+  const [currentLink, setCurrentLink] = useState("");
+  const [bannerBgColor, setBannerBgColor] = useState("#FFFFFF");
+  const [bannerTextColor, setBannerTextColor] = useState("#000000");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const dispatch = useDispatch();
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileUrl, setFileUrl] = useState(null);
 
   const handleThemeChange = (e) => {
     setSelectedTheme(e.target.value);
     setIsSubmitSuccessful(false); // Reset when theme changes
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setThemeLoading(true);
+  // Then modify your uploadFile function
+  const uploadFile = async (file) => {
     try {
-      const response = await fetch("/api/settings/add-selected-theme", {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/settings/upload-sabbath-file', {
+        method: 'POST',
+        body: formData,
+        // Add credentials to ensure session cookies are sent
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.details || error.error || 'Upload failed');
+      }
+
+      const data = await response.json();
+      setFileUrl(data.fileUrl);
+      return data.fileUrl;
+
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error(error.message);
+      return null;
+    }
+  };
+
+  // Fix the typo and logic in handleSubmit
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true); // Start loading
+      let uploadedFileUrl = null;
+
+      if (file) {
+        uploadedFileUrl = await uploadFile(file);
+        setSelectedFile(uploadedFileUrl); // Fix the typo and use the correct variable
+        if (!uploadedFileUrl) {
+          toast.error("Error uploading file");
+          return;
+        }
+      }
+
+      const response = await fetch("/api/settings/update-sabbath", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ themeId: selectedTheme }),
+        body: JSON.stringify({
+          isSabbathMode,
+          isAutoSabbathMode,
+          closingDay,
+          openingDay,
+          closingTime,
+          openingTime,
+          sabbathFile: uploadedFileUrl, // Use the correct variable
+          bannerText,
+          socialLinks,
+          bannerBgColor,
+          bannerTextColor,
+        }),
       });
+
       if (response.ok) {
         const data = await response.json();
-        const theme = data.user.selectedTheme;
-        setSelectedTheme(theme);
-        setShop(data.user.shop);
         dispatch(login({ user: data.user }));
-        setThemeLoading(false);
+        toast.success("Settings saved successfully");
         setIsSubmitSuccessful(true);
-        toast.success('Theme Selected Successfully')
       } else {
-        console.error("Failed to add theme");
-        setIsSubmitSuccessful(false);
-        setThemeLoading(false);
-        toast.error("Error Adding Theme");
+        const error = await response.json();
+        throw new Error(error.message || "Error saving settings");
       }
     } catch (error) {
-      console.error("Error adding theme:", error);
-      setIsSubmitSuccessful(false);
-      setThemeLoading(false);
-      toast.error("Error Adding Theme");
+      console.error("Error:", error);
+      toast.error(error.message || "Error saving settings");
+
+      // Handle session expiration
+      if (
+        error.message.includes("Unauthorized") ||
+        error.message.includes("session")
+      ) {
+        window.location.href = "/auth";
+      }
+    } finally {
+      setIsSubmitting(false); // Stop loading
     }
   };
 
@@ -123,6 +240,19 @@ const SabbathSection = ({ themes }) => {
       ".myshopify.com",
       ""
     )}/themes/${themeId}/editor?context=apps`;
+  };
+
+  // Add this helper function to format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  const handlePreview = () => {
+    setShowPreview(true);
   };
 
   return (
@@ -385,6 +515,7 @@ const SabbathSection = ({ themes }) => {
                   const selectedFile = e.target.files[0];
                   if (selectedFile && selectedFile.size <= 5 * 1024 * 1024) {
                     setFile(selectedFile);
+                    setFileUrl(null); // Clear previous URL
                   }
                 }}
                 accept=".jpeg,.jpg,.pdf,.xlsx,.png"
@@ -401,8 +532,25 @@ const SabbathSection = ({ themes }) => {
                   strokeWidth="1.5"
                 />
               </svg>
-              <p className="fs14 fw500" style={{ color: "#0D0D0D" }}>
-                גרור ושחרר קובץ כאן או בחר קובץ
+              <p
+                className="fs14 fw500"
+                style={{
+                  color: file ? "#2C6ECB" : "#0D0D0D",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                {file ? (
+                  <>
+                    <span>{file.name}</span>
+                    <span style={{ color: "#777777" }}>
+                      ({formatFileSize(file.size)})
+                    </span>
+                  </>
+                ) : (
+                  "גרור ושחרר קובץ כאן או בחר קובץ"
+                )}
               </p>
             </div>
             <div className="d-flex justify-content-between mt-2">
@@ -478,12 +626,11 @@ const SabbathSection = ({ themes }) => {
                       setSocialLinks(newLinks);
                     }}
                     style={{
-                   
                       height: "36px",
                       background: "#BE0A19",
                       borderRadius: "10px",
                       border: "none",
-                   
+
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
@@ -577,7 +724,10 @@ const SabbathSection = ({ themes }) => {
           </div>
         </div>
 
-        <div className="d-flex flex-column gap-4 mt-4" style={{ width: "486px" }}>
+        <div
+          className="d-flex flex-column gap-4 mt-4"
+          style={{ width: "486px" }}
+        >
           <div>
             <p className="fs14 fw700 mb-2">טקסט באנר</p>
             <input
@@ -609,7 +759,10 @@ const SabbathSection = ({ themes }) => {
               <p className="fw700 fs14 mb-3">צבעי באנר:</p>
               <div className="d-flex gap-1 flex-wrap">
                 <div className="color-picker-group rtl">
-                  <label htmlFor="bannerBgColor" className="form-label fs14 mb-2">
+                  <label
+                    htmlFor="bannerBgColor"
+                    className="form-label fs14 mb-2"
+                  >
                     צבע רקע
                   </label>
                   <div className="color-picker-wrapper">
@@ -629,7 +782,10 @@ const SabbathSection = ({ themes }) => {
                 </div>
 
                 <div className="color-picker-group rtl">
-                  <label htmlFor="bannerTextColor" className="form-label fs14 mb-2">
+                  <label
+                    htmlFor="bannerTextColor"
+                    className="form-label fs14 mb-2"
+                  >
                     צבע טקסט
                   </label>
                   <div className="color-picker-wrapper">
@@ -652,6 +808,71 @@ const SabbathSection = ({ themes }) => {
           </div>
         </div>
 
+        <div className="d-flex align-items-end gap-4 mt-4">
+          <div className="d-flex gap-4 rtl">
+            <button
+              onClick={handleSubmit}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "8px 24px",
+                gap: "10px",
+                width: "79px",
+                height: "37px",
+                background: "#FBB105",
+                borderRadius: "24px",
+                border: "none",
+                cursor: isSubmitting ? "not-allowed" : "pointer",
+                fontSize: "14px",
+                fontFamily: "Inter",
+                fontWeight: "500",
+                color: "#0D0D0D",
+                opacity: isSubmitting ? 0.7 : 1,
+              }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <div className="d-flex align-items-center gap-2">
+                  <span
+                    className="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  שומר...
+                </div>
+              ) : (
+                "שמור"
+              )}
+            </button>
+
+            <button
+              onClick={handlePreview}
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "8px 24px",
+                gap: "10px",
+                width: "146px",
+                height: "37px",
+                background: "#021341",
+                borderRadius: "24px",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontFamily: "Inter",
+                fontWeight: "500",
+                color: "#FBFBFB",
+              }}
+            >
+              תצוגה מקדימה
+            </button>
+          </div>
+        </div>
+
         {isSubmitSuccessful && (
           <a
             href={getThemeEditorUrl()}
@@ -671,16 +892,70 @@ const SabbathSection = ({ themes }) => {
             עבור לערכת הנושא
           </a>
         )}
+
+        {showPreview && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.5)",
+              zIndex: 1000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                width: "90%",
+                maxHeight: "90vh",
+                overflow: "hidden",
+              }}
+            >
+              <button
+                onClick={() => setShowPreview(false)}
+                style={{
+                  position: "absolute",
+                  top: "-40px",
+                  right: "0",
+                  background: "none",
+                  border: "none",
+                  color: "#FBFBFB",
+                  cursor: "pointer",
+                  fontSize: "24px",
+                }}
+              >
+                ✕
+              </button>
+              <SabbathPreview
+                bannerText={bannerText}
+                bannerBgColor={bannerBgColor}
+                bannerTextColor={bannerTextColor}
+                socialLinks={socialLinks}
+                imageUrl={fileUrl} // Use fileUrl instead of selectedFile
+                openingDay={openingDay}
+                openingTime={openingTime}
+                storeName={user?.shop?.replace('.myshopify.com', '')} // Format shop name
+                onClose={() => setShowPreview(false)}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="steps">
         <h4>שלבים:</h4>
 
         {[
-          "שלב 1 - בחרו את ערכת הנושא מהרשימה.",
-          'שלב 2 - לחצו "שמירה".',
-          'שלב 3 - הכנסו ל"הגדרות האפליקציה בערכת הנושא".',
-          'שלב 4 - וודאו שהאפליקציה מופעלת וש"Activate RTL" מסומן.',
+          "שלב 1 - התחל בהפעלה או כיבוי של מצב שבת בהתאם להעדפותיך. אם תרצה שמצב זה יופעל אוטומטית בכל שבוע, הפעל את הפעל מצב שבת באופן אוטומטי כך שהחנות שלך תיסגר ותפתח מחדש בזמנים שתקבע.",
+          "שלב 2 - בחר את הזמנים הספציפיים שבהם החנות שלך תיסגר ותפתח מחדש בכל שבת. זה מבטיח שהחנות שלך משקפת את השעות הנכונות באופן אוטומטי, כך שלא תצטרך להתאים אותה מדי שבוע.",
+          "שלב 3 - צור הודעה מותאמת אישית שתוצג ללקוחות כשהחנות שלך במצב שבת, תודיע להם מתי תחזור או תספק מידע נוסף.",
+          "שלב 4 - הוסף קישורים שבהם לקוחות יכולים להגיע אליך במהלך מצב השבת במידת הצורך, כגון דף יצירת קשר חלופי או אפשרות תמיכה.",
+          "שלב 5 - בחר צבעי רקע וטקסט עבור הבאנר של מצב שבת כדי להתאים לסגנון החנות שלך, ולאחר מכן לחץ על שמור כדי להחיל את כל ההגדרות שלך.",
         ].map((item) => (
           <div
             className="d-flex aic gap-3 mb-2"

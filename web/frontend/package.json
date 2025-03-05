@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "test:r2": "node scripts/test-r2-connection.js"
   },
   "type": "module",
   "engines": {

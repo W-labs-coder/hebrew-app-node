@@ -111,7 +111,51 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "#FFFFFF"  // Add default value to match controller
     },
-    contacts: [contactSchema]
+    contacts: [contactSchema],
+    
+    // Add Sabbath settings
+    isSabbathMode: {
+      type: Boolean,
+      default: false
+    },
+    isAutoSabbathMode: {
+      type: Boolean,
+      default: false
+    },
+    closingDay: {
+      type: String,
+      enum: ['Friday', 'Saturday'],
+      default: 'Friday'
+    },
+    openingDay: {
+      type: String,
+      enum: ['Saturday', 'Sunday'],
+      default: 'Saturday'
+    },
+    closingTime: {
+      type: String,
+      default: '00:00'
+    },
+    openingTime: {
+      type: String,
+      default: '00:00'
+    },
+    sabbathFile: String,
+    bannerText: {
+      type: String,
+      default: ''
+    },
+    socialLinks: [{
+      type: String
+    }],
+    bannerBgColor: {
+      type: String,
+      default: '#FFFFFF'
+    },
+    bannerTextColor: {
+      type: String,
+      default: '#000000'
+    }
   },
   { timestamps: true }
 );
