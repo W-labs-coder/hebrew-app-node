@@ -143,6 +143,54 @@ const SabbathSection = ({ themes }) => {
     setIsSubmitSuccessful(false); // Reset when theme changes
   };
 
+  // Add useEffect to fetch and set initial values
+  useEffect(() => {
+    const loadSabbathSettings = async () => {
+      try {
+        const response = await fetch("/api/settings/get-sabbath", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch settings");
+        }
+
+        const data = await response.json();
+        
+        // Update local state with fetched settings
+        setIsSabbathMode(data.isSabbathMode || false);
+        setIsAutoSabbathMode(data.isAutoSabbathMode || false);
+        setClosingDay(data.closingDay || "Friday");
+        setOpeningDay(data.openingDay || "Saturday");
+        setClosingTime(data.closingTime || "00:00");
+        setOpeningTime(data.openingTime || "00:00");
+        setBannerText(data.bannerText || "");
+        setSocialLinks(data.socialLinks || []);
+        setBannerBgColor(data.bannerBgColor || "#FFFFFF");
+        setBannerTextColor(data.bannerTextColor || "#000000");
+        setFileUrl(data.sabbathFile || null);
+        setSelectedTheme(data.selectedTheme || "");
+        setShop(data.shop || "");
+
+        // Update Redux state
+        dispatch(login({ user: data }));
+
+      } catch (error) {
+        console.error("Error loading settings:", error);
+        toast.error("Error loading settings");
+
+        if (error.message.includes("Unauthorized") || error.message.includes("session")) {
+          window.location.href = "/auth";
+        }
+      }
+    };
+
+    loadSabbathSettings();
+  }, [dispatch]); // Only run on mount and when dispatch changes
+
   // Then modify your uploadFile function
   const uploadFile = async (file) => {
     try {
@@ -175,19 +223,20 @@ const SabbathSection = ({ themes }) => {
   // Fix the typo and logic in handleSubmit
   const handleSubmit = async () => {
     try {
-      setIsSubmitting(true); // Start loading
+      setIsSubmitting(true);
       let uploadedFileUrl = null;
 
       if (file) {
         uploadedFileUrl = await uploadFile(file);
-        setSelectedFile(uploadedFileUrl); // Fix the typo and use the correct variable
+        setSelectedFile(uploadedFileUrl);
         if (!uploadedFileUrl) {
           toast.error("Error uploading file");
           return;
         }
       }
 
-      const response = await fetch("/api/settings/update-sabbath", {
+      // First update settings
+      const settingsResponse = await fetch("/api/settings/update-sabbath", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -199,7 +248,7 @@ const SabbathSection = ({ themes }) => {
           openingDay,
           closingTime,
           openingTime,
-          sabbathFile: uploadedFileUrl, // Use the correct variable
+          sabbathFile: uploadedFileUrl,
           bannerText,
           socialLinks,
           bannerBgColor,
@@ -207,34 +256,42 @@ const SabbathSection = ({ themes }) => {
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        dispatch(login({ user: data.user }));
-        toast.success("Settings saved successfully");
-        setIsSubmitSuccessful(true);
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || "Error saving settings");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error(error.message || "Error saving settings");
+      if (!settingsResponse.ok) throw new Error("Failed to update settings");
 
-      // Handle session expiration
-      if (
-        error.message.includes("Unauthorized") ||
-        error.message.includes("session")
-      ) {
-        window.location.href = "/auth";
+      // Then toggle theme with proper theme ID
+      const themeResponse = await fetch("/api/settings/toggle-sabbath-theme", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          isSabbathMode,
+          sabbathThemeId: selectedTheme
+        }),
+      });
+
+      if (!themeResponse.ok) {
+        const errorData = await themeResponse.json();
+        throw new Error(errorData.message || "Failed to toggle theme");
       }
+
+      // Set submit successful to show theme editor link
+      setIsSubmitSuccessful(true);
+
+      // Show success message
+      toast.success(isSabbathMode ? 'Sabbath mode activated' : 'Sabbath mode deactivated');
+      
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Failed to update settings");
     } finally {
-      setIsSubmitting(false); // Stop loading
+      setIsSubmitting(false);
     }
   };
 
   const getThemeEditorUrl = () => {
     const shopifyAdmin = "https://admin.shopify.com/store";
-    const themeIdMatch = user?.selectedTheme.match(/\/(\d+)$/);
+    const themeIdMatch = selectedTheme.match(/\/(\d+)$/);
     const themeId = themeIdMatch ? themeIdMatch[1] : "";
     return `${shopifyAdmin}/${shop.replace(
       ".myshopify.com",

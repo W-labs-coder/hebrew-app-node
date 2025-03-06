@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema(
       unique: true
     },
     selectedTheme: String,
+    originalTheme: String, // Add this field
     selectedLanguage: String,
     buyNowText: String,
     buyNowSize: String,

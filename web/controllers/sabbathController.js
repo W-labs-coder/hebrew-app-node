@@ -7,14 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 export const updateSabbathSettings = async (req, res) => {
   try {
     const session = res.locals.shopify.session;
-    
-    if (!session || !session.accessToken) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized: Invalid session"
-      });
-    }
-
     const {
       isSabbathMode,
       isAutoSabbathMode,
@@ -22,7 +14,7 @@ export const updateSabbathSettings = async (req, res) => {
       openingDay,
       closingTime,
       openingTime,
-      sabbathFile,
+      sabbathFile,  // This is the URL from R2
       bannerText,
       socialLinks,
       bannerBgColor,
@@ -37,155 +29,152 @@ export const updateSabbathSettings = async (req, res) => {
       openingDay: openingDay || 'Saturday',
       closingTime: closingTime || '00:00',
       openingTime: openingTime || '00:00',
-      sabbathFile: sabbathFile || '',
+      sabbathFile: sabbathFile || '', // Save the R2 URL
       bannerText: bannerText || '',
       socialLinks: socialLinks || [],
       bannerBgColor: bannerBgColor || '#FFFFFF',
       bannerTextColor: bannerTextColor || '#000000'
     };
 
-    // Update MongoDB
+    // Update MongoDB with the sabbath file URL
     const shopId = session.shop;
     const user = await User.findOneAndUpdate(
       { shop: shopId },
-      { $set: settingsData },
+      { 
+        $set: settingsData
+      },
       { new: true, upsert: true }
     );
 
-    try {
-      const client = new shopify.api.clients.Graphql({ session });
-      
-      // Get shop ID
-      const shopResponse = await client.request(`
-        query {
-          shop {
-            id
+    // Get shop ID for metafields
+    const client = new shopify.api.clients.Graphql({ session });
+    const shopResponse = await client.request(`
+      query {
+        shop {
+          id
+        }
+      }
+    `);
+
+    const shopGid = shopResponse.data.shop.id;
+
+    // Update metafields including the sabbath file URL
+    const metafields = [
+      {
+        key: "sabbath_mode",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "boolean",
+        value: settingsData.isSabbathMode.toString()
+      },
+      {
+        key: "auto_sabbath_mode",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "boolean", 
+        value: settingsData.isAutoSabbathMode.toString()
+      },
+      {
+        key: "closing_day",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: settingsData.closingDay
+      },
+      {
+        key: "opening_day",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: settingsData.openingDay
+      },
+      {
+        key: "closing_time",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: settingsData.closingTime
+      },
+      {
+        key: "opening_time", 
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: settingsData.openingTime
+      },
+      {
+        key: "banner_text",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: settingsData.bannerText
+      },
+      {
+        key: "social_links",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "json",
+        value: JSON.stringify(settingsData.socialLinks)
+      },
+      {
+        key: "banner_bg_color",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: settingsData.bannerBgColor
+      },
+      {
+        key: "banner_text_color",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: settingsData.bannerTextColor
+      },
+      {
+        key: "sabbath_file",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "single_line_text_field",
+        value: settingsData.sabbathFile // Save URL in metafield
+      }
+    ];
+
+    // Perform metafields update
+    const metafieldSetMutation = `
+      mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+        metafieldsSet(metafields: $metafields) {
+          metafields {
+            key
+            namespace
+            value
+            type
+          }
+          userErrors {
+            field
+            message
+            code
           }
         }
-      `);
+      }
+    `;
 
-      const shopGid = shopResponse.data.shop.id;
+    await client.request(metafieldSetMutation, {
+      variables: {
+        metafields: metafields
+      }
+    });
 
-      // Update metafields
-      const metafields = [
-        {
-          key: "sabbath_mode",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "boolean",
-          value: settingsData.isSabbathMode.toString()
-        },
-        {
-          key: "auto_sabbath_mode",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "boolean", 
-          value: settingsData.isAutoSabbathMode.toString()
-        },
-        {
-          key: "closing_day",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "single_line_text_field",
-          value: settingsData.closingDay
-        },
-        {
-          key: "opening_day",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "single_line_text_field",
-          value: settingsData.openingDay
-        },
-        {
-          key: "closing_time",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "single_line_text_field",
-          value: settingsData.closingTime
-        },
-        {
-          key: "opening_time", 
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "single_line_text_field",
-          value: settingsData.openingTime
-        },
-        {
-          key: "banner_text",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "single_line_text_field",
-          value: settingsData.bannerText
-        },
-        {
-          key: "social_links",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "json",
-          value: JSON.stringify(settingsData.socialLinks)
-        },
-        {
-          key: "banner_bg_color",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "single_line_text_field",
-          value: settingsData.bannerBgColor
-        },
-        {
-          key: "banner_text_color",
-          namespace: "custom",
-          ownerId: shopGid,
-          type: "single_line_text_field",
-          value: settingsData.bannerTextColor
-        }
-      ];
-
-      const metafieldSetMutation = `
-        mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
-          metafieldsSet(metafields: $metafields) {
-            metafields {
-              key
-              namespace
-              value
-              type
-            }
-            userErrors {
-              field
-              message
-              code
-            }
-          }
-        }
-      `;
-
-      await client.request(metafieldSetMutation, {
-        variables: {
-          metafields,
-        },
-      });
-
-    } catch (shopifyError) {
-      console.error("Shopify API Error:", shopifyError);
-      return res.status(200).json({
-        success: true,
-        message: "Settings saved locally. Shopify sync will retry later.",
-        user,
-        shopifyError: shopifyError.message
-      });
-    }
-
-    return res.status(200).json({
+    res.json({
       success: true,
-      message: "Sabbath settings updated successfully",
-      user
+      data: user,
+      message: 'Settings updated successfully'
     });
 
   } catch (error) {
-    console.error("Error updating Sabbath settings:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error updating Sabbath settings",
-      error: error.message
+    console.error('Error updating sabbath settings:', error);
+    res.status(500).json({
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
@@ -372,5 +361,124 @@ export const getImageUrl = async (req, res) => {
   } catch (error) {
     console.error('Error getting image URL:', error);
     res.status(500).json({ error: 'Failed to get image URL' });
+  }
+};
+
+export const toggleSabbathTheme = async (req, res) => {
+  try {
+    const session = res.locals.shopify.session;
+    const { isSabbathMode } = req.body;
+    
+    const client = new shopify.api.clients.Graphql({ session });
+    
+    // Get user's settings
+    const user = await User.findOne({ shop: session.shop });
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Update the sabbath mode state in the database
+    await User.findOneAndUpdate(
+      { shop: session.shop },
+      { 
+        $set: { 
+          isSabbathMode: isSabbathMode 
+        }
+      }
+    );
+
+    // Get shop ID first
+    const shopResponse = await client.request(`
+      query {
+        shop {
+          id
+        }
+      }
+    `);
+
+    const shopGid = shopResponse.data.shop.id;
+
+    // Update metafields using the same pattern as updateSabbathSettings
+    const metafieldSetMutation = `
+      mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+        metafieldsSet(metafields: $metafields) {
+          metafields {
+            key
+            namespace
+            value
+            type
+          }
+          userErrors {
+            field
+            message
+            code
+          }
+        }
+      }
+    `;
+
+    await client.request(metafieldSetMutation, {
+      variables: {
+        metafields: [{
+          key: "sabbath_mode",
+          namespace: "custom",
+          ownerId: shopGid,
+          type: "boolean",
+          value: isSabbathMode.toString()
+        }]
+      }
+    });
+
+    res.json({ 
+      success: true,
+      message: isSabbathMode ? 'Sabbath mode activated' : 'Sabbath mode deactivated'
+    });
+    
+  } catch (error) {
+    console.error('Error toggling sabbath mode:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+export const getSabbathSettings = async (req, res) => {
+  try {
+    const session = res.locals.shopify.session;
+    
+    if (!session) {
+      return res.status(401).json({ error: "Unauthorized: Session not found" });
+    }
+
+    const user = await User.findOne({ shop: session.shop });
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      isSabbathMode: user.isSabbathMode,
+      isAutoSabbathMode: user.isAutoSabbathMode,
+      closingDay: user.closingDay,
+      openingDay: user.openingDay,
+      closingTime: user.closingTime,
+      openingTime: user.openingTime,
+      sabbathFile: user.sabbathFile,
+      bannerText: user.bannerText,
+      socialLinks: user.socialLinks,
+      bannerBgColor: user.bannerBgColor,
+      bannerTextColor: user.bannerTextColor,
+      selectedTheme: user.selectedTheme,
+      shop: user.shop
+    });
+
+  } catch (error) {
+    console.error('Error getting Sabbath settings:', error);
+    res.status(500).json({ 
+      error: 'Failed to get Sabbath settings',
+      details: error.message 
+    });
   }
 };

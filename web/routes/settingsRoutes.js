@@ -17,6 +17,8 @@ import {
   uploadSabbathFile,
   getUploadUrl,
   getImageUrl,
+  toggleSabbathTheme,
+  getSabbathSettings,
 } from "../controllers/sabbathController.js";
 import { r2Client } from '../config/r2.js';
 import { v4 as uuidv4 } from "uuid";
@@ -55,6 +57,8 @@ router.post("/update-whatsapp-settings", updateWhatsappSettings);
 router.post("/whatsapp/contacts", addOrUpdateWhatsappContact);
 router.delete("/whatsapp/contacts/:id", deleteWhatsappContact);
 router.post("/update-sabbath", updateSabbathSettings);
+router.post("/toggle-sabbath-theme", toggleSabbathTheme);
+router.get("/get-sabbath", getSabbathSettings);
 
 // Add the new file upload route
 router.post("/upload-sabbath-file", upload.single('file'), uploadSabbathFile);
