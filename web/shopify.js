@@ -31,6 +31,7 @@ const shopify = shopifyApp({
   webhooks: {
     path: "/api/webhooks",
   },
+  hostName: process.env.SHOPIFY_APP_URL,
   sessionStorage: new MongoDBSessionStorage(process.env.MONGO_URI),
 });
 
