@@ -12,16 +12,7 @@
     "deploy": "shopify app deploy"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.5.0",
-    "@shopify/app-bridge": "^3.7.10",
-    "@shopify/app-bridge-react": "^4.1.6",
-    "bootstrap": "^5.3.3",
-    "phosphor-react": "^1.4.1",
-    "react-bootstrap": "^2.10.9",
-    "react-color": "^2.19.3",
-    "react-redux": "^9.2.0",
-    "react-toastify": "^11.0.2",
-    "redux-persist": "^6.0.0"
+    
   },
   "author": "emmy",
   "private": true,
