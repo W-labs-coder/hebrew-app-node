@@ -1,8 +1,9 @@
 name = "Hebrew App"
 type = "theme"
-icon = "assets/icon.svg"
+icon = "assets/logo.svg"
 
-assets = [
-  "{%  %}cks/assets/*.png",
-  "blocks/assets/*.svg"
-]
+[extension_points]
+theme = "blocks/**/*"
+
+[[assets]]
+path = "assets/*"

@@ -165,7 +165,17 @@ const userSchema = new mongoose.Schema(
         updatedAt: Date
       },
       default: {}
-    }
+    },
+    iconLocation: { type: String, default: 'bottom_right' },
+    iconShape: { type: String, default: 'rounded' },
+    iconSize: { type: String, default: 'medium' },
+    iconType: { type: String, default: 'default' },
+    helpTitle: { type: String, default: 'כלי נגישות' },
+    helpText: { type: String, default: '' },
+    ownerEmail: { type: String, default: '' },
+    leftIconSpacing: { type: Number, default: 20 },
+    topBottomSpacing: { type: Number, default: 20 },
+    zIndex: { type: Number, default: 999 }
   },
   { timestamps: true }
 );
