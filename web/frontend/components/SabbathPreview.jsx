@@ -324,7 +324,6 @@ const SabbathPreview = ({
         </Banner>
 
         <div style={{ marginTop: '32px',
-            'box-shadow': '0px 0px 0px 1px #00000014',
             'box-shadow': '0px 5px 10px -2px #00000026',
 border: '1px solid  #C6C6C6',
 borderRadius : '16px',

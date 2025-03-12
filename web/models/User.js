@@ -156,6 +156,15 @@ const userSchema = new mongoose.Schema(
     bannerTextColor: {
       type: String,
       default: '#000000'
+    },
+    notifications: {
+      type: Map,
+      of: {
+        subject: String,
+        template: String,
+        updatedAt: Date
+      },
+      default: {}
     }
   },
   { timestamps: true }
