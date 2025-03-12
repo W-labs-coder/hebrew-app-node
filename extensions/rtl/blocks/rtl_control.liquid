@@ -46,6 +46,20 @@
 {% assign closing_time = shop.metafields.custom.closing_time.value %}
 {% assign opening_time = shop.metafields.custom.opening_time.value %}
 
+{% assign accessibility_icon_location = shop.metafields.custom.accessibility_icon_location.value | default: 'bottom_right' %}
+{% assign accessibility_icon_shape = shop.metafields.custom.accessibility_icon_shape.value | default: 'rounded' %}
+{% assign accessibility_icon_size = shop.metafields.custom.accessibility_icon_size.value | default: 'medium' %}
+{% assign accessibility_icon_type = shop.metafields.custom.accessibility_icon_type.value | default: 'default' %}
+{% assign accessibility_help_title = shop.metafields.custom.accessibility_help_title.value | default: 'כלי נגישות' %}
+{% assign accessibility_help_text = shop.metafields.custom.accessibility_help_text.value | default: '' %}
+{% assign accessibility_owner_email = shop.metafields.custom.accessibility_owner_email.value | default: '' %}
+{% assign accessibility_left_spacing = shop.metafields.custom.accessibility_left_spacing.value | default: 20 %}
+{% assign accessibility_top_spacing = shop.metafields.custom.accessibility_top_spacing.value | default: 20 %}
+{% assign accessibility_zindex = shop.metafields.custom.accessibility_zindex.value | default: 999 %}
+{% assign accessibility_button_bg_color = shop.metafields.custom.accessibility_button_bg_color.value | default: "#25D366" %}
+{% assign accessibility_button_text_color = shop.metafields.custom.accessibility_button_text_color.value | default: "#FFFFFF" %}
+{% assign accessibility_button_icon_color = shop.metafields.custom.accessibility_button_icon_color.value | default: "#FFFFFF" %}
+
 {%- capture payment_processor_images -%}
   {%- for processor in shop.metafields.custom.payment_processors.value -%}
     {%- assign image_name = processor | downcase | replace: ' ', '_' | append: '.png' -%}
@@ -2040,6 +2054,248 @@ function getCurrentTimeInShopTimeZone() {
 }
 </script>
 
+{% if block.settings.enable_accessibility %}
+  <div class="accessibility-widget-container" 
+       style="position: fixed; z-index: {{ accessibility_zindex }}; 
+              {% case accessibility_icon_location %}
+                {% when 'top_left' %}
+                  top: {{ accessibility_top_spacing }}px; left: {{ accessibility_left_spacing }}px;
+                {% when 'top_right' %}
+                  top: {{ accessibility_top_spacing }}px; right: {{ accessibility_left_spacing }}px;
+                {% when 'bottom_left' %}
+                  bottom: {{ accessibility_top_spacing }}px; left: {{ accessibility_left_spacing }}px;
+                {% when 'bottom_right' %}
+                  bottom: {{ accessibility_top_spacing }}px; right: {{ accessibility_left_spacing }}px;
+              {% endcase %}">
+    
+    <button class="accessibility-button" 
+            aria-label="{{ accessibility_help_title }}"
+            aria-expanded="false"
+            aria-controls="accessibility-panel"
+            style="background-color: {{ accessibility_button_bg_color }};
+                   border-radius: {% if accessibility_icon_shape == 'rounded' %}50%{% else %}8px{% endif %};
+                   width: {% case accessibility_icon_size %}
+                            {% when 'small' %}32px
+                            {% when 'large' %}64px
+                            {% else %}48px
+                          {% endcase %};
+                   height: {% case accessibility_icon_size %}
+                            {% when 'small' %}32px
+                            {% when 'large' %}64px
+                            {% else %}48px
+                          {% endcase %};">
+      
+      <span class="accessibility-icon" style="color: {{ accessibility_button_icon_color }};">
+        {% case accessibility_icon_type %}
+          {% when 'modern' %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-10h2v5h-2zm0-4h2v2h-2z"/></svg>
+          {% when 'classic' %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zm0 20c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm1-9v4h-2v-4H9l3-3 3 3h-2z"/></svg>
+          {% else %}
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 6c-2.61.7-5.67 1-8.5 1s-5.89-.3-8.5-1L3 8c1.86.5 4 .83 6 1v13h2v-6h2v6h2V9c2-.17 4.14-.5 6-1l-.5-2zM12 6c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+        {% endcase %}
+      </span>
+      
+      <span class="accessibility-tooltip" style="color: {{ accessibility_button_text_color }};">
+        {{ accessibility_help_title }}
+      </span>
+    </button>
+
+    <div id="accessibility-panel" class="accessibility-panel" aria-hidden="true">
+      <div class="accessibility-panel-header">
+        <h2>{{ accessibility_help_title }}</h2>
+        <button class="close-panel" aria-label="Close accessibility panel">&times;</button>
+      </div>
+      <div class="accessibility-panel-content">
+        {{ accessibility_help_text }}
+        {% if accessibility_owner_email != blank %}
+          <div class="accessibility-contact">
+            <p>Contact for accessibility issues:</p>
+            <a href="mailto:{{ accessibility_owner_email }}">{{ accessibility_owner_email }}</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .accessibility-widget-container {
+      display: block;
+      pointer-events: auto;
+    }
+
+    .accessibility-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .accessibility-button:hover {
+      transform: scale(1.1);
+    }
+
+    .accessibility-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .accessibility-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .accessibility-tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.8);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      
+      {% case accessibility_icon_location %}
+        {% when 'top_left' or 'top_right' %}
+          bottom: -30px;
+        {% else %}
+          top: -30px;
+      {% endcase %}
+    }
+
+    .accessibility-button:hover .accessibility-tooltip {
+      opacity: 1;
+    }
+
+    .accessibility-panel {
+      display: none;
+      position: absolute;
+      width: 300px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      
+      {% case accessibility_icon_location %}
+        {% when 'top_left' %}
+          top: 100%;
+          left: 0;
+        {% when 'top_right' %}
+          top: 100%;
+          right: 0;
+        {% when 'bottom_left' %}
+          bottom: 100%;
+          left: 0;
+        {% when 'bottom_right' %}
+          bottom: 100%;
+          right: 0;
+      {% endcase %}
+    }
+
+    .accessibility-panel.active {
+      display: block;
+    }
+
+    .accessibility-panel-header {
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accessibility-panel-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .close-panel {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0 8px;
+    }
+
+    .accessibility-panel-content {
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .accessibility-contact {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+
+    .accessibility-contact p {
+      margin: 0 0 8px 0;
+      font-weight: bold;
+    }
+
+    .accessibility-contact a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    .accessibility-contact a:hover {
+      text-decoration: underline;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const button = document.querySelector('.accessibility-button');
+      const panel = document.querySelector('.accessibility-panel');
+      const closeButton = document.querySelector('.close-panel');
+
+      if (button && panel && closeButton) {
+        button.addEventListener('click', function() {
+          const isExpanded = panel.classList.contains('active');
+          panel.classList.toggle('active');
+          button.setAttribute('aria-expanded', !isExpanded);
+          panel.setAttribute('aria-hidden', isExpanded);
+        });
+
+        closeButton.addEventListener('click', function() {
+          panel.classList.remove('active');
+          button.setAttribute('aria-expanded', 'false');
+          panel.setAttribute('aria-hidden', 'true');
+        });
+
+        // Close panel when clicking outside
+        document.addEventListener('click', function(event) {
+          if (!panel.contains(event.target) && !button.contains(event.target)) {
+            panel.classList.remove('active');
+            button.setAttribute('aria-expanded', 'false');
+            panel.setAttribute('aria-hidden', 'true');
+          }
+        });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(event) {
+          if (event.key === 'Escape' && panel.classList.contains('active')) {
+            panel.classList.remove('active');
+            button.setAttribute('aria-expanded', 'false');
+            panel.setAttribute('aria-hidden', 'true');
+          }
+        });
+      }
+    });
+  </script>
+{% endif %}
+
 {% schema %}
 {
   "name": "Hebrew App",
@@ -2073,6 +2329,12 @@ function getCurrentTimeInShopTimeZone() {
       "type": "checkbox",
       "id": "enable_whatsapp",
       "label": "Enable WhatsApp Button",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_accessibility",
+      "label": "Enable Accessibility Widget",
       "default": false
     }
   ]

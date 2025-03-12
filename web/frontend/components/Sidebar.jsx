@@ -79,13 +79,13 @@ const mainMenu = [
     icon: AutomaticFocusIcon,
     permissions: "automatic-focus",
   },
-  {
-    title: "CSS",
-    slug: "css",
-    link: "/css",
-    icon: CssIcon,
-    permissions: "css",
-  },
+  // {
+  //   title: "CSS",
+  //   slug: "css",
+  //   link: "/css",
+  //   icon: CssIcon,
+  //   permissions: "css",
+  // },
   {
     title: "ביטולי עסקאות",
     slug: "transaction-cancellation",
