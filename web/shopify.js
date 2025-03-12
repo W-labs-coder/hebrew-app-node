@@ -19,6 +19,10 @@ if (!process.env.SHOPIFY_API_SECRET) {
   throw new Error("SHOPIFY_API_SECRET environment variable is not set");
 }
 
+if (!process.env.SHOPIFY_APP_URL) {
+  throw new Error("SHOPIFY_APP_URL environment variable is not set");
+}
+
 const shopify = shopifyApp({
   api: {
     apiVersion: LATEST_API_VERSION,
