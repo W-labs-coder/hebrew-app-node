@@ -25,6 +25,8 @@ import { v4 as uuidv4 } from "uuid";
 import { generateNotificationContent, updateNotification } from "../controllers/notificationsController.js";
 import { updateAccessibilitySettings } from "../controllers/accessibilityController.js";
 import { updatePostalSettings } from "../controllers/postalController.js";
+import { updateOrderCancellationSettings } from "../controllers/orderCancellationController.js";
+import { submitCancellationRequest, getCancellations } from "../controllers/orderCancellationSubmissionController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -79,5 +81,11 @@ router.post(
   updatePostalSettings
 );
 
+// Add new route
+router.post("/order-cancellation", updateOrderCancellationSettings);
+
+// Add routes for cancellation management
+router.post("/transaction-cancellation/submit", submitCancellationRequest);
+router.get("/transaction-cancellation/list", getCancellations);
 
 export default router;

@@ -1,4 +1,4 @@
-import User from "../models/User";
+import User from "../models/User.js";
 
 // Add Shopify GraphQL mutation for updating order
 const UPDATE_ORDER_MUTATION = `

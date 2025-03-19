@@ -176,16 +176,75 @@ const userSchema = new mongoose.Schema(
     leftIconSpacing: { type: Number, default: 20 },
     topBottomSpacing: { type: Number, default: 20 },
     zIndex: { type: Number, default: 999 },
-     autofocusDetection: {
-        type: String,
-        enum: ['enabled', 'disabled'],
-        default: 'disabled'
-      },
-      autofocusCorrection: {
-        type: String,
-        enum: ['enabled', 'disabled'],
-        default: 'disabled'
-      },
+    autofocusDetection: {
+      type: String,
+      enum: ['enabled', 'disabled'],
+      default: 'disabled'
+    },
+    autofocusCorrection: {
+      type: String,
+      enum: ['enabled', 'disabled'],
+      default: 'disabled'
+    },
+    // Transaction Cancellation Settings
+    transactionCancellation: {
+      type: String,
+      enum: ['enabled', 'disabled'],
+      default: 'disabled'
+    },
+    email: String,
+    termOfUse: String,
+    linkTermOfUseWebsite: String,
+    cancellationConditions: String,
+    termOfUseBgColor: {
+      type: String,
+      default: '#FFFFFF'
+    },
+    termOfUseTextColor: {
+      type: String,
+      default: '#000000'
+    },
+    termOfUseBtnBackgroundColor: {
+      type: String,
+      default: '#021341'
+    },
+    termOfUseBtnTextColor: {
+      type: String,
+      default: '#FFFFFF'
+    },
+    pageTitle: {
+      type: String,
+      default: 'ביטול עסקה'
+    },
+    titleOfCancellationCondition: {
+      type: String,
+      default: 'תנאי ביטול עסקה'
+    },
+    formTitle: {
+      type: String,
+      default: 'טופס ביטול עסקה'
+    },
+    termOfUseButtonText: {
+      type: String,
+      default: 'לצפייה בתנאי השימוש של האתר'
+    },
+    termOfUseFullName: {
+      type: String,
+      default: 'שם מלא'
+    },
+    termOfUseEmail: {
+      type: String,
+      default: 'דואר אלקטרוני'
+    },
+    termOfUsePhone: {
+      type: String,
+      default: 'מספר טלפון'
+    },
+    orderNumberField: {
+      type: String,
+      default: 'מספר הזמנה'
+    },
+    termOfUseShortMessage: String
   },
   { timestamps: true }
 );

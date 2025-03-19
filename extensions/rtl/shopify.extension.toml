@@ -5,5 +5,16 @@ icon = "assets/logo.svg"
 [extension_points]
 theme = "blocks/**/*"
 
+[[block_types]]
+type = "rtl_control" 
+name = "RTL Control"
+target = "body"
+
+[[block_types]]
+type = "cancellation_form"
+name = "Transaction Cancellation Form" 
+target = "section"
+enabled_on = ["templates/page"]
+
 [[assets]]
 path = "assets/*"
