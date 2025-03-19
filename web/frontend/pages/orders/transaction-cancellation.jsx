@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import AlertIcon3 from "../../components/svgs/AlertIcon3";
 import CheckDarkIcon from "../../components/svgs/CheckDarkIcon";
 
-export default function Postal() {
+export default function TransactionCancellation() {
   return (
     <div className="dashboard-container">
       <Sidebar />
@@ -19,7 +19,7 @@ export default function Postal() {
           <Layout>
             <Layout.Section>
               <div>
-                <PostalSettings />
+                <TransactionCancellationSettings />
               </div>
             </Layout.Section>
           </Layout>
@@ -29,7 +29,7 @@ export default function Postal() {
   );
 }
 
-const PostalSettings = () => {
+const TransactionCancellationSettings = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const user = useSelector((state) => state.auth.user);
@@ -107,6 +107,11 @@ const PostalSettings = () => {
     }
   };
 
+
+  useEffect(() => {
+    generateStoreTermsLink()
+  },[])
+
   const getWhatsAppEditorUrl = () => {
     const shopifyAdmin = "https://admin.shopify.com/store";
     const themeIdMatch = user?.selectedTheme.match(/\/(\d+)$/);
@@ -121,6 +126,46 @@ const PostalSettings = () => {
     { id: "enabled", name: "לְאַפשֵׁר" },
     { id: "disabled", name: "נָכֶה" },
   ]);
+
+  const handleResetCancellationConditions = () => {
+    setFormData(prevState => ({
+      ...prevState,
+      cancellationConditions: ''
+    }));
+  };
+
+  const handleCopyTermsLink = () => {
+    if (formData.linkTermOfUseWebsite) {
+      navigator.clipboard.writeText(formData.linkTermOfUseWebsite)
+        .then(() => {
+          toast.success('הקישור הועתק בהצלחה!');
+        })
+        .catch(() => {
+          toast.error('שגיאה בהעתקת הקישור');
+        });
+    } else {
+      toast.warning('אין קישור להעתקה');
+    }
+  };
+
+  const generateStoreTermsLink = () => {
+    if (!user?.shop) {
+      toast.error('Store information not available');
+      return;
+    }
+    
+    // Convert myshopify domain to store's primary domain
+    const storeDomain = user.shop.replace('.myshopify.com', '');
+    const termsLink = `https://${storeDomain}.myshopify.com/pages/terms-of-service`;
+    
+    setFormData(prevState => ({
+      ...prevState,
+      termOfUse: termsLink,
+      linkTermOfUseWebsite: termsLink
+    }));
+    
+    // toast.success('Terms of service link generated');
+  };
 
   return (
     <section>
@@ -221,15 +266,41 @@ const PostalSettings = () => {
                         onChange={handleInputChange}
                         placeholder='הכנס כתובת דוא"ל...'
                       />
-                      <Input
-                        type="text"
-                        label="קישור לתנאי השימוש באתר:"
-                        id="termOfUse"
-                        name="termOfUse"
-                        value={formData.termOfUse}
-                        onChange={handleInputChange}
-                        placeholder="הקלד כאן את הקישור לאתר..."
-                      />
+                      <div className="d-flex gap-2 align-items-end">
+                        <div style={{ flex: 1 }}>
+                          <Input
+                            type="text"
+                            label="קישור לתנאי השימוש באתר:"
+                            id="termOfUse"
+                            name="termOfUse"
+                            value={formData.termOfUse}
+                            onChange={handleInputChange}
+                            placeholder="הקלד כאן את הקישור לאתר..."
+                            disabled={true} 
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "140px",
+                            height: "40px",
+                            padding: "8px 24px",
+                            gap: "10px",
+                            borderRadius: "24px",
+                            backgroundColor: "#021341",
+                            color: "#FFFFFF",
+                            fontSize: "14px",
+                            fontWeight: "700",
+                            textAlign: "center",
+                            cursor: "pointer",
+                          }}
+                          onClick={handleCopyTermsLink}
+                        >
+                          צור קישור
+                        </div>
+                      </div>
                       <div>
                         <p className="fs14 fw700">תנאי ביטול עסקה:</p>
                         <textarea
@@ -237,23 +308,29 @@ const PostalSettings = () => {
                           name="cancellationConditions"
                           value={formData.cancellationConditions}
                           onChange={handleInputChange}
+                          style={{ width: "100%", height: "200px" }}
                         ></textarea>
-                        <Button
-                          type="button"
-                          className="primary-button"
+                        <div
                           style={{
-                            minWidth: "180px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "220px",
                             height: "40px",
-                            borderRadius: "8px",
+                            padding: "8px 24px",
+                            gap: "10px",
+                            borderRadius: "24px",
                             backgroundColor: "#021341",
-                            border: "none",
                             color: "#FFFFFF",
                             fontSize: "14px",
-                            fontWeight: "500",
+                            fontWeight: "700",
+                            textAlign: "center",
+                            cursor: "pointer",
                           }}
+                          onClick={handleResetCancellationConditions}
                         >
                           איפוס תנאי ביטול עסקה
-                        </Button>
+                        </div>
                       </div>
                       <Input
                         type="url"
@@ -264,22 +341,27 @@ const PostalSettings = () => {
                         onChange={handleInputChange}
                         placeholder="הקלד כאן את הקישור לאתר..."
                       />
-                      <Button
-                        type="button"
-                        className="primary-button"
+                      <div
                         style={{
-                          minWidth: "140px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "140px",
                           height: "40px",
-                          borderRadius: "8px",
+                          padding: "8px 24px",
+                          gap: "10px",
+                          borderRadius: "24px",
                           backgroundColor: "#021341",
-                          border: "none",
                           color: "#FFFFFF",
                           fontSize: "14px",
-                          fontWeight: "500",
+                          fontWeight: "700",
+                          textAlign: "center",
+                          cursor: "pointer",
                         }}
+                        onClick={handleCopyTermsLink}
                       >
                         העתקת קישור
-                      </Button>
+                      </div>
 
                       <div className="color-pickers-container mt-4">
                         <p className="fw700 fs14 mb-3">התאמת צבעים:</p>
@@ -465,6 +547,7 @@ const PostalSettings = () => {
                           name="termOfUseShortMessage"
                           value={formData.termOfUseShortMessage}
                           onChange={handleInputChange}
+                          style={{ width: "100%", height: "200px" }}
                         ></textarea>
                       </div>
                     </div>
@@ -501,7 +584,7 @@ const PostalSettings = () => {
                     </Button>
                   </div>
 
-                  {isSubmitSuccessful && (
+                  {/* {isSubmitSuccessful && (
                     <div className="mt-3">
                       <a
                         href={getWhatsAppEditorUrl()}
@@ -522,7 +605,7 @@ const PostalSettings = () => {
                         עבור לערכת הנושא
                       </a>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardIcon from "./svgs/DashboardIcon";
 import RtlIcon from "./svgs/RtlIcon";
@@ -15,7 +15,7 @@ import TrainingIcon from "./svgs/TrainingIcon";
 import SupportIcon from "./svgs/SupportIcon";
 import AlertIcon from "./svgs/AlertIcon";
 
-const mainMenu = [
+export const mainMenu = [
   {
     title: "בַּיִת",
     slug: "dashboard",
@@ -120,14 +120,38 @@ const Sidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleNav = (link) => {
-    navigate(link)
-    // window.location.href = link;
+    navigate(link);
   };
+
+  if (isMobile) {
+    return null; // Don't render sidebar on mobile
+  }
 
   return (
     <div
-      style={{ padding: "24px", backgroundColor: "white" }}
+      style={{ 
+        padding: "24px", 
+        backgroundColor: "white",
+        position: "fixed",
+        top: 0,
+        right: 0,
+        width: "260px",
+        height: "100vh",
+        overflowY: "auto",
+        zIndex: 1000
+      }}
       className="sidebar"
     >
       {mainMenu.map((item, index) => {
