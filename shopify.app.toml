@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "86154af1674159ac797f5767f244100c"
-application_url = "https://argument-over-extends-represents.trycloudflare.com"
+application_url = "https://sole-chevy-wanna-me.trycloudflare.com"
 embedded = true
 name = "Hebrew App"
 handle = "hebrew-app-new"
@@ -20,9 +20,9 @@ scopes = "read_themes,write_products"
 
 [auth]
 redirect_urls = [
-  "https://argument-over-extends-represents.trycloudflare.com/auth/callback",
-  "https://argument-over-extends-represents.trycloudflare.com/auth/shopify/callback",
-  "https://argument-over-extends-represents.trycloudflare.com/api/auth/callback"
+  "https://sole-chevy-wanna-me.trycloudflare.com/auth/callback",
+  "https://sole-chevy-wanna-me.trycloudflare.com/auth/shopify/callback",
+  "https://sole-chevy-wanna-me.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]

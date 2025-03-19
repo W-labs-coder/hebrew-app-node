@@ -1,0 +1,109 @@
+{% if app.metafields.custom.cancellation_form_enabled == 'true' %}
+  {% assign styles = app.metafields.custom.cancellation_styles | parse_json %}
+  {% assign fields = app.metafields.custom.cancellation_form_fields | parse_json %}
+
+  
+  <div class="cancellation-form-container" 
+       style="background-color: {{ styles.bgColor }}; color: {{ styles.textColor }}">
+    
+    <h1>{{ app.metafields.custom.cancellation_page_title }}</h1>
+    
+    <div class="cancellation-conditions">
+      {{ app.metafields.custom.cancellation_conditions }}
+    </div>
+
+    <form id="cancellationForm" 
+          action="/api/settings/transaction-cancellation/submit" 
+          method="POST"
+          class="cancellation-form">
+      
+      <div class="form-field">
+        <label>{{ fields.fullName }}</label>
+        <input type="text" name="fullName" required>
+      </div>
+
+      <div class="form-field">
+        <label>{{ fields.email }}</label>
+        <input type="email" name="email" required>
+      </div>
+
+      <div class="form-field">
+        <label>{{ fields.phone }}</label>
+        <input type="tel" name="phone" required>
+      </div>
+
+      <div class="form-field">
+        <label>{{ fields.orderNumber }}</label>
+        <input type="text" name="orderNumber" required>
+      </div>
+
+      <div class="form-field">
+        <label>{{ fields.shortMessage }}</label>
+        <textarea name="message"></textarea>
+      </div>
+
+      <button type="submit" 
+              style="background-color: {{ styles.buttonBgColor }}; 
+                     color: {{ styles.buttonTextColor }}">
+        {{ app.metafields.custom.cancellation_form_title }}
+      </button>
+    </form>
+  </div>
+
+  <style>
+    .cancellation-form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .cancellation-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Add more styles as needed */
+  </style>
+
+  <script>
+    document.getElementById('cancellationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const shopUrl = Shopify.shop; // This is available in Shopify themes
+      
+      try {
+        const response = await fetch(`/api/settings/transaction-cancellation/submit?shop=${shopUrl}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(Object.fromEntries(formData))
+        });
+        
+        if (response.ok) {
+          alert('Your cancellation request has been submitted successfully');
+          e.target.reset();
+        } else {
+          throw new Error('Failed to submit form');
+        }
+      } catch (error) {
+        alert('There was an error submitting your request. Please try again.');
+      }
+    });
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Transaction Cancellation Form",
+  "target": "section",
+  "settings": []
+}
+{% endschema %}
