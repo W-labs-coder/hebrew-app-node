@@ -74,7 +74,8 @@ export const submitCancellationRequest = async (req, res) => {
 // Add method to fetch cancellations
 export const getCancellations = async (req, res) => {
   try {
-    const shop = req.query.shop;
+    const session = res.locals.shopify.session;
+    const shop = session.shop;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const status = req.query.status;

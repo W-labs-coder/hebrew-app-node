@@ -344,7 +344,7 @@ const PaymentSection = () => {
                 </div>
               </div>
 
-              <div style={{ marginTop: "16px" }}>
+              {/* <div style={{ marginTop: "16px" }}>
                 <label
                   style={{
                     display: "flex",
@@ -374,7 +374,7 @@ const PaymentSection = () => {
                     <UploadIcon />
                   </div>
                 </label>
-              </div>
+              </div> */}
             </div>
             <div className="">
               <PaymentImage />

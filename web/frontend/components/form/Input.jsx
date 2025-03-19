@@ -10,6 +10,7 @@ const Input = ({
   placeholder,
   value,
   onChange,
+  disabled,
 }) => (
   <div className="input-container">
     <label htmlFor={id}>{label}</label>
@@ -30,6 +31,7 @@ const Input = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        disabled={disabled}
       />
     )}
   </div>
