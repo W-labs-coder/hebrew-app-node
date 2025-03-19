@@ -645,9 +645,22 @@ input[type="date"] {
   border-radius: 10px;
   margin-top: 20px;
 }
+.steps-gray {
+  background-color: #E1E1E1;
+  color: #0D0D0D;
+   padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
 
 .steps h4 {
     color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.steps-gray h4 {
+    color: #0D0D0D;
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 16px;

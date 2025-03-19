@@ -74,7 +74,6 @@ const AccessibilitySettings = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-   
     setIsSubmitting(true);
     setIsSubmitSuccessful(false);
 
@@ -85,7 +84,7 @@ const AccessibilitySettings = () => {
       };
 
       const response = await fetch(
-        "/api/settings/update-accessibility-settings",
+        "/api/settings/update-accessibility-settings", // Ensure this matches your backend URL and port
         {
           method: "POST",
           headers: {
@@ -101,7 +100,7 @@ const AccessibilitySettings = () => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || "Failed to update WhatsApp settings"
+          errorData.message || "Failed to update accessibility settings"
         );
       }
 
@@ -113,10 +112,10 @@ const AccessibilitySettings = () => {
       }
 
       setIsSubmitSuccessful(true);
-      toast.success("WhatsApp settings updated successfully");
+      toast.success("Accessibility settings updated successfully");
     } catch (error) {
       console.error("Error:", error);
-      toast.error(error.message || "Failed to update WhatsApp settings");
+      toast.error(error.message || "Failed to update accessibility settings");
 
       // Handle session expiration
       if (

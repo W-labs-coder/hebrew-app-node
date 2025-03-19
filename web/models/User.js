@@ -175,7 +175,17 @@ const userSchema = new mongoose.Schema(
     ownerEmail: { type: String, default: '' },
     leftIconSpacing: { type: Number, default: 20 },
     topBottomSpacing: { type: Number, default: 20 },
-    zIndex: { type: Number, default: 999 }
+    zIndex: { type: Number, default: 999 },
+     autofocusDetection: {
+        type: String,
+        enum: ['enabled', 'disabled'],
+        default: 'disabled'
+      },
+      autofocusCorrection: {
+        type: String,
+        enum: ['enabled', 'disabled'],
+        default: 'disabled'
+      },
   },
   { timestamps: true }
 );

@@ -2,6 +2,7 @@ import Subscription from "../models/Subscription.js";
 import User from "../models/User.js";
 import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
+import { setupWebhooks } from '../webhooks/webhooks.js';
 
 export const createSubscription = async (req, res) => {
   const session = res.locals.shopify.session;
@@ -155,6 +156,14 @@ export const confirmSubscription = async (req, res) => {
       trialEndDate,
       chargeId: charge_id,
     });
+
+    // Register webhooks after successful subscription
+    try {
+      await setupWebhooks(shop, session.accessToken);
+    } catch (webhookError) {
+      console.error('Failed to setup webhooks:', webhookError);
+      // Continue execution - don't fail the subscription setup
+    }
 
     const user = await User.create({shop})
 

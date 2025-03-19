@@ -149,12 +149,6 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        console.log('WhatsApp Widget Debug:', {
-          contacts: {{ contacts | json }},
-          widgetEnabled: {{ whatsapp_widget_enabled | json }},
-          widgetElement: document.querySelector('.whatsapp-floating-widget'),
-          contactElements: document.querySelectorAll('.whatsapp-contact')
-        });
       });
     </script>
   {% endif %}
@@ -200,17 +194,6 @@
           (lastMessageTime === null || timeDifference >= messageFrequency)
         );
 
-        console.log('Debug Values:', {
-          welcomeEnabled: Boolean(welcomeEnabled),
-          hasWelcomeMessage: Boolean(welcomeMessage),
-          lastMessageTime: lastMessageTime,
-          currentTime: currentTime,
-          timeDifference: timeDifference,
-          messageFrequency: messageFrequency,
-          isLastMessageNull: lastMessageTime === null,
-          shouldSendWelcome
-        });
-
         const defaultEnabled = {{ enable_default_message }};
         const defaultMessage = "{{ default_message | escape }}";
         let initialUrl = `https://wa.me/${phone}`;
@@ -221,30 +204,19 @@
         window.open(initialUrl, '_blank');
 
         if (shouldSendWelcome) {
-          console.log('Scheduling welcome message with delay:', messageDelay);
           setTimeout(() => {
             try {
-              console.log('Attempting to send welcome message...');
               const welcomeUrl = `https://wa.me/${phone}?text=${encodeURIComponent(welcomeMessage)}`;
-              console.log('Welcome URL:', welcomeUrl);
               const newWindow = window.open(welcomeUrl, '_blank');
               
               if (newWindow) {
-                console.log('Welcome message window opened successfully');
                 localStorage.setItem('lastWhatsAppMessage', currentTime.toString());
-                console.log('Last message time updated:', currentTime);
-              } else {
-                console.error('Popup blocker might be preventing the welcome message');
               }
             } catch (error) {
-              console.error('Error sending welcome message:', error);
             }
           }, messageDelay);
-        } else {
-          console.log('Not sending welcome message because conditions not met');
         }
       } catch (error) {
-        console.error('WhatsApp open error:', error);
         window.open(`https://wa.me/${phoneNumber || "{{ whatsapp_phone | escape }}"}`, '_blank');
       }
     }
@@ -555,224 +527,7 @@ flex-direction: column;
 <link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&family=Amatic+SC:wght@400;700&family=Arimo:wght@400;700&family=Assistant:wght@200;300;400;500;600;700;800&family=Bellefair&family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Cousine:ital,wght@0,400;0,700;1,400;1,700&family=David+Libre:wght@400;500;700&family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Fredoka:wght@300;400;500;600;700&family=Heebo:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Sans+Hebrew:wght@100;200;300;400;500;600;700&family=Karantina:wght@300;400;700&family=Miriam+Libre:wght@400;700&family=Noto+Rashi+Hebrew:wght@200;300;400;500;600;700;800;900&family=Noto+Sans+Hebrew:wght@100;200;300;400;500;600;700;800;900&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Secular+One&family=Suez+One&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Varela+Round&display=swap" rel="stylesheet">
 
 <script>
-// Add near the top of your scripts
-console.log('RTL Control Script Loading:', {
-  timestamp: new Date().toISOString(),
-  whatsappEnabled: {{ block.settings.enable_whatsapp | json }},
-  widgetEnabled: {{ whatsapp_widget_enabled | json }},
-  rtlEnabled: {{ block.settings.enable_rtl | json }}
-});
-
-function setRTL(isRTL) {
-  const htmlElement = document.documentElement;
-  const bodyElement = document.body;
-  
-  if (isRTL) {
-    htmlElement.setAttribute('dir', 'rtl');
-    htmlElement.setAttribute('lang', 'he');
-    bodyElement.setAttribute('dir', 'rtl');
-    bodyElement.style.direction = 'rtl';
-    document.body.classList.add('rtl-enabled');
-  } else {
-    htmlElement.setAttribute('dir', 'ltr');
-    htmlElement.setAttribute('lang', 'en');
-    bodyElement.setAttribute('dir', 'ltr');
-    bodyElement.style.direction = 'ltr';
-    document.body.classList.remove('rtl-enabled');
-  }
-  
-  console.log('RTL State:', {
-    isRTL: isRTL,
-    htmlDir: htmlElement.getAttribute('dir'),
-    bodyDir: bodyElement.getAttribute('dir'),
-    bodyStyle: bodyElement.style.direction
-  });
-}
-
-function updateBuyNowText() {
-  if (window.enableBuyNowText && window.buyNowText) {
-    const buttons = document.querySelectorAll('.shopify-payment-button__button');
-    buttons.forEach(button => {
-      if (button) {
-        button.textContent = window.buyNowText;
-      }
-    });
-    
-    const dynamicButtons = document.querySelectorAll('.shopify-payment-button__more-options');
-    dynamicButtons.forEach(button => {
-      if (button) {
-        button.textContent = window.buyNowText;
-      }
-    });
-  }
-}
-
-function displayFooterBanners() {
-  // Debug settings
-  console.log("Footer Banners Settings:", {
-    enabled: window.enableFooterBanners,
-    shippingOption: {{ shop.metafields.custom.shipping_option.value | json }},
-    warrantyDays: {{ shop.metafields.custom.warranty_days.value | json }},
-    paymentProcessorImages: {{ payment_processor_images | json }},
-    paymentFeatureImages: {{ payment_features_images | json }}
-  });
-
-  // Early return if disabled
-  if (!window.enableFooterBanners) {
-    console.log("Footer banners disabled");
-    return;
-  }
-
-  // Find footer element
-  const footer = document.querySelector('footer');
-  if (!footer) {
-    console.error("Footer not found");
-    return;
-  }
-
-  // Remove existing banner if present
-  const existingBanner = document.querySelector('.footer-banners');
-  if (existingBanner) {
-    existingBanner.remove();
-  }
-
-  // Create footer banner container
-  const footerBanner = document.createElement('div');
-  footerBanner.classList.add('footer-banners');
-  
-  // Build banner content with proper Liquid syntax
-  footerBanner.innerHTML = `
-    <div class="footer-banner-content">
-      {% if payment_processor_images != blank %}
-        <div class="payment-processors">
-          <h4>אמצעי תשלום</h4>
-          <div class="image-container">
-            {{ payment_processor_images }}
-          </div>
-        </div>
-      {% endif %}
-      
-      {% if payment_features_images != blank and block.settings.enable_footer_banners %}
-        <div class="payment-features">
-          <div class="image-container">
-            {{ payment_features_images }}
-          </div>
-        </div>
-      {% endif %}
-      
-      <div class="shipping-warranty">
-        {% if shop.metafields.custom.shipping_option.value != blank %}
-          <p>משלוח: {{ shop.metafields.custom.shipping_option.value }}</p>
-        {% endif %}
-        {% if shop.metafields.custom.warranty_days.value != blank %}
-          <p>אחריות: {{ shop.metafields.custom.warranty_days.value }} ימים</p>
-        {% endif %}
-      </div>
-    </div>
-  `;
-
-  // Add styles
-  const styles = `
-    <style>
-      .footer-banners {
-        width: 100%;
-        padding: 20px;
-        margin-top: 20px;
-        text-align: center;
-        background: transparent;
-      }
-      
-      .footer-banner-content {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      
-      .payment-processors h4 {
-        margin-bottom: 10px;
-        font-weight: 600;
-      }
-      
-      .image-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        margin: 10px 0;
-      }
-      
-      .image-container img {
-        max-width: 50px;
-        height: auto;
-        margin: 5px;
-      }
-      
-      .shipping-warranty {
-        font-weight: 500;
-        margin-top: 10px;
-      }
-      
-      .shipping-warranty p {
-        margin: 5px 0;
-      }
-    </style>
-  `;
-  
-  // Insert styles and banner
-  footerBanner.insertAdjacentHTML('beforeend', styles);
-  footer.insertAdjacentElement('afterbegin', footerBanner);
-  
-  console.log("Footer banner added successfully");
-}
-
-// Main initialization
-document.addEventListener('DOMContentLoaded', function () {
-  // Set global variables
-  window.buyNowText = {{ buyNowText | json }};
-  window.alternativeFont = {{ alternativeFont | json }};
-  window.enableBuyNowText = {{ block.settings.enable_buy_now_text }};
-  window.enableAlternativeFont = {{ block.settings.enable_alternative_font }};
-  window.enableFooterBanners = {{ enableFooterBanners | json }};
-  window.enableWhatsApp = {{ block.settings.enable_whatsapp }};
-
-  // Initialize features
-  setRTL({{ block.settings.enable_rtl }});
-  updateBuyNowText();
-  displayFooterBanners();
-
-  // Add mutation observer
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.addedNodes.length) {
-        updateBuyNowText();
-      }
-    });
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
-  // Listen for Shopify Theme Editor changes
-  document.addEventListener('shopify:block:select', function(event) {
-    if (event.detail.blockId === {{ block.id | json }}) {
-      setRTL({{ block.settings.enable_rtl }});
-      updateBuyNowText();
-      displayFooterBanners();
-    }
-  });
-
-  // Debug logging
-  console.log('Features Initialized:', {
-    rtlEnabled: {{ block.settings.enable_rtl }},
-    buyNowTextEnabled: window.enableBuyNowText,
-    footerBannersEnabled: window.enableFooterBanners,
-    currentDirection: document.documentElement.getAttribute('dir')
-  });
-});
+document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const t=document.documentElement,n=document.body;e?(t.setAttribute("dir","rtl"),t.setAttribute("lang","he"),n.setAttribute("dir","rtl"),n.style.direction="rtl",document.body.classList.add("rtl-enabled")):(t.setAttribute("dir","ltr"),t.setAttribute("lang","en"),n.setAttribute("dir","ltr"),n.style.direction="ltr",document.body.classList.remove("rtl-enabled"))}function updateBuyNowText(){if(window.enableBuyNowText&&window.buyNowText){document.querySelectorAll(".shopify-payment-button__button").forEach(e=>{e&&(e.textContent=window.buyNowText)});document.querySelectorAll(".shopify-payment-button__more-options").forEach(e=>{e&&(e.textContent=window.buyNowText)})}}function displayFooterBanners(){if(!window.enableFooterBanners)return;const e=document.querySelector("footer");if(!e)return;const t=document.querySelector(".footer-banners");t&&t.remove();const n=document.createElement("div");n.classList.add("footer-banners"),n.innerHTML=`<div class="footer-banner-content">{% if payment_processor_images != blank %}<div class="payment-processors"><h4>אמצעי תשלום</h4><div class="image-container">{{ payment_processor_images }}</div></div>{% endif %}{% if payment_features_images != blank and block.settings.enable_footer_banners %}<div class="payment-features"><div class="image-container">{{ payment_features_images }}</div></div>{% endif %}<div class="shipping-warranty">{% if shop.metafields.custom.shipping_option.value != blank %}<p>משלוח: {{ shop.metafields.custom.shipping_option.value }}</p>{% endif %}{% if shop.metafields.custom.warranty_days.value != blank %}<p>אחריות: {{ shop.metafields.custom.warranty_days.value }} ימים</p>{% endif %}</div></div><style>.footer-banners{width:100%;padding:20px;margin-top:20px;text-align:center;background:transparent}.footer-banner-content{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.payment-processors h4{margin-bottom:10px;font-weight:600}.image-container{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:10px 0}.image-container img{max-width:50px;height:auto;margin:5px}.shipping-warranty{font-weight:500;margin-top:10px}.shipping-warranty p{margin:5px 0}</style>`,e.insertAdjacentElement("afterbegin",n)}window.buyNowText={{ buyNowText | json }},window.alternativeFont={{ alternativeFont | json }},window.enableBuyNowText={{ block.settings.enable_buy_now_text }},window.enableAlternativeFont={{ block.settings.enable_alternative_font }},window.enableFooterBanners={{ enableFooterBanners | json }},window.enableWhatsApp={{ block.settings.enable_whatsapp }},setRTL({{ block.settings.enable_rtl }}),updateBuyNowText(),displayFooterBanners();const e=new MutationObserver(e=>{e.forEach(e=>{e.addedNodes.length&&updateBuyNowText()})});e.observe(document.body,{childList:!0,subtree:!0}),document.addEventListener("shopify:block:select",function(e){e.detail.blockId==={{ block.id | json }}&&(setRTL({{ block.settings.enable_rtl }}),updateBuyNowText(),displayFooterBanners())})});
 </script>
 
 <script>
@@ -809,13 +564,6 @@ document.addEventListener('DOMContentLoaded', function () {
     bodyElement.style.direction = 'ltr';
     document.body.classList.remove('rtl-enabled');
   }
-  
-  console.log('RTL State:', {
-    isRTL: isRTL,
-    htmlDir: htmlElement.getAttribute('dir'),
-    bodyDir: bodyElement.getAttribute('dir'),
-    bodyStyle: bodyElement.style.direction
-  });
 }
 
 
@@ -826,11 +574,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (button) {
         const originalText = button.textContent;
         button.textContent = buyNowText;
-        console.log('Buy Now Text Updated:', {
-          originalText: originalText,
-          newText: buyNowText,
-          element: button
-        });
       }
     });
     
@@ -879,25 +622,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
     function displayFooterBanners() {
-  // Debug settings
-  console.log("Footer Banners Settings:", {
-    enabled: window.enableFooterBanners,
-    shippingOption: {{ shop.metafields.custom.shipping_option.value | json }},
-    warrantyDays: {{ shop.metafields.custom.warranty_days.value | json }},
-    paymentProcessorImages: {{ payment_processor_images | json }},
-    paymentFeatureImages: {{ payment_features_images | json }}
-  });
-
   // Early return if disabled
   if (!window.enableFooterBanners) {
-    console.log("Footer banners disabled");
     return;
   }
 
   // Find footer element
   const footer = document.querySelector('footer');
   if (!footer) {
-    console.error("Footer not found");
     return;
   }
 
@@ -994,8 +726,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // Insert styles and banner
   footerBanner.insertAdjacentHTML('beforeend', styles);
   footer.insertAdjacentElement('afterbegin', footerBanner);
-  
-  console.log("Footer banner added successfully");
 }
 
 
@@ -1025,128 +755,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     })();
   });
-
-  // Add debug logging
-  console.log('WhatsApp Settings:', {
-    enabled: {{ settings.enable_whatsapp }},
-    phone: "{{ whatsapp_phone }}",
-    widgetEnabled: {{ whatsapp_widget_enabled }},
-    showSimpleButton: true // This should be determined by logic
-  });
-
-  // Check if simple button exists and log its state
-  const whatsappButton = document.querySelector('.whatsapp-widget');
-  console.log('WhatsApp Button Element:', whatsappButton);
-  console.log('WhatsApp Button Display:', whatsappButton ? getComputedStyle(whatsappButton).display : 'Element not found');
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('WhatsApp Debug:', {
-      blockSettingsEnabled: {{ block.settings.enable_whatsapp | json }},
-      settingsEnabled: {{ settings.enable_whatsapp | default: false | json }},
-      whatsappPhone: '{{ whatsapp_phone }}',
-      showSimpleButton: {{ show_simple_button | json }},
-      widgetEnabled: {{ whatsapp_widget_enabled | json }},
-      style: '{{ whatsapp_style }}'
-    });
-  });
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-  const widget = document.querySelector('.whatsapp-widget-container');
-  const closeButton = document.querySelector('.whatsapp-close-button');
-  
-  if (widget && closeButton) {
-    closeButton.addEventListener('click', function() {
-      widget.classList.add('hidden');
-      // Store the state in localStorage
-      localStorage.setItem('whatsappWidgetHidden', 'true');
-      
-      // Show widget again after 24 hours
-      setTimeout(() => {
-        widget.classList.remove('hidden');
-        localStorage.removeItem('whatsappWidgetHidden');
-      }, 24 * 60 * 60 * 1000);
-    });
-    
-    // Check if widget was previously hidden
-    if (localStorage.getItem('whatsappWidgetHidden')) {
-      widget.classList.add('hidden');
-    }
-  }
-});
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Debug initialization
-    const widget = document.querySelector('.whatsapp-widget');
-    console.log('Widget initialization:', {
-      widget: widget,
-      display: widget ? getComputedStyle(widget).display : 'not found',
-      visibility: widget ? getComputedStyle(widget).visibility : 'not found',
-      opacity: widget ? getComputedStyle(widget).opacity : 'not found',
-      zIndex: widget ? getComputedStyle(widget).zIndex : 'not found',
-      position: widget ? getComputedStyle(widget).position : 'not found'
-    });
-
-    // Force widget display
-    if (widget) {
-      widget.style.cssText = `
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: fixed !important;
-        z-index: 9999 !important;
-        bottom: 20px !important;
-        right: 20px !important;
-      `;
-    }
-  });
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Debug WhatsApp initialization
-    const debug = {
-      settings: {
-        blockEnabled: {{ block.settings.enable_whatsapp | json }},
-        widgetEnabled: {{ whatsapp_widget_enabled | json }},
-        phone: '{{ whatsapp_phone }}',
-        style: '{{ whatsapp_style }}'
-      },
-      elements: {}
-    };
-
-    // Check widget elements
-    const elements = [
-      '.whatsapp-widget',
-      '.whatsapp-floating-widget',
-      '.whatsapp-button'
-    ];
-
-    elements.forEach(selector => {
-      const element = document.querySelector(selector);
-      if (element) {
-        debug.elements[selector] = {
-          display: getComputedStyle(element).display,
-          visibility: getComputedStyle(element).visibility,
-          opacity: getComputedStyle(element).opacity,
-          zIndex: getComputedStyle(element).zIndex,
-          position: getComputedStyle(element).position
-        };
-      } else {
-        debug.elements[selector] = 'Not found';
-      }
-    });
-
-    console.group('WhatsApp Widget Debug');
-    console.log('Settings:', debug.settings);
-    console.log('Elements:', debug.elements);
-    console.groupEnd();
-  });
 </script>
 
 <script>
@@ -1168,15 +776,6 @@ document.addEventListener('DOMContentLoaded', function () {
   observer.observe(document.body, {
     childList: true,
     subtree: true
-  });
-
-  // Debug logging
-  console.log('Features Initialized:', {
-    rtlEnabled: {{ block.settings.enable_rtl }},
-    buyNowTextEnabled: {{ block.settings.enable_buy_now_text }},
-    footerBannersEnabled: {{ block.settings.enable_footer_banners }},
-    buyNowText: {{ buyNowText | json }},
-    currentDirection: document.documentElement.getAttribute('dir')
   });
 });
 </script>
@@ -1228,376 +827,6 @@ document.addEventListener('DOMContentLoaded', function () {
   
   // Re-run after a short delay to ensure all elements are loaded
   setTimeout(initializeWhatsApp, 1000);
-});
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Add initialization code here
-    initializeWhatsApp();
-    initializeFeatures();
-  });
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-  const scripts = document.getElementsByTagName('script');
-  console.log('Total scripts:', scripts.length);
-  
-  // Verify WhatsApp initialization
-  const whatsappElements = {
-    widget: document.querySelector('.whatsapp-floating-widget'),
-    button: document.querySelector('.whatsapp-button'),
-    container: document.querySelector('.whatsapp-widget-container')
-  };
-  
-  console.log('WhatsApp Elements Status:', whatsappElements);
-});
-</script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('WhatsApp Debug:', {
-      position: '{{ whatsapp_position }}',
-      widgetEnabled: {{ whatsapp_widget_enabled | json }},
-      phone: '{{ whatsapp_phone }}',
-      elements: {
-        widget: document.querySelector('.whatsapp-floating-widget'),
-        button: document.querySelector('.whatsapp-widget')
-      }
-    });
-  });
-</script>
-
-<style>
-  html[dir="rtl"],
-  body[dir="rtl"] {
-    direction: rtl !important;
-    text-align: right !important;
-  }
-   
-  body.custom-font-applied,
-  body.custom-font-applied *:not(i):not(.fa):not(.fas):not(.far):not(.fal):not(.fab) {
-    font-family: var(--custom-font, 'Rubik'), sans-serif !important;
-  }
-
-  /* Apply font to specific elements that might be overriding our styles */
-  body.custom-font-applied h1,
-  body.custom-font-applied h2,
-  body.custom-font-applied h3,
-  body.custom-font-applied h4,
-  body.custom-font-applied h5,
-  body.custom-font-applied h6,
-  body.custom-font-applied p,
-  body.custom-font-applied span,
-  body.custom-font-applied a,
-  body.custom-font-applied button,
-  body.custom-font-applied input,
-  body.custom-font-applied select,
-  body.custom-font-applied textarea {
-    font-family: var(--custom-font, 'Rubik'), sans-serif !important;
-  }
-
-  /* Add styles for footer banners */
-  .footer-banners {
-  background-color: transparent;
-  padding: 20px;
-  text-align: center;
-  width: 100vw; /* Ensures it takes up the full width */
-  display: block; /* Ensures it's a block element */
-  clear: both; /* Forces other elements to appear below */
-}
-
-
-  .footer-banners img {
-    max-width: 50px;
-    margin: 0 10px;
-  }
-
-  .footer__content-bottom-wrapper{
-    flex-direction: column-reverse;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .payment-section {
-    padding: 16px;
-    border-radius: 10px;
-    {% if payment_background == 'transparent' %}
-      background: transparent;
-    {% else %}
-      background: white;
-    {% endif %}
-  }
-</style>
-
-<style>
-  /* WhatsApp Styles */
-  .whatsapp-widget {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    border-radius: 8px;
-  }
-
-  .whatsapp-widget-header {
-    padding: 16px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-  }
-  .whatsapp-button {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    border-radius: 10px;
-    padding: 8px 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-width: 160px;
-    text-decoration: none;
-  }
-
-  /* RTL Styles */
-  html[dir="rtl"],
-  body[dir="rtl"] {
-    direction: rtl !important;
-    text-align: right !important;
-  }
-
-  /* Footer Banner Styles */
-  .footer-banners {
-    width: 100%;
-    padding: 20px;
-    margin-top: 20px;
-    text-align: center;
-    background: transparent;
-  }
-
-  .footer-banner-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  /* Rest of your existing styles... */
-</style>
-
-<script>
-// Single WhatsApp initialization function
-function initializeWhatsApp() {
-  const config = {
-    enabled: {{ block.settings.enable_whatsapp | json }},
-    widgetEnabled: {{ whatsapp_widget_enabled | json }},
-    phone: '{{ whatsapp_phone }}',
-    position: '{{ whatsapp_position }}',
-    style: '{{ whatsapp_style }}'
-  };
-
-  // Early exit if WhatsApp is not enabled
-  if (!config.enabled) {
-    console.log('WhatsApp disabled');
-    return;
-  }
-
-  console.log('Initializing WhatsApp with config:', config);
-
-  // Handle floating widget
-  const floatingWidget = document.querySelector('.whatsapp-floating-widget');
-  if (config.widgetEnabled && floatingWidget) {
-    // Force show the widget with important flags
-    floatingWidget.style.cssText = `
-      position: fixed !important;
-      bottom: 20px !important;
-      ${config.position}: 20px !important;
-      z-index: 999999 !important;
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      pointer-events: auto !important;
-      transform: none !important;
-      width: 300px;
-      max-width: 100%;
-    `;
-
-    // Ensure the container is also visible
-    const widgetContainer = floatingWidget.querySelector('.whatsapp-widget-container');
-    if (widgetContainer) {
-      widgetContainer.style.cssText = `
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        transform: none !important;
-        width: 100% !important;
-        height: auto !important;
-      `;
-    }
-  }
-
-  // Log visibility state
-  console.log('WhatsApp Widget State:', {
-    widget: floatingWidget,
-    display: floatingWidget ? getComputedStyle(floatingWidget).display : 'not found',
-    visibility: floatingWidget ? getComputedStyle(floatingWidget).visibility : 'not found',
-    opacity: floatingWidget ? getComputedStyle(floatingWidget).opacity : 'not found',
-    zIndex: floatingWidget ? getComputedStyle(floatingWidget).zIndex : 'not found'
-  });
-}
-
-// Call initialization on DOMContentLoaded and after a delay
-document.addEventListener('DOMContentLoaded', function() {
-  initializeWhatsApp();
-  // Add a delayed call to handle any dynamic loading issues
-  setTimeout(initializeWhatsApp, 1000);
-});
-
-// Add a CSS fix to ensure widget visibility
-const styleTag = document.createElement('style');
-styleTag.textContent = `
-  .whatsapp-floating-widget {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: fixed !important;
-    z-index: 999999 !important;
-    pointer-events: auto !important;
-  }
-
-  .whatsapp-widget-container {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .whatsapp-widget-container[data-state="minimized"] {
-    height: auto !important;
-  }
-
-  .whatsapp-widget-container[data-state="minimized"] .whatsapp-widget-body {
-    display: none !important;
-  }
-`;
-document.head.appendChild(styleTag);
-</script>
-
-<script>
-// Define all initialization functions
-function initializeFeatures() {
-  // RTL initialization
-  setRTL({{ block.settings.enable_rtl }});
-  
-  // Buy Now text
-  updateBuyNowText();
-  
-  // Footer banners
-  displayFooterBanners();
-  
-  // WhatsApp initialization
-  if (window.initializeWhatsApp) {
-    window.initializeWhatsApp();
-  }
-  
-  // Debug logging
-  console.log('Features Initialized:', {
-    rtlEnabled: {{ block.settings.enable_rtl }},
-    buyNowTextEnabled: {{ block.settings.enable_buy_now_text }},
-    footerBannersEnabled: {{ block.settings.enable_footer_banners }},
-    whatsappEnabled: {{ block.settings.enable_whatsapp }},
-    currentDirection: document.documentElement.getAttribute('dir')
-  });
-}
-
-// Single initialization point
-document.addEventListener('DOMContentLoaded', function() {
-  initializeFeatures();
-  
-  // Add mutation observer for dynamic content
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.addedNodes.length) {
-        updateBuyNowText();
-      }
-    });
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-});
-
-// Re-initialize on Shopify Theme Editor changes
-document.addEventListener('shopify:block:select', function(event) {
-  if (event.detail.blockId === {{ block.id | json }}) {
-    initializeFeatures();
-  }
-});
-</script>
-
-<script>
-// Add to your existing JavaScript
-function checkSabbathStatus() {
-  const now = new Date();
-  const currentDay = now.getDay();
-  const currentTime = now.getHours() * 60 + now.getMinutes();
-
-  const days = {
-    'Friday': 5,
-    'Saturday': 6,
-    'Sunday': 0
-  };
-
-  const closingDay = days['{{ closing_day }}'];
-  const openingDay = days['{{ opening_day }}'];
-  const [closingHour, closingMinute] = '{{ closing_time }}'.split(':').map(Number);
-  const [openingHour, openingMinute] = '{{ opening_time }}'.split(':').map(Number);
-  
-  const closingTime = closingHour * 60 + closingMinute;
-  const openingTime = openingHour * 60 + openingMinute;
-
-  let isSabbath = false;
-
-  if (currentDay === closingDay && currentTime >= closingTime) {
-    isSabbath = true;
-  } else if (currentDay === openingDay && currentTime < openingTime) {
-    isSabbath = true;
-  } else if (currentDay > closingDay && currentDay < openingDay) {
-    isSabbath = true;
-  }
-
-  return isSabbath;
-}
-
-// Auto-enable Sabbath mode if needed
-document.addEventListener('DOMContentLoaded', function() {
-  const isAutoSabbath = {{ is_auto_sabbath | default: false }};
-  
-  if (isAutoSabbath) {
-    const isSabbath = checkSabbathStatus();
-    if (isSabbath) {
-      document.body.classList.add('sabbath-mode');
-      const sabbathOverlay = document.querySelector('.sabbath-overlay');
-      if (sabbathOverlay) {
-        sabbathOverlay.style.display = 'block';
-      }
-    }
-  }
-  
-  // Check status every minute
-  setInterval(() => {
-    if (isAutoSabbath) {
-      const isSabbath = checkSabbathStatus();
-      document.body.classList.toggle('sabbath-mode', isSabbath);
-      const sabbathOverlay = document.querySelector('.sabbath-overlay');
-      if (sabbathOverlay) {
-        sabbathOverlay.style.display = isSabbath ? 'block' : 'none';
-      }
-    }
-  }, 60000);
 });
 </script>
 
@@ -2048,7 +1277,6 @@ function getCurrentTimeInShopTimeZone() {
     const shopTimeZone = '{{ shop.timezone }}';
     return new Date().toLocaleString('en-US', { timeZone: shopTimeZone });
   } catch (e) {
-    console.error('Time zone conversion failed:', e);
     return new Date(); // Fallback to local time
   }
 }
@@ -2107,14 +1335,127 @@ function getCurrentTimeInShopTimeZone() {
         <button class="close-panel" aria-label="Close accessibility panel">&times;</button>
       </div>
       <div class="accessibility-panel-content">
-        {{ accessibility_help_text }}
+        
+      
+  
+  
+  <!-- Keyboard Navigation -->
+  <div class="accessibility-section">
+    <div class="section-header">ניווט מקלדת</div>
+    <button class="accessibility-option" data-action="keyboard-nav">
+      <span class="icon">⌨️</span>
+      <span class="label">ניווט מקלדת</span>
+    </button>
+  </div>
+  
+  <!-- Color Settings -->
+  <div class="accessibility-section">
+    <div class="section-header">חסימת אנימציות</div>
+    <button class="accessibility-option" data-action="animations-block">
+      <span class="icon">🚫</span>
+      <span class="label">חסימת אנימציות</span>
+    </button>
+  </div>
+  
+  <!-- Color Adjustments -->
+  <div class="accessibility-section">
+    <div class="section-header">ניגודיות צבעים</div>
+    <div class="options-grid">
+      <button class="accessibility-option" data-action="contrast-default">
+        <span class="icon">⚪</span>
+        <span class="label">תצוגת מוגברת</span>
+      </button>
+      <button class="accessibility-option" data-action="contrast-choice">
+        <span class="icon">⚫</span>
+        <span class="label">ניגודיות בהירה</span>
+      </button>
+      <button class="accessibility-option" data-action="contrast-invert">
+        <span class="icon">⚪</span>
+        <span class="label">ניגודיות הפוכה</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Text Size -->
+  <div class="accessibility-section">
+    <div class="section-header">גודל טקסט</div>
+    <div class="options-grid">
+      <button class="accessibility-option" data-action="text-increase">
+        <span class="icon">↑</span>
+        <span class="label">הגדלת גופן</span>
+      </button>
+      <button class="accessibility-option" data-action="text-decrease">
+        <span class="icon">↓</span>
+        <span class="label">הקטנת גופן</span>
+      </button>
+      <button class="accessibility-option" data-action="text-readable">
+        <span class="icon">T</span>
+        <span class="label">גופן קריא</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Content Highlighting -->
+  <div class="accessibility-section">
+    <div class="section-header">הדגשת תוכן</div>
+    <div class="options-grid">
+      <button class="accessibility-option" data-action="highlight-links">
+        <span class="icon">🔗</span>
+        <span class="label">הדגשת קישורים</span>
+      </button>
+      <button class="accessibility-option" data-action="highlight-headings">
+        <span class="icon">H</span>
+        <span class="label">הדגשת כותרות</span>
+      </button>
+      <button class="accessibility-option" data-action="highlight-images">
+        <span class="icon">🖼️</span>
+        <span class="label">תיאור לתמונות</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Cursor Options -->
+  <div class="accessibility-section">
+    <div class="section-header">הגדלת תצוגה</div>
+    <div class="options-grid">
+      <button class="accessibility-option" data-action="cursor-large-white">
+        <span class="icon">⬜</span>
+        <span class="label">סמן לבן גדול</span>
+      </button>
+      <button class="accessibility-option" data-action="cursor-large-black">
+        <span class="icon">⬛</span>
+        <span class="label">סמן שחור גדול</span>
+      </button>
+      <button class="accessibility-option" data-action="zoom-enable">
+        <span class="icon">🔍</span>
+        <span class="label">הגדלת תצוגה</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Declaration and Reporting -->
+  <div class="accessibility-section">
+    <button class="accessibility-option" data-action="declaration">
+      <span class="label">הצהרת נגישות</span>
+    </button>
+    <button class="accessibility-option" data-action="report-issue">
+      <span class="label">דווח על בעיית נגישות</span>
+    </button>
+    <button class="accessibility-option" data-action="reset-settings">
+      <span class="icon">↻</span>
+      <span class="label">איפוס נגישות</span>
+    </button>
+  </div>
+
+  {{ accessibility_help_text }}
         {% if accessibility_owner_email != blank %}
           <div class="accessibility-contact">
             <p>Contact for accessibility issues:</p>
             <a href="mailto:{{ accessibility_owner_email }}">{{ accessibility_owner_email }}</a>
           </div>
         {% endif %}
-      </div>
+</div>
+
     </div>
   </div>
 
@@ -2252,47 +1593,1028 @@ function getCurrentTimeInShopTimeZone() {
     .accessibility-contact a:hover {
       text-decoration: underline;
     }
+
+
+    .accessibility-widget-container {
+  display: block;
+  pointer-events: auto;
+  direction: rtl;
+  text-align: right;
+  font-family: 'Rubik', 'Arial', sans-serif;
+}
+
+.accessibility-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 999999;
+}
+
+.accessibility-button:hover {
+  transform: scale(1.1);
+}
+
+.accessibility-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.accessibility-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.accessibility-panel {
+  display: none;
+  position: absolute;
+  width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 999999;
+}
+
+.accessibility-panel.active {
+  display: block;
+}
+
+.accessibility-panel-header {
+  padding: 16px;
+  background: #0D1117;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.accessibility-panel-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close-panel {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.accessibility-section {
+  padding: 8px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.section-header {
+  font-weight: 600;
+  margin: 8px 0;
+  color: #800000;
+  font-size: 16px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.accessibility-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: center;
+  min-height: 80px;
+}
+
+.accessibility-option:hover {
+  background: #e8e8e8;
+}
+
+.accessibility-option.active {
+  background: #e0e7ff;
+  border-color: #4f46e5;
+}
+
+.icon-container {
+  margin-bottom: 4px;
+  height: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.accessibility-option:not(.options-grid .accessibility-option) {
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 12px;
+  min-height: unset;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.accessibility-option:not(.options-grid .accessibility-option) .icon-container {
+  margin-bottom: 0;
+  margin-left: 8px;
+}
+
+/* Custom cursor styles */
+.large-white-cursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path d="M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 18.78C7.39 18.95 7.05 18.94 6.82 18.77C6.6 18.59 6.5 18.3 6.5 18V3C6.5 2.73 6.63 2.5 6.82 2.33C7.05 2.17 7.36 2.15 7.61 2.29L7.65 2.32L18.43 11.68C18.6 11.84 18.68 12.06 18.68 12.28C18.67 12.52 18.57 12.73 18.39 12.88L16.3 14.5L18.89 19.85C19.12 20.35 18.89 20.93 18.39 21.17L13.64 21.97Z" fill="white" stroke="black" stroke-width="1"/></svg>') 16 16, auto !important;
+}
+
+.large-black-cursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path d="M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 18.78C7.39 18.95 7.05 18.94 6.82 18.77C6.6 18.59 6.5 18.3 6.5 18V3C6.5 2.73 6.63 2.5 6.82 2.33C7.05 2.17 7.36 2.15 7.61 2.29L7.65 2.32L18.43 11.68C18.6 11.84 18.68 12.06 18.68 12.28C18.67 12.52 18.57 12.73 18.39 12.88L16.3 14.5L18.89 19.85C19.12 20.35 18.89 20.93 18.39 21.17L13.64 21.97Z" fill="black"/></svg>') 16 16, auto !important;
+}
+
+/* High contrast mode */
+body.high-contrast {
+  filter: contrast(1.5);
+}
+
+body.inverted-colors {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+body.inverted-colors img,
+body.inverted-colors video {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Link highlighting */
+body.highlight-links a {
+  background-color: yellow !important;
+  color: black !important;
+  text-decoration: underline !important;
+  font-weight: bold !important;
+  border: 2px solid black !important;
+  padding: 2px !important;
+}
+
+/* Heading highlighting */
+body.highlight-headings h1,
+body.highlight-headings h2,
+body.highlight-headings h3,
+body.highlight-headings h4,
+body.highlight-headings h5,
+body.highlight-headings h6 {
+  background-color: #ffcccb !important;
+  color: black !important;
+  border: 2px dashed black !important;
+  padding: 5px !important;
+}
+
+/* Image highlighting */
+body.highlight-images img {
+  border: 3px solid red !important;
+  padding: 2px !important;
+}
+
+/* Animations blocking */
+body.no-animations *,
+body.no-animations *::before,
+body.no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Readable font */
+body.readable-font * {
+  font-family: Arial, sans-serif !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+  line-height: 1.5 !important;
+}
+
+/* Zoom lens */
+.zoom-lens {
+  position: fixed;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 2px solid black;
+  pointer-events: none;
+  z-index: 9999;
+  background-color: white;
+  display: none;
+  transform: scale(1.5);
+  background-repeat: no-repeat;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* Keyboard navigation focus */
+body.keyboard-nav :focus {
+  outline: 3px solid blue !important;
+  outline-offset: 3px !important;
+}
+
+/* Focus not visible when not in keyboard nav mode */
+body:not(.keyboard-nav) :focus {
+  outline: none !important;
+}
+
+  .accessibility-widget-container {
+    display: block;
+    pointer-events: auto;
+    direction: rtl;
+    text-align: right;
+    font-family: 'Rubik', 'Arial', sans-serif;
+    position: fixed !important;
+    z-index: 999999 !important;
+  }
+
+  .accessibility-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 999999;
+    animation: floatButton 3s ease-in-out infinite;
+  }
+
+  @keyframes floatButton {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .accessibility-button:hover {
+    transform: scale(1.1);
+    animation-play-state: paused;
+  }
+
+  /* Ensure the panel appears above other elements */
+  .accessibility-panel.active {
+    z-index: 999998;
+    position: absolute;
+  }
+
+  /* Prevent panel from inheriting float animation */
+  .accessibility-panel {
+    animation: none;
+  }
   </style>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const button = document.querySelector('.accessibility-button');
-      const panel = document.querySelector('.accessibility-panel');
-      const closeButton = document.querySelector('.close-panel');
+  // Initialize accessibility widget
+  initAccessibilityWidget();
 
-      if (button && panel && closeButton) {
-        button.addEventListener('click', function() {
-          const isExpanded = panel.classList.contains('active');
-          panel.classList.toggle('active');
-          button.setAttribute('aria-expanded', !isExpanded);
-          panel.setAttribute('aria-hidden', isExpanded);
-        });
+  function initAccessibilityWidget() {
+    const button = document.querySelector('.accessibility-button');
+    const panel = document.querySelector('.accessibility-panel');
+    const closeButton = document.querySelector('.close-panel');
+    const options = document.querySelectorAll('.accessibility-option');
+    
+    // Load saved settings
+    loadSavedSettings();
 
-        closeButton.addEventListener('click', function() {
+    // Toggle panel visibility
+    if (button && panel && closeButton) {
+      button.addEventListener('click', function() {
+        const isExpanded = panel.classList.contains('active');
+        panel.classList.toggle('active');
+        button.setAttribute('aria-expanded', !isExpanded);
+        panel.setAttribute('aria-hidden', isExpanded);
+      });
+
+      closeButton.addEventListener('click', function() {
+        panel.classList.remove('active');
+        button.setAttribute('aria-expanded', 'false');
+        panel.setAttribute('aria-hidden', 'true');
+      });
+
+      // Close panel when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!panel.contains(event.target) && !button.contains(event.target)) {
           panel.classList.remove('active');
           button.setAttribute('aria-expanded', 'false');
           panel.setAttribute('aria-hidden', 'true');
-        });
+        }
+      });
 
-        // Close panel when clicking outside
-        document.addEventListener('click', function(event) {
-          if (!panel.contains(event.target) && !button.contains(event.target)) {
-            panel.classList.remove('active');
-            button.setAttribute('aria-expanded', 'false');
-            panel.setAttribute('aria-hidden', 'true');
-          }
-        });
+      // Add keyboard navigation
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && panel.classList.contains('active')) {
+          panel.classList.remove('active');
+          button.setAttribute('aria-expanded', 'false');
+          panel.setAttribute('aria-hidden', 'true');
+        }
+      });
+    }
 
-        // Add keyboard navigation
-        document.addEventListener('keydown', function(event) {
-          if (event.key === 'Escape' && panel.classList.contains('active')) {
-            panel.classList.remove('active');
-            button.setAttribute('aria-expanded', 'false');
-            panel.setAttribute('aria-hidden', 'true');
+    // Attach event listeners to all accessibility options
+    options.forEach(option => {
+      option.addEventListener('click', function() {
+        const action = this.dataset.action;
+        handleAccessibilityAction(action, this);
+      });
+    });
+
+    // Create zoom lens element
+    const zoomLens = document.createElement('div');
+    zoomLens.classList.add('zoom-lens');
+    document.body.appendChild(zoomLens);
+  }
+
+  function handleAccessibilityAction(action, element) {
+    if (!element) return;
+    
+    switch(action) {
+      case 'keyboard-nav':
+        toggleFeature('keyboard-nav', 'keyboard-nav');
+        break;
+      
+      case 'animations-block':
+        toggleFeature('no-animations', 'animations-block');
+        break;
+      
+      case 'contrast-default':
+        removeFeature('high-contrast');
+        removeFeature('inverted-colors');
+        setActiveInGroup('contrast-default', element);
+        saveSettings('contrast', 'default');
+        break;
+      
+      case 'contrast-choice':
+        addFeature('high-contrast');
+        removeFeature('inverted-colors');
+        setActiveInGroup('contrast-choice', element);
+        saveSettings('contrast', 'high');
+        break;
+      
+      case 'contrast-invert':
+        addFeature('inverted-colors');
+        removeFeature('high-contrast');
+        setActiveInGroup('contrast-invert', element);
+        saveSettings('contrast', 'inverted');
+        break;
+      
+      case 'text-increase':
+        changeFontSize(1);
+        break;
+      
+      case 'text-decrease':
+        changeFontSize(-1);
+        break;
+      
+      case 'text-readable':
+        toggleFeature('readable-font', 'text-readable');
+        break;
+      
+      case 'highlight-links':
+        toggleFeature('highlight-links', 'highlight-links');
+        break;
+      
+      case 'highlight-headings':
+        toggleFeature('highlight-headings', 'highlight-headings');
+        break;
+      
+      case 'highlight-images':
+        toggleFeature('highlight-images', 'highlight-images');
+        break;
+      
+      case 'cursor-large-white':
+        removeFeature('large-black-cursor');
+        toggleFeature('large-white-cursor', 'cursor-large-white');
+        break;
+      
+      case 'cursor-large-black':
+        removeFeature('large-white-cursor');
+        toggleFeature('large-black-cursor', 'cursor-large-black');
+        break;
+      
+      case 'zoom-enable':
+        toggleZoomLens();
+        break;
+      
+      case 'declaration':
+        showAccessibilityDeclaration();
+        break;
+      
+      case 'report-issue':
+        reportAccessibilityIssue();
+        break;
+      
+      case 'reset-settings':
+        resetAllSettings();
+        break;
+    }
+  }
+
+  // Toggle a feature on or off
+  function toggleFeature(className, optionName) {
+    const body = document.body;
+    const option = document.querySelector(`.${optionName}`);
+    
+    if (body.classList.contains(className)) {
+      body.classList.remove(className);
+      option.classList.remove('active');
+      saveSettings(optionName, false);
+    } else {
+      body.classList.add(className);
+      option.classList.add('active');
+      saveSettings(optionName, true);
+    }
+  }
+
+  // Add a feature
+  function addFeature(className) {
+    document.body.classList.add(className);
+  }
+
+  // Remove a feature
+  function removeFeature(className) {
+    document.body.classList.remove(className);
+  }
+
+  // Set active state in a group of options
+  function setActiveInGroup(activeOption, element) {
+    if (!element) return;
+    
+    // Find the closest parent with options-grid class
+    const parent = element.closest('.options-grid');
+    if (!parent) return;
+    
+    // Remove active class from all options in the group
+    const options = parent.querySelectorAll('.accessibility-option');
+    options.forEach(option => {
+      if (option) option.classList.remove('active');
+    });
+    
+    // Add active class to clicked element
+    element.classList.add('active');
+  }
+
+  // Change font size
+  function changeFontSize(direction) {
+    const html = document.documentElement;
+    let currentSize = parseFloat(getComputedStyle(html).fontSize);
+    
+    // Get saved font size or use current
+    if (localStorage.getItem('a11y-font-size')) {
+      currentSize = parseFloat(localStorage.getItem('a11y-font-size'));
+    }
+    
+    // Increase or decrease by 1px, with limits
+    let newSize = currentSize + direction;
+    if (newSize < 12) newSize = 12;
+    if (newSize > 24) newSize = 24;
+    
+    html.style.fontSize = `${newSize}px`;
+    saveSettings('font-size', newSize);
+    
+    // Update active state of buttons
+    const increaseBtn = document.querySelector('.text-increase');
+    const decreaseBtn = document.querySelector('.text-decrease');
+    
+    if (newSize >= 24) {
+      increaseBtn.setAttribute('disabled', 'true');
+    } else {
+      increaseBtn.removeAttribute('disabled');
+    }
+    
+    if (newSize <= 12) {
+      decreaseBtn.setAttribute('disabled', 'true');
+    } else {
+      decreaseBtn.removeAttribute('disabled');
+    }
+  }
+
+  // Toggle zoom lens functionality
+  function toggleZoomLens() {
+    const zoomLens = document.querySelector('.zoom-lens');
+    const zoomOption = document.querySelector('.zoom-enable');
+    const zoomActive = zoomLens.style.display === 'block';
+    
+    if (zoomActive) {
+      zoomLens.style.display = 'none';
+      document.removeEventListener('mousemove', moveZoomLens);
+      zoomOption.classList.remove('active');
+      saveSettings('zoom-enable', false);
+    } else {
+      zoomLens.style.display = 'block';
+      document.addEventListener('mousemove', moveZoomLens);
+      zoomOption.classList.add('active');
+      saveSettings('zoom-enable', true);
+    }
+  }
+
+  // Move zoom lens with mouse
+  function moveZoomLens(e) {
+    const zoomLens = document.querySelector('.zoom-lens');
+    
+    // Position the lens
+    const x = e.clientX - (zoomLens.offsetWidth / 2);
+    const y = e.clientY - (zoomLens.offsetHeight / 2);
+    
+    zoomLens.style.left = `${x}px`;
+    zoomLens.style.top = `${y}px`;
+    
+    // Create zoomed view
+        // Create zoomed view
+    const zoomFactor = 1.5;
+    zoomLens.style.backgroundImage = `none`;
+    zoomLens.style.backgroundSize = `${document.body.scrollWidth * zoomFactor}px ${document.body.scrollHeight * zoomFactor}px`;
+    
+    // Calculate background position
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
+    
+    const backgroundX = -((e.clientX + scrollX) * zoomFactor - zoomLens.offsetWidth / 2);
+    const backgroundY = -((e.clientY + scrollY) * zoomFactor - zoomLens.offsetHeight / 2);
+    
+    // Apply background position
+    zoomLens.style.backgroundPosition = `${backgroundX}px ${backgroundY}px`;
+    
+    // Capture page as image for zoom lens
+    html2canvas(document.body).then(canvas => {
+      const dataUrl = canvas.toDataURL();
+      zoomLens.style.backgroundImage = `url(${dataUrl})`;
+    });
+  }
+
+  // Show accessibility declaration
+  function showAccessibilityDeclaration() {
+    const declarationContent = `
+      <div class="a11y-declaration-modal">
+        <h2>הצהרת נגישות</h2>
+        <p>אתר זה עומד בדרישות תקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות), התשע"ג-2013.</p>
+        <p>האתר תוכנן ופותח כך שיהיה נגיש לכלל האוכלוסייה, כולל אנשים עם מוגבלויות.</p>
+        <p>התאמות הנגישות בוצעו על פי המלצות התקן הישראלי (ת"י 5568) לנגישות תכנים באינטרנט ברמת AA ומסמך הנחיות הנגישות WCAG 2.0 הבינלאומי.</p>
+        <button class="close-declaration">סגירה</button>
+      </div>
+    `;
+    
+    const modalOverlay = document.createElement('div');
+    modalOverlay.classList.add('a11y-modal-overlay');
+    modalOverlay.innerHTML = declarationContent;
+    document.body.appendChild(modalOverlay);
+    
+    // Add styles
+    const modalStyles = `
+      .a11y-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999999;
+      }
+      
+      .a11y-declaration-modal {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        direction: rtl;
+        text-align: right;
+      }
+      
+      .a11y-declaration-modal h2 {
+        margin-top: 0;
+        color: #333;
+      }
+      
+      .close-declaration {
+        background: #0D1117;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 16px;
+      }
+    `;
+    
+    const styleElement = document.createElement('style');
+    styleElement.textContent = modalStyles;
+    document.head.appendChild(styleElement);
+    
+    // Add close functionality
+    document.querySelector('.close-declaration').addEventListener('click', function() {
+      document.body.removeChild(modalOverlay);
+      document.head.removeChild(styleElement);
+    });
+  }
+
+  // Report accessibility issue
+  function reportAccessibilityIssue() {
+    const reportFormContent = `
+      <div class="a11y-report-modal">
+        <h2>דווח על בעיית נגישות</h2>
+        <form id="a11y-report-form">
+          <div class="form-group">
+            <label for="issue-type">סוג הבעיה:</label>
+            <select id="issue-type" required>
+              <option value="">בחר סוג בעיה</option>
+              <option value="keyboard">בעיה בניווט מקלדת</option>
+              <option value="screen-reader">בעיה בקורא מסך</option>
+              <option value="contrast">בעיה בניגודיות צבעים</option>
+              <option value="zoom">בעיה בהגדלת תצוגה</option>
+              <option value="other">אחר</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="issue-description">תיאור הבעיה:</label>
+            <textarea id="issue-description" rows="4" required></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="contact-email">דוא"ל ליצירת קשר (לא חובה):</label>
+            <input type="email" id="contact-email">
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="cancel-report">ביטול</button>
+            <button type="submit" class="submit-report">שליחה</button>
+          </div>
+        </form>
+      </div>
+    `;
+    
+    const modalOverlay = document.createElement('div');
+    modalOverlay.classList.add('a11y-modal-overlay');
+    modalOverlay.innerHTML = reportFormContent;
+    document.body.appendChild(modalOverlay);
+    
+    // Add styles
+    const modalStyles = `
+      .a11y-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999999;
+      }
+      
+      .a11y-report-modal {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        direction: rtl;
+        text-align: right;
+      }
+      
+      .a11y-report-modal h2 {
+        margin-top: 0;
+        color: #333;
+      }
+      
+      .form-group {
+        margin-bottom: 16px;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+      
+      .form-group select,
+      .form-group textarea,
+      .form-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      
+      .cancel-report,
+      .submit-report {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      
+      .cancel-report {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+      }
+      
+      .submit-report {
+        background: #0D1117;
+        color: white;
+        border: none;
+      }
+    `;
+    
+    const styleElement = document.createElement('style');
+    styleElement.textContent = modalStyles;
+    document.head.appendChild(styleElement);
+    
+    // Add form submission and close functionality
+    document.querySelector('.cancel-report').addEventListener('click', function() {
+      closeReportModal();
+    });
+    
+    document.getElementById('a11y-report-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const issueType = document.getElementById('issue-type').value;
+      const issueDescription = document.getElementById('issue-description').value;
+      const contactEmail = document.getElementById('contact-email').value;
+      
+      // Send report data to server (implement according to your backend)
+      
+      // Show success message
+      const formElement = document.getElementById('a11y-report-form');
+      formElement.innerHTML = `
+        <div class="success-message">
+          <p>תודה על הדיווח! הבעיה תיבדק בהקדם.</p>
+          <button type="button" class="close-report">סגירה</button>
+        </div>
+      `;
+      
+      document.querySelector('.close-report').addEventListener('click', function() {
+        closeReportModal();
+      });
+    });
+    
+    function closeReportModal() {
+      document.body.removeChild(modalOverlay);
+      document.head.removeChild(styleElement);
+    }
+  }
+
+  // Reset all accessibility settings
+  function resetAllSettings() {
+    // Remove all accessibility classes from body
+    const accessibilityClasses = [
+      'keyboard-nav',
+      'no-animations',
+      'high-contrast',
+      'inverted-colors',
+      'readable-font',
+      'highlight-links',
+      'highlight-headings',
+      'highlight-images',
+      'large-white-cursor',
+      'large-black-cursor'
+    ];
+    
+    accessibilityClasses.forEach(className => {
+      document.body.classList.remove(className);
+    });
+    
+    // Reset font size
+    document.documentElement.style.fontSize = '';
+    
+    // Turn off zoom lens
+    const zoomLens = document.querySelector('.zoom-lens');
+    if (zoomLens) {
+      zoomLens.style.display = 'none';
+      document.removeEventListener('mousemove', moveZoomLens);
+    }
+    
+    // Remove active class from all options
+    const options = document.querySelectorAll('.accessibility-option');
+    options.forEach(option => {
+      option.classList.remove('active');
+    });
+    
+    // Set default contrast option as active
+    const defaultContrastOption = document.querySelector('.contrast-default');
+    if (defaultContrastOption) {
+      defaultContrastOption.classList.add('active');
+    }
+    
+    // Clear local storage settings
+    localStorage.removeItem('a11y-settings');
+    localStorage.removeItem('a11y-font-size');
+    
+    // Show confirmation message
+    const confirmationMessage = document.createElement('div');
+    confirmationMessage.classList.add('a11y-confirmation');
+    confirmationMessage.textContent = 'הגדרות הנגישות אופסו בהצלחה';
+    document.body.appendChild(confirmationMessage);
+    
+    // Add styles for confirmation
+    const confirmationStyles = `
+      .a11y-confirmation {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 9999999;
+        font-size: 16px;
+        text-align: center;
+        animation: fadeInOut 3s forwards;
+      }
+      
+      @keyframes fadeInOut {
+        0% { opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+    `;
+    
+    const styleElement = document.createElement('style');
+    styleElement.textContent = confirmationStyles;
+    document.head.appendChild(styleElement);
+    
+    // Remove confirmation after animation
+    setTimeout(() => {
+      document.body.removeChild(confirmationMessage);
+      document.head.removeChild(styleElement);
+    }, 3000);
+  }
+
+  // Save settings to localStorage
+  function saveSettings(key, value) {
+    let settings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
+    settings[key] = value;
+    localStorage.setItem('a11y-settings', JSON.stringify(settings));
+    
+    // Special case for font size
+    if (key === 'font-size') {
+      localStorage.setItem('a11y-font-size', value);
+    }
+  }
+
+  // Load saved settings from localStorage
+  function loadSavedSettings() {
+    const settings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
+    
+    // Apply each saved setting
+    Object.keys(settings).forEach(key => {
+      const value = settings[key];
+      
+      switch(key) {
+        case 'keyboard-nav':
+          if (value) toggleFeature('keyboard-nav', 'keyboard-nav');
+          break;
+          
+        case 'animations-block':
+          if (value) toggleFeature('no-animations', 'animations-block');
+          break;
+          
+        case 'contrast':
+          const contrastButton = value === 'high' 
+            ? document.querySelector('[data-action="contrast-choice"]')
+            : value === 'inverted'
+              ? document.querySelector('[data-action="contrast-invert"]')
+              : document.querySelector('[data-action="contrast-default"]');
+              
+          if (contrastButton) {
+            if (value === 'high') {
+              addFeature('high-contrast');
+              removeFeature('inverted-colors');
+            } else if (value === 'inverted') {
+              addFeature('inverted-colors');
+              removeFeature('high-contrast');
+            } else {
+              removeFeature('high-contrast');
+              removeFeature('inverted-colors');
+            }
+            setActiveInGroup(null, contrastButton);
           }
-        });
+          break;
+          
+        case 'text-readable':
+          if (value) toggleFeature('readable-font', 'text-readable');
+          break;
+          
+        case 'highlight-links':
+          if (value) toggleFeature('highlight-links', 'highlight-links');
+          break;
+          
+        case 'highlight-headings':
+          if (value) toggleFeature('highlight-headings', 'highlight-headings');
+          break;
+          
+        case 'highlight-images':
+          if (value) toggleFeature('highlight-images', 'highlight-images');
+          break;
+          
+        case 'cursor-large-white':
+          if (value) {
+            removeFeature('large-black-cursor');
+            toggleFeature('large-white-cursor', 'cursor-large-white');
+          }
+          break;
+          
+        case 'cursor-large-black':
+          if (value) {
+            removeFeature('large-white-cursor');
+            toggleFeature('large-black-cursor', 'cursor-large-black');
+          }
+          break;
+          
+        case 'zoom-enable':
+          if (value) {
+            const zoomLens = document.querySelector('.zoom-lens');
+            if (zoomLens) {
+              zoomLens.style.display = 'block';
+              document.addEventListener('mousemove', moveZoomLens);
+              document.querySelector('.zoom-enable').classList.add('active');
+            }
+          }
+          break;
       }
     });
+    
+    // Apply saved font size
+    const savedFontSize = localStorage.getItem('a11y-font-size');
+    if (savedFontSize) {
+      document.documentElement.style.fontSize = `${savedFontSize}px`;
+    }
+  }
+
+  // Add keyboard navigation detection
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      document.body.classList.add('keyboard-user');
+    }
+  });
+
+  document.addEventListener('mousedown', function() {
+    document.body.classList.remove('keyboard-user');
+  });
+
+  // Optional: Add html2canvas library for zoom functionality
+  function loadHtml2Canvas() {
+    if (typeof html2canvas === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
+      script.onload = function() {
+      };
+      document.head.appendChild(script);
+    }
+  }
+  
+  loadHtml2Canvas();
+});
+
   </script>
 {% endif %}
 
