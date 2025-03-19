@@ -66,32 +66,23 @@ export const updateAccessibilitySettings = async (req, res) => {
       { new: true, upsert: true }
     );
 
-    // Create a new Graphql client with refreshed session
-    const client = new shopify.api.clients.Graphql({
-      session,
-      clientOptions: {
-        timeout: 10000,
-        keepAlive: true,
-        headers: {
-          'X-Shopify-Access-Token': session.accessToken
-        }
-      }
-    });
-
-    // Test connection
-    const shopResponse = await client.request(`
-      query {
-        shop {
-          id
-        }
-      }
-    `).catch(error => {
-      throw new Error(`Shopify API connection failed: ${error.message}`);
-    });
+    
+     const client = new shopify.api.clients.Graphql({ session });
+        const shopResponse = await client.request(`
+          query {
+            shop {
+              id
+            }
+          }
+        `)
 
     if (!shopResponse?.data?.shop?.id) {
       throw new Error('Failed to get shop ID');
-    }
+    };
+    
+        
+
+
 
     const shopGid = shopResponse.data.shop.id;
 
@@ -190,6 +181,9 @@ export const updateAccessibilitySettings = async (req, res) => {
       }
     ];
 
+    // Log the metafields for debugging
+    console.log('Metafields to be sent:', JSON.stringify(metafields, null, 2));
+
     // Update metafields
     const metafieldSetMutation = `
       mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
@@ -209,15 +203,17 @@ export const updateAccessibilitySettings = async (req, res) => {
       }
     `;
 
-    const mutationResponse = await client.request(metafieldSetMutation, {
-      metafields,
-    });
+    // Log the mutation for debugging
+    console.log('MetafieldSet mutation:', metafieldSetMutation);
 
-    if (mutationResponse.data?.metafieldsSet?.userErrors?.length > 0) {
-      throw new Error(
-        mutationResponse.data.metafieldsSet.userErrors[0].message
-      );
-    }
+    await client.request(metafieldSetMutation, {
+      variables: {
+        metafields: metafields
+      }
+    }).catch(error => {
+      console.error('Error in metafieldsSet mutation:', error.response?.data || error.message);
+      throw new Error(`MetafieldsSet mutation failed: ${error.message}`);
+    });
 
     // Send success response
     return res.status(200).json({

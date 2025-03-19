@@ -24,6 +24,7 @@ import { r2Client } from '../config/r2.js';
 import { v4 as uuidv4 } from "uuid";
 import { generateNotificationContent, updateNotification } from "../controllers/notificationsController.js";
 import { updateAccessibilitySettings } from "../controllers/accessibilityController.js";
+import { updatePostalSettings } from "../controllers/postalController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -72,5 +73,11 @@ router.post("/get-upload-url", getUploadUrl);
 router.get("/get-image-url/:imageId", getImageUrl);
 
 router.post("/update-accessibility-settings", updateAccessibilitySettings);
+
+router.post(
+  '/update-postal-settings',
+  updatePostalSettings
+);
+
 
 export default router;
