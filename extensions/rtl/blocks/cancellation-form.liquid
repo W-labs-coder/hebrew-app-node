@@ -1,6 +1,6 @@
 {% if app.metafields.custom.cancellation_form_enabled == 'true' %}
-  {% assign styles = app.metafields.custom.cancellation_styles | parse_json %}
-  {% assign fields = app.metafields.custom.cancellation_form_fields | parse_json %}
+  {% assign styles = app.metafields.custom.cancellation_styles.value %}
+  {% assign fields = app.metafields.custom.cancellation_form_fields.value %}
 
   
   <div class="cancellation-form-container" 
@@ -102,7 +102,7 @@
 
 {% schema %}
 {
-  "name": "Transaction Cancellation Form",
+  "name": "Cancellation Form",
   "target": "section",
   "settings": []
 }
