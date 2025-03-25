@@ -1,6 +1,6 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
-import { handleOrderCreated } from "../controllers/postalController.js";
 import shopify from "../shopify.js";
+import { handleOrderCreated } from "../controllers/postalController.js";
 
 const webhookHandlers = {
   "orders/create": {
@@ -17,20 +17,18 @@ export const setupWebhooks = async ({ shop, accessToken, isOnline }) => {
     const promises = Object.entries(webhookHandlers).map(
       async ([topic, handler]) => {
         try {
-          const response = await shopify.api.rest.Webhook.create({
-            session,
-            address: `${process.env.HOST}${handler.callbackUrl}`,
-            topic,
-            format: "json",
-            delivery_method: DeliveryMethod.Http,
+          const webhook = new shopify.api.rest.Webhook({ session });
+          webhook.address = `${process.env.HOST}${handler.callbackUrl}`;
+          webhook.topic = topic;
+          webhook.format = "json";
+          webhook.delivery_method = DeliveryMethod.Http;
+
+          await webhook.save({
+            update: true, // Allows updating if a webhook already exists
           });
 
-          if (!response || !response.id) {
-            console.error(`Failed to register webhook ${topic}:`, response);
-            return { success: false, topic, error: response };
-          }
-
-          return { success: true, topic, result: response };
+          console.log(`Webhook registered: ${topic} -> ${webhook.address}`);
+          return { success: true, topic, result: webhook };
         } catch (error) {
           console.error(`Error registering webhook ${topic}:`, error);
           return { success: false, topic, error: error.message };
