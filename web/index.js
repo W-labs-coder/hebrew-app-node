@@ -61,7 +61,11 @@ app.post(
 
 app.post("/api/webhooks/orders/create", express.text({type: '*/*'}), async (req, res) => {
   try {
-    await Shopify.Webhooks.Registry.process(req, res);
+    await shopify.api.webhooks.process({
+      rawBody: req.body,
+      rawRequest: req,
+      rawResponse: res
+    });
   } catch (error) {
     console.error('Webhook processing error:', error);
     res.status(500).send(error.message);
