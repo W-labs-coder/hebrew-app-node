@@ -1,13 +1,9 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
 import shopify from "../shopify.js";
-import { handleOrderCreated } from "../controllers/postalController.js";
 
+// Remove orders/create webhook
 const webhookHandlers = {
-  "orders/create": {
-    deliveryMethod: DeliveryMethod.Http,
-    callbackUrl: "/api/webhooks/orders/create",
-    callback: handleOrderCreated,
-  },
+  // Add other webhooks here as needed
 };
 
 export const setupWebhooks = async ({ session, accessToken, isOnline }) => {

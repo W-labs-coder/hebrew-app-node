@@ -18,6 +18,24 @@ const UPDATE_ORDER_MUTATION = `
   }
 `;
 
+// Add this query at the top level
+const ORDERS_QUERY = `
+  query getOrders($query: String!) {
+    orders(query: $query, first: 1) {
+      edges {
+        node {
+          id
+          shippingAddress {
+            address1
+            city
+            zip
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const updatePostalSettings = async (req, res) => {
   try {
     const { autofocusDetection, autofocusCorrection } = req.body;
@@ -158,6 +176,30 @@ export const handleOrderCreated = async (req, res) => {
   } catch (error) {
     console.error('Error in handleOrderCreated:', error);
     res.status(500).send();
+  }
+};
+
+// Add this new function to poll for new orders
+export const pollNewOrders = async (session) => {
+  try {
+    const client = new shopify.api.clients.Graphql({ session });
+    const timeAgo = new Date(Date.now() - 5 * 60000).toISOString(); // Last 5 minutes
+    
+    const response = await client.request({
+      data: {
+        query: ORDERS_QUERY,
+        variables: {
+          query: `created_at:>='${timeAgo}'`
+        }
+      }
+    });
+
+    const orders = response.body.data.orders.edges;
+    for (const { node: order } of orders) {
+      await handleOrderCreated({ body: order }, { locals: { shopify: { session } } });
+    }
+  } catch (error) {
+    console.error('Error polling orders:', error);
   }
 };
 
