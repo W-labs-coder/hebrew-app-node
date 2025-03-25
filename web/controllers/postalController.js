@@ -40,8 +40,9 @@ export const updatePostalSettings = async (req, res) => {
       });
     }
     
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
+     const shop = session.shop;
+    const user = await User.findOneAndUpdate(
+      { shop: shop },
       {
         autofocusDetection,
         autofocusCorrection
