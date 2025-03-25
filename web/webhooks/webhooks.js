@@ -1,36 +1,40 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
+import { handleOrderCreated } from "../controllers/postalController.js";
 import shopify from "../shopify.js";
 
-// Remove orders/create webhook
 const webhookHandlers = {
-  // Add other webhooks here as needed
+  'orders/create': {
+    deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: "/api/webhooks/orders/create",
+    callback: handleOrderCreated,
+  },
 };
 
-export const setupWebhooks = async ({ session, accessToken, isOnline }) => {
- 
-
+export const setupWebhooks = async ({ session }) => {
   try {
-    const promises = Object.entries(webhookHandlers).map(
-      async ([topic, handler]) => {
-        try {
-          const webhook = new shopify.api.rest.Webhook({ session });
-          webhook.address = `${process.env.HOST}${handler.callbackUrl}`;
-          webhook.topic = topic;
-          webhook.format = "json";
-          webhook.delivery_method = DeliveryMethod.Http;
+    const promises = Object.entries(webhookHandlers).map(async ([topic, handler]) => {
+      try {
+        // Using REST Admin API with offline token
+        const webhook = new shopify.api.rest.Webhook({ session: { 
+          shop: session.shop,
+          accessToken: session.accessToken,
+          isOnline: false // Use offline token for higher permissions
+        }});
+        
+        webhook.address = `${process.env.HOST}${handler.callbackUrl}`;
+        webhook.topic = topic;
+        webhook.format = "json";
+        
+        await webhook.save({
+          update: true,
+        });
 
-          await webhook.save({
-            update: true, // Allows updating if a webhook already exists
-          });
-
-          console.log(`Webhook registered: ${topic} -> ${webhook.address}`);
-          return { success: true, topic, result: webhook };
-        } catch (error) {
-          console.error(`Error registering webhook ${topic}:`, error);
-          return { success: false, topic, error: error.message };
-        }
+        return { success: true, topic, result: webhook };
+      } catch (error) {
+        console.error(`Error registering webhook ${topic}:`, error);
+        return { success: false, topic, error: error.message };
       }
-    );
+    });
 
     const results = await Promise.all(promises);
     results.forEach(({ topic, success, result, error }) => {
