@@ -3,25 +3,26 @@ import { handleOrderCreated } from "../controllers/postalController.js";
 import shopify from "../shopify.js";
 
 const webhookHandlers = {
-  ORDERS_CREATE: {
+  'orders/create': {  // Changed from ORDERS_CREATE to match Shopify's webhook topic format
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks/orders/create",
     callback: handleOrderCreated,
   },
 };
 
-export const setupWebhooks = async (shop, accessToken) => {
+export const setupWebhooks = async (session) => {
   const results = await Promise.all(
     Object.entries(webhookHandlers).map(async ([topic, handler]) => {
       try {
         const response = await shopify.api.webhooks.register({
-          session: {
-            shop,
-            accessToken,
+          session,
+          webhookConfig: {
+            address: `${process.env.HOST}${handler.callbackUrl}`,
+            topic: topic,
+            format: 'json',
           },
-          webhookHandler: handler,
         });
-
+        
         console.log(`Webhook ${topic} registration ${response.success ? 'success' : 'failed'}`);
         return response;
       } catch (error) {

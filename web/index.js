@@ -37,7 +37,7 @@ const afterAuth = async (req, res, next) => {
   const session = res.locals.shopify.session;
   
   try {
-    const webhookResults = await setupWebhooks(session.shop, session.accessToken);
+    const webhookResults = await setupWebhooks(session);
     console.log('Webhook registration results:', webhookResults);
   } catch (error) {
     console.error('Failed to setup webhooks:', error);
