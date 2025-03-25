@@ -10,8 +10,8 @@ const webhookHandlers = {
   },
 };
 
-export const setupWebhooks = async ({ shop, accessToken, isOnline }) => {
-  const session = res.locals.shopify.session;
+export const setupWebhooks = async ({ session, accessToken, isOnline }) => {
+ 
 
   try {
     const promises = Object.entries(webhookHandlers).map(

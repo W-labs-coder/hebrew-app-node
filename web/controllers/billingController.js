@@ -155,7 +155,7 @@ export const confirmSubscription = async (req, res) => {
     // Register webhooks after successful subscription
     try {
       const webhookResults = await setupWebhooks({
-        shop: session.shop,
+       session,
         accessToken: session.accessToken,
         isOnline: false  // Changed to false for offline access token
       });
