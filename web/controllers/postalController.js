@@ -230,9 +230,11 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
     }
 
     const shippingAddress = checkoutData.shipping_address || checkoutData.deliveryAddress;
+
+    // Check if the address is incomplete
     if (!shippingAddress?.address1 || !shippingAddress?.city) {
-      console.log('❌ Invalid address:', shippingAddress);
-      return;
+      console.log('⚠️ Incomplete address detected. Skipping postal code validation:', shippingAddress);
+      return; // Exit early if the address is incomplete
     }
 
     const validZip = await validateIsraeliPostalCode(
