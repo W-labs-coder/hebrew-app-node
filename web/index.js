@@ -32,28 +32,14 @@ const STATIC_PATH =
 
 const app = express();
 
-// Define afterAuth before using it
-const afterAuth = async (req, res, next) => {
-  const session = res.locals.shopify.session;
-  
-  try {
-    const webhookResults = await setupWebhooks(session);
-    console.log('Webhook registration results:', webhookResults);
-  } catch (error) {
-    console.error('Failed to setup webhooks:', error);
-  }
-  
-  next(); // Continue to the next middleware
-};
-
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
-  afterAuth, // Add the afterAuth middleware here
   shopify.redirectToShopifyOrAppRoot()
-);
+); // Removed afterAuth middleware
+
 app.post(
   shopify.config.webhooks.path,
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
