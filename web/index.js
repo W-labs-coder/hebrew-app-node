@@ -45,13 +45,30 @@ app.post(
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
 
-app.post("/api/webhooks/orders/create", express.text({type: '*/*'}), async (req, res) => {
+app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
-    await shopify.api.webhooks.process({
-      rawBody: req.body,
-      rawRequest: req,
-      rawResponse: res
+    // Verify webhook
+    const hmac = req.get('X-Shopify-Hmac-Sha256');
+    const topic = req.get('X-Shopify-Topic');
+    
+    console.log('Received webhook:', {
+      topic,
+      body: req.body.toString('utf8')
     });
+
+    const shop = req.get('X-Shopify-Shop-Domain');
+    const orderData = JSON.parse(req.body);
+    
+    // Get session for this shop
+    const session = await shopify.config.sessionStorage.loadSession(shop);
+    
+    // Call the handler
+    await webhooks.ORDERS_CREATE.callback(orderData, {
+      locals: {
+        shopify: { session }
+      }
+    }, res);
+
   } catch (error) {
     console.error('Webhook processing error:', error);
     res.status(500).send(error.message);

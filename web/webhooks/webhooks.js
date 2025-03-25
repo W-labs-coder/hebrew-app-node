@@ -6,7 +6,15 @@ const webhookHandlers = {
   'orders/create': {
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks/orders/create",
-    callback: handleOrderCreated,
+    callback: async (topic, shop, body, webhookId) => {
+      console.log('Processing order webhook:', { topic, shop });
+      try {
+        const data = typeof body === 'string' ? JSON.parse(body) : body;
+        await handleOrderCreated(data, { locals: { shopify: { session: { shop } } } });
+      } catch (error) {
+        console.error('Error in webhook callback:', error);
+      }
+    },
   },
 };
 

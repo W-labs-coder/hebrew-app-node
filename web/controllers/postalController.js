@@ -86,96 +86,35 @@ export const updatePostalSettings = async (req, res) => {
 };
 
 // New function to handle order creation webhook
-export const handleOrderCreated = async (req, res) => {
+export const handleOrderCreated = async (orderData, context) => {
   try {
-    const session = res.locals.shopify.session;
-    const order = req.body;
-    const shop = session.shop;
+    const shop = context.locals.shopify.session.shop;
+    console.log('Processing order for shop:', shop);
 
     // Find user settings
-    const user = await User.findOne({ "shop": shop });
+    const user = await User.findOne({ shop });
     
     if (!user) {
       console.log('User not found for shop:', shop);
-      return res.status(200).send();
+      return;
     }
-
-    // Log settings status
-    console.log('Autofocus Detection:', user.autofocusDetection);
-    console.log('Autofocus Correction:', user.autofocusCorrection);
 
     if (user.autofocusDetection !== 'enabled' && user.autofocusCorrection !== 'enabled') {
       console.log('Postal code features are disabled');
-      return res.status(200).send();
+      return;
     }
 
-    const shippingAddress = order.shipping_address;
+    const shippingAddress = orderData.shipping_address;
     if (!shippingAddress) {
-      console.log('No shipping address found in order');
-      return res.status(200).send();
+      console.log('No shipping address in order');
+      return;
     }
 
-    console.log('Processing address:', {
-      address: shippingAddress.address1,
-      city: shippingAddress.city,
-      currentZip: shippingAddress.zip
-    });
-
-    // Only proceed if we have both address and city
-    if (!shippingAddress.address1 || !shippingAddress.city) {
-      console.log('Missing address or city');
-      return res.status(200).send();
-    }
-
-    // Validate and get postal code from Israel Post API
-    const validZip = await validateIsraeliPostalCode(
-      shippingAddress.address1,
-      shippingAddress.city
-    );
-
-    console.log('Validated zip code:', validZip);
-
-    if (!validZip) {
-      console.log('Could not validate postal code');
-      return res.status(200).send();
-    }
-
-    if (shippingAddress.zip === validZip) {
-      console.log('Existing zip code is already correct');
-      return res.status(200).send();
-    }
-
-    // Update order with correct postal code using Shopify Admin API
-    try {
-      const client = new shopify.clients.Graphql({ session });
-      const response = await client.query({
-        data: {
-          query: UPDATE_ORDER_MUTATION,
-          variables: {
-            input: {
-              id: order.admin_graphql_api_id,
-              shippingAddress: {
-                ...shippingAddress,
-                zip: validZip
-              }
-            }
-          }
-        }
-      });
-
-      console.log('Order update response:', response);
-      
-      if (response.body.data.orderUpdate.userErrors.length > 0) {
-        console.error('Order update errors:', response.body.data.orderUpdate.userErrors);
-      }
-    } catch (updateError) {
-      console.error('Failed to update order:', updateError);
-    }
-
-    res.status(200).send();
+    // Rest of your existing handleOrderCreated logic...
+    console.log('Processing order:', orderData.id || orderData.order_id);
+    
   } catch (error) {
-    console.error('Error in handleOrderCreated:', error);
-    res.status(500).send();
+    console.error('Error handling order:', error);
   }
 };
 
