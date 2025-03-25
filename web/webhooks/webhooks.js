@@ -15,7 +15,7 @@ export const setupWebhooks = async (shop, accessToken) => {
   const results = await Promise.all(
     Object.entries(webhookHandlers).map(async ([topic, handler]) => {
       try {
-        const response = await shopify.Webhooks.Registry.register({
+        const response = await shopify.api.webhooks.register({
           path: handler.callbackUrl,
           topic: topic,
           accessToken: accessToken,
