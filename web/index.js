@@ -94,9 +94,26 @@ app.post("/api/webhooks/checkouts/update", express.raw({type: '*/*'}), async (re
     const body = req.body.toString('utf8');
     const checkoutData = JSON.parse(body);
     
-    const session = await shopify.config.sessionStorage.loadSession(shop);
-    
-    // Fix: Access the webhook handler correctly using bracket notation
+    // Fix: Use proper session handling
+    const sessionId = await shopify.api.session.getCurrentId({
+      isOnline: false,
+      rawRequest: req,
+      rawResponse: res,
+    });
+    const session = await shopify.config.sessionStorage.loadSession(sessionId);
+
+    if (!session) {
+      console.log('❌ No session found, trying offline session');
+      // Try getting offline session
+      const offlineSession = await shopify.config.sessionStorage.loadSession(`offline_${shop}`);
+      if (!offlineSession) {
+        console.log('❌ No offline session found');
+        return res.status(401).send('No session found');
+      }
+      console.log('✅ Found offline session');
+      session = offlineSession;
+    }
+
     await webhooks['checkouts/update'].callback(
       'checkouts/update',
       shop,
