@@ -12,6 +12,7 @@ import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import User from "./models/User.js";
 import webhooks from "./webhooks/webhooks.js";
+import { setupWebhooks } from "./webhooks/webhooks.js";
 
 // Add these lines after imports to define __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -159,18 +160,14 @@ const afterAuth = async (req, res) => {
   
   // Register webhooks
   try {
-    await Shopify.Webhooks.Registry.register({
-      shop: session.shop,
-      accessToken: session.accessToken,
-      path: "/api/webhooks/orders/create",
-      topic: "ORDERS_CREATE",
-    });
-    console.log('Webhook registered successfully');
+    const webhookResults = await setupWebhooks(session.shop, session.accessToken);
+    console.log('Webhook registration results:', webhookResults);
   } catch (error) {
-    console.error('Failed to register webhook:', error);
+    console.error('Failed to setup webhooks:', error);
   }
   
-  // ...rest of your afterAuth code...
+  // Redirect to app home page
+  redirectToShopifyOrAppRoot();
 };
 
 app.listen(PORT);
