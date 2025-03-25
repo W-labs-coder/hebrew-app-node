@@ -3,7 +3,7 @@ import { handleOrderCreated } from "../controllers/postalController.js";
 import shopify from "../shopify.js";
 
 const webhookHandlers = {
-  'orders/create': {  // Changed from ORDERS_CREATE to match Shopify's webhook topic format
+  'orders/create': {
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks/orders/create",
     callback: handleOrderCreated,
@@ -17,27 +17,58 @@ export const setupWebhooks = async ({ shop, accessToken, isOnline }) => {
     isOnline
   };
 
-  const results = await Promise.all(
-    Object.entries(webhookHandlers).map(async ([topic, handler]) => {
+  try {
+    const promises = Object.entries(webhookHandlers).map(async ([topic, handler]) => {
       try {
-        const response = await shopify.api.webhooks.register({
+        // Create webhook subscription
+        const webhookResponse = await shopify.api.webhooks.register({
           session,
           webhookSubscription: {
             address: `${process.env.HOST}${handler.callbackUrl}`,
-            topic,
+            topic: `${topic}`, // Ensure correct topic format
             format: 'json',
           },
         });
-        
-        console.log(`Webhook ${topic} registration ${response.success ? 'success' : 'failed'}`);
-        return response;
+
+        if (!webhookResponse.success) {
+          console.error(`Failed to register webhook ${topic}:`, webhookResponse.result);
+          return {
+            success: false,
+            topic,
+            error: webhookResponse.result
+          };
+        }
+
+        return {
+          success: true,
+          topic,
+          result: webhookResponse.result
+        };
+
       } catch (error) {
-        console.error(`Failed to register ${topic} webhook: ${error.message}`);
-        return { success: false, error };
+        console.error(`Error registering webhook ${topic}:`, error);
+        return {
+          success: false,
+          topic,
+          error: error.message
+        };
       }
-    })
-  );
-  return results;
+    });
+
+    const results = await Promise.all(promises);
+    
+    // Log detailed results
+    results.forEach(result => {
+      console.log(`Webhook ${result.topic}: ${result.success ? 'Success' : 'Failed'}`, 
+        result.success ? result.result : result.error);
+    });
+
+    return results;
+
+  } catch (error) {
+    console.error('Webhook registration error:', error);
+    throw error;
+  }
 };
 
 export default webhookHandlers;
