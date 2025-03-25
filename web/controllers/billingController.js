@@ -157,18 +157,22 @@ export const confirmSubscription = async (req, res) => {
       const webhookResults = await setupWebhooks({
         shop: session.shop,
         accessToken: session.accessToken,
-        isOnline: true
+        isOnline: false  // Changed to false for offline access token
       });
-      console.log('Webhook registration results:', webhookResults);
-      
-      // Check if any webhooks failed to register
+
+      // Log detailed results
       const failedWebhooks = webhookResults.filter(result => !result.success);
       if (failedWebhooks.length > 0) {
-        console.error('Some webhooks failed to register:', failedWebhooks);
+        console.error('Failed webhooks:', 
+          failedWebhooks.map(w => ({
+            topic: w.topic,
+            error: w.error
+          }))
+        );
       }
     } catch (webhookError) {
-      console.error('Failed to setup webhooks:', webhookError);
-      // Don't fail the subscription setup, but log the error
+      console.error('Webhook setup failed:', webhookError);
+      // Continue with subscription setup
     }
 
     const user = await User.create({shop});
