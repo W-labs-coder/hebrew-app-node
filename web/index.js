@@ -32,15 +32,26 @@ const STATIC_PATH =
 
 const app = express();
 
+// Define afterAuth before using it
+const afterAuth = async (req, res, next) => {
+  const session = res.locals.shopify.session;
+  
+  try {
+    const webhookResults = await setupWebhooks(session.shop, session.accessToken);
+    console.log('Webhook registration results:', webhookResults);
+  } catch (error) {
+    console.error('Failed to setup webhooks:', error);
+  }
+  
+  next(); // Continue to the next middleware
+};
+
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
-  (_req, res, next) => {
-    console.log("Callback Session:", res.locals.shopify);
-    next();
-  },
+  afterAuth, // Add the afterAuth middleware here
   shopify.redirectToShopifyOrAppRoot()
 );
 app.post(
@@ -154,20 +165,5 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
         .replace("%VITE_SHOPIFY_API_KEY%", apiKey)
     );
 });
-
-const afterAuth = async (req, res) => {
-  const session = res.locals.shopify.session;
-  
-  // Register webhooks
-  try {
-    const webhookResults = await setupWebhooks(session.shop, session.accessToken);
-    console.log('Webhook registration results:', webhookResults);
-  } catch (error) {
-    console.error('Failed to setup webhooks:', error);
-  }
-  
-  // Redirect to app home page
-  redirectToShopifyOrAppRoot();
-};
 
 app.listen(PORT);
