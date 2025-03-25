@@ -96,7 +96,8 @@ app.post("/api/webhooks/checkouts/update", express.raw({type: '*/*'}), async (re
     
     const session = await shopify.config.sessionStorage.loadSession(shop);
     
-    await webhooks.checkouts/update.callback(
+    // Fix: Access the webhook handler correctly using bracket notation
+    await webhooks['checkouts/update'].callback(
       'checkouts/update',
       shop,
       checkoutData,
