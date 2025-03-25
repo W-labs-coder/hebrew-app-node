@@ -34,26 +34,40 @@
 
 {%- capture payment_processor_images -%}
   {%- for processor in shop.metafields.custom.payment_processors.value -%}
-    {%- assign image_name = processor | downcase | replace: ' ', '_' | append: '.png' -%}
-    <img src="{{ image_name | asset_url }}" alt="{{ processor }}" width="50" height="30">
+    {%- assign icon_name = processor | downcase | replace: ' ', '-' -%}
+    <span 
+      class="iconify payment-icon" 
+      data-icon="payment-{{ icon_name }}"
+      data-width="50"
+      data-height="30"
+      aria-label="{{ processor }}"
+    ></span>
   {%- endfor -%}
 {%- endcapture -%}
 
 {%- capture payment_features_images -%}
   {%- for feature in shop.metafields.custom.payment_features.value -%}
-    {%- assign image_name = feature | downcase | replace: ' ', '-' | append: '-svg.svg' -%}
-    <img src="{{ image_name | asset_url }}" alt="{{ feature }}" width="50" height="30">
+    {%- assign icon_name = feature | downcase | replace: ' ', '-' -%}
+    <span 
+      class="iconify feature-icon" 
+      data-icon="feature-{{ icon_name }}"
+      data-width="50"
+      data-height="30"
+      aria-label="{{ feature }}"
+    ></span>
   {%- endfor -%}
 {%- endcapture -%}
 
 {%- capture selected_calendars -%}
   {%- for calendar in shop.metafields.custom.selected_calendars.value -%}
-    {%- assign image_name = calendar | downcase | replace: ' ', '-' -%}
-    {%- assign image_path = image_name | append: '-icon-svg.svg' -%}
-    {%- assign asset_url = image_path | asset_url -%}
-    {%- if asset_url != blank -%}
-      <img src="{{ 'calendar-icon-svg.svg' | asset_url }}" alt="{{ calendar }}" width="50" height="30">
-    {%- endif -%}
+    {%- assign icon_name = calendar | downcase | replace: ' ', '-' -%}
+    <span 
+      class="iconify calendar-icon" 
+      data-icon="calendar-{{ icon_name }}"
+      data-width="50"
+      data-height="30"
+      aria-label="{{ calendar }}"
+    ></span>
   {%- endfor -%}
 {%- endcapture -%}
 
@@ -2695,3 +2709,53 @@ body:not(.keyboard-nav) :focus {
     img.classList.add('remote-img');
   });
 </script>
+
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Define icon mappings
+  const iconMappings = {
+    'payment-visa': 'logos:visa',
+    'payment-mastercard': 'logos:mastercard',
+    'payment-paypal': 'logos:paypal',
+    'payment-apple-pay': 'logos:apple-pay',
+    'payment-google-pay': 'logos:google-pay',
+    'feature-secure': 'material-symbols:security',
+    'feature-fast': 'material-symbols:speed',
+    'feature-reliable': 'material-symbols:verified',
+    'calendar-jewish': 'mdi:star-david',
+    'calendar-gregorian': 'mdi:calendar',
+    'calendar-hebrew': 'mdi:calendar-star'
+  };
+
+  // Apply icon mappings
+  document.querySelectorAll('.iconify').forEach(icon => {
+    const requestedIcon = icon.getAttribute('data-icon');
+    if (iconMappings[requestedIcon]) {
+      icon.setAttribute('data-icon', iconMappings[requestedIcon]);
+    }
+  });
+});
+</script>
+
+<style>
+.iconify.payment-icon,
+.iconify.feature-icon,
+.iconify.calendar-icon {
+  display: inline-block;
+  margin: 5px;
+  vertical-align: middle;
+}
+
+.payment-icon {
+  color: #1a1a1a;
+}
+
+.feature-icon {
+  color: #0066cc;
+}
+
+.calendar-icon {
+  color: #4a4a4a;
+}
+</style>
