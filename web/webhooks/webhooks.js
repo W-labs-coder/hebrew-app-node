@@ -1,5 +1,6 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
 import { handleOrderCreated } from "../controllers/postalController.js";
+import shopify from "../shopify.js";
 
 const webhookHandlers = {
   ORDERS_CREATE: {
