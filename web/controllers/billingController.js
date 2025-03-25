@@ -103,11 +103,6 @@ const host = process.env.HOST || process.env.APP_URL;
 
 };
 
-
-
-
-
-
 export const confirmSubscription = async (req, res) => {
   const { shop, subscriptionId, charge_id } = req.query;
   const host = process.env.HOST;
@@ -159,13 +154,24 @@ export const confirmSubscription = async (req, res) => {
 
     // Register webhooks after successful subscription
     try {
-      await setupWebhooks(shop, session.accessToken);
+      const webhookResults = await setupWebhooks({
+        shop: session.shop,
+        accessToken: session.accessToken,
+        isOnline: true
+      });
+      console.log('Webhook registration results:', webhookResults);
+      
+      // Check if any webhooks failed to register
+      const failedWebhooks = webhookResults.filter(result => !result.success);
+      if (failedWebhooks.length > 0) {
+        console.error('Some webhooks failed to register:', failedWebhooks);
+      }
     } catch (webhookError) {
       console.error('Failed to setup webhooks:', webhookError);
-      // Continue execution - don't fail the subscription setup
+      // Don't fail the subscription setup, but log the error
     }
 
-    const user = await User.create({shop})
+    const user = await User.create({shop});
 
     return res
       .status(200)
@@ -178,11 +184,6 @@ export const confirmSubscription = async (req, res) => {
     return res.status(500).json({error: error});
   }
 };
-
-
-
-
-
 
 export const getSubscriptions = async (req, res) => {
   try {

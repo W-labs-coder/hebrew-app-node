@@ -10,15 +10,21 @@ const webhookHandlers = {
   },
 };
 
-export const setupWebhooks = async (session) => {
+export const setupWebhooks = async ({ shop, accessToken, isOnline }) => {
+  const session = {
+    shop,
+    accessToken,
+    isOnline
+  };
+
   const results = await Promise.all(
     Object.entries(webhookHandlers).map(async ([topic, handler]) => {
       try {
         const response = await shopify.api.webhooks.register({
           session,
-          webhookConfig: {
+          webhookSubscription: {
             address: `${process.env.HOST}${handler.callbackUrl}`,
-            topic: topic,
+            topic,
             format: 'json',
           },
         });
