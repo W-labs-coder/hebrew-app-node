@@ -77,46 +77,44 @@ export const handleOrderCreated = async (req, res) => {
     // Find user settings
     const user = await User.findOne({ "shop": shop });
     
-    if (!user || user.autofocusDetection === 'disabled') {
-      return res.status(200).send(); // Do nothing if feature is disabled
-    }
-
-    const shippingAddress = order.shipping_address;
-    if (!shippingAddress) {
+    // Check both autofocus settings
+    if (!user || (user.autofocusDetection !== 'enabled' && user.autofocusCorrection !== 'enabled')) {
       return res.status(200).send();
     }
 
-    // Only process if zip is missing or correction is enabled
-    if (!shippingAddress.zip || user.autofocusCorrection === 'enabled') {
-      // Call Israel Post API (you'll need to implement this)
-      const validZip = await validateIsraeliPostalCode(
-        shippingAddress.address1,
-        shippingAddress.city
-      );
+    const shippingAddress = order.shipping_address;
+    if (!shippingAddress || !shippingAddress.address1 || !shippingAddress.city) {
+      return res.status(200).send();
+    }
 
-      if (validZip && validZip !== shippingAddress.zip) {
-        // Update order with correct postal code
-        const client = new shopify.clients.Graphql({ session });
-        await client.query({
-          data: {
-            query: UPDATE_ORDER_MUTATION,
-            variables: {
-              input: {
-                id: order.admin_graphql_api_id,
-                shippingAddress: {
-                  ...shippingAddress,
-                  zip: validZip
-                }
+    // Validate and get postal code from Israel Post API
+    const validZip = await validateIsraeliPostalCode(
+      shippingAddress.address1,
+      shippingAddress.city
+    );
+
+    if (validZip && (!shippingAddress.zip || validZip !== shippingAddress.zip)) {
+      // Update order with correct postal code using Shopify Admin API
+      const client = new shopify.clients.Graphql({ session });
+      await client.query({
+        data: {
+          query: UPDATE_ORDER_MUTATION,
+          variables: {
+            input: {
+              id: order.admin_graphql_api_id,
+              shippingAddress: {
+                ...shippingAddress,
+                zip: validZip
               }
             }
           }
-        });
-      }
+        }
+      });
     }
 
     res.status(200).send();
   } catch (error) {
-    console.error('Webhook Error:', error);
+    console.error('Error handling order creation:', error);
     res.status(500).send();
   }
 };
@@ -134,13 +132,16 @@ async function validateIsraeliPostalCode(address, city) {
       body: JSON.stringify({ address, city })
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error('Failed to validate postal code:', await response.text());
+      return null;
+    }
     
     const data = await response.json();
     return data.postalCode; // Return validated postal code
 
   } catch (error) {
-    console.error('Israel Post API Error:', error);
+    console.error('Error validating postal code:', error);
     return null;
   }
 }
