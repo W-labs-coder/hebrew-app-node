@@ -319,9 +319,14 @@ async function validateIsraeliPostalCode(address, city) {
     const text = await response.text();
     console.log('Raw Mikud response:', text);
 
-    // The API returns a JSON-like string that needs parsing
+    // Check if the response is valid JSON
+    if (text.trim().startsWith('<')) {
+      console.error('Mikud API returned HTML instead of JSON');
+      return null;
+    }
+
+    // Parse the JSON response
     try {
-      // Clean the response - remove extra quotes and escape characters
       const cleanJson = text.replace(/\\"/g, '"').replace(/^"/, '').replace(/"$/, '');
       const data = JSON.parse(cleanJson);
 
