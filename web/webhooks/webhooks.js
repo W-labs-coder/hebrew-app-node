@@ -7,29 +7,29 @@ const webhookHandlers = {
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks/checkouts/update",
     callback: async (topic, shop, body, webhookId) => {
-      console.log('🎯 Webhook received:', { topic, shop });
+      console.log('🎯 Processing webhook:', { topic, shop });
       try {
         const data = typeof body === 'string' ? JSON.parse(body) : body;
-        const session = await shopify.config.sessionStorage.loadSession(shop);
+        const session = await shopify.config.sessionStorage.loadSession(`offline_${shop}`);
         
         if (!session) {
-          console.log('❌ No session found for shop:', shop);
+          console.log('❌ No offline session found for shop:', shop);
           return;
         }
 
-        await handleCheckoutUpdate(data, { 
-          locals: { 
-            shopify: { 
+        await handleCheckoutUpdate(data, {
+          locals: {
+            shopify: {
               session: {
                 shop,
                 accessToken: session.accessToken,
                 isOnline: false
               }
-            } 
-          } 
+            }
+          }
         });
       } catch (error) {
-        console.error('Error in webhook callback:', error);
+        console.error('❌ Webhook processing error:', error);
       }
     },
   },

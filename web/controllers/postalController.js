@@ -38,17 +38,18 @@ const ORDERS_QUERY = `
 `;
 
 const UPDATE_CHECKOUT_MUTATION = `
-  mutation checkoutShippingAddressUpdate($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
-    checkoutShippingAddressUpdate(checkoutId: $checkoutId, shippingAddress: $shippingAddress) {
+  mutation updateCheckout($input: CheckoutDeliveryAddressUpdateV2Input!) {
+    checkoutDeliveryAddressUpdateV2(input: $input) {
       checkout {
         id
-        shippingAddress {
+        deliveryAddress {
           address1
           city
           zip
         }
       }
-      userErrors {
+      checkoutUserErrors {
+        code
         field
         message
       }
@@ -211,80 +212,72 @@ export const pollNewOrders = async (session) => {
 
 export const handleCheckoutUpdate = async (checkoutData, context) => {
   try {
+    console.log('🔍 Full checkout data:', JSON.stringify(checkoutData, null, 2));
+
     const shop = context.locals.shopify.session.shop;
-    console.log('🛒 Processing checkout:', checkoutData);
+    const accessToken = context.locals.shopify.session.accessToken;
+
+    // Early validation
+    if (!checkoutData.token && !checkoutData.id) {
+      console.log('❌ No checkout token/id found in data');
+      return;
+    }
 
     const user = await User.findOne({ shop });
-    console.log('👤 User settings:', user?.autofocusDetection);
-    
     if (!user || user.autofocusDetection !== 'enabled') {
-      console.log('⚠️ Autofocus not enabled for shop');
+      console.log('⚠️ Autofocus not enabled for shop:', shop);
       return;
     }
 
-    // Log raw checkout data
-    console.log('📦 Raw checkout data:', JSON.stringify(checkoutData, null, 2));
-
-    const shippingAddress = checkoutData.shipping_address || checkoutData.shippingAddress;
+    const shippingAddress = checkoutData.shipping_address || checkoutData.deliveryAddress;
     if (!shippingAddress?.address1 || !shippingAddress?.city) {
-      console.log('❌ Missing address or city in checkout');
-      console.log('Address data:', shippingAddress);
+      console.log('❌ Invalid address:', shippingAddress);
       return;
     }
-
-    console.log('🏠 Processing address:', {
-      address: shippingAddress.address1,
-      city: shippingAddress.city,
-      current_zip: shippingAddress.zip
-    });
 
     const validZip = await validateIsraeliPostalCode(
       shippingAddress.address1,
       shippingAddress.city
     );
 
-    console.log('📮 Validated zip code:', validZip);
-
-    if (!validZip) {
-      console.log('❌ Could not validate postal code');
+    if (!validZip || shippingAddress.zip === validZip) {
+      console.log('⏭️ Skip update:', { currentZip: shippingAddress.zip, validZip });
       return;
     }
 
-    if (shippingAddress.zip === validZip) {
-      console.log('✓ Zip code already correct');
-      return;
-    }
-
-    const session = {
-      shop,
-      accessToken: context.locals.shopify.session.accessToken,
-      isOnline: false
-    };
-
-    console.log('🔄 Updating checkout:', {
-      id: checkoutData.id || checkoutData.token,
-      zip: validZip
+    console.log('📝 Attempting checkout update:', {
+      checkoutId: checkoutData.token || checkoutData.id,
+      validZip
     });
 
-    const client = new shopify.api.clients.Graphql({ session });
+    const client = new shopify.api.clients.Graphql({
+      session: { shop, accessToken, isOnline: false }
+    });
+
     const response = await client.request({
       data: {
         query: UPDATE_CHECKOUT_MUTATION,
         variables: {
-          checkoutId: checkoutData.id || checkoutData.token,
-          shippingAddress: {
-            ...shippingAddress,
-            zip: validZip
+          input: {
+            checkoutId: checkoutData.token || checkoutData.id,
+            deliveryAddress: {
+              ...shippingAddress,
+              zip: validZip
+            }
           }
         }
       }
     });
 
-    console.log('✅ Checkout update response:', JSON.stringify(response.body, null, 2));
+    console.log('✅ Mutation response:', JSON.stringify(response.body, null, 2));
+
+    if (response.body.data?.checkoutDeliveryAddressUpdateV2?.checkoutUserErrors?.length > 0) {
+      console.error('🚨 Mutation errors:', response.body.data.checkoutDeliveryAddressUpdateV2.checkoutUserErrors);
+    }
 
   } catch (error) {
-    console.error('❌ Error handling checkout:', error);
-    console.error('Error details:', error.response?.body || error.message);
+    console.error('❌ Checkout update failed:', error.message);
+    console.error('Stack:', error.stack);
   }
 };
 
