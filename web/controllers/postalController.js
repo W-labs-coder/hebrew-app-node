@@ -37,6 +37,25 @@ const ORDERS_QUERY = `
   }
 `;
 
+const UPDATE_CHECKOUT_MUTATION = `
+  mutation checkoutShippingAddressUpdateV2($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
+    checkoutShippingAddressUpdateV2(checkoutId: $checkoutId, shippingAddress: $shippingAddress) {
+      checkout {
+        id
+        shippingAddress {
+          address1
+          city
+          zip
+        }
+      }
+      checkoutUserErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 export const updatePostalSettings = async (req, res) => {
   try {
     const { autofocusDetection, autofocusCorrection } = req.body;
@@ -187,6 +206,57 @@ export const pollNewOrders = async (session) => {
     }
   } catch (error) {
     console.error('Error polling orders:', error);
+  }
+};
+
+export const handleCheckoutUpdate = async (checkoutData, context) => {
+  try {
+    const shop = context.locals.shopify.session.shop;
+    console.log('🛒 Processing checkout for shop:', shop);
+
+    const user = await User.findOne({ shop });
+    if (!user || user.autofocusDetection !== 'enabled') {
+      return;
+    }
+
+    const shippingAddress = checkoutData.shipping_address;
+    if (!shippingAddress?.address1 || !shippingAddress?.city) {
+      return;
+    }
+
+    console.log('📦 Processing checkout address:', {
+      address: shippingAddress.address1,
+      city: shippingAddress.city
+    });
+
+    const validZip = await validateIsraeliPostalCode(
+      shippingAddress.address1,
+      shippingAddress.city
+    );
+
+    if (!validZip || shippingAddress.zip === validZip) {
+      return;
+    }
+
+    console.log('🔄 Updating checkout with zip:', validZip);
+
+    const client = new shopify.api.clients.Graphql({ session: context.locals.shopify.session });
+    await client.request({
+      data: {
+        query: UPDATE_CHECKOUT_MUTATION,
+        variables: {
+          checkoutId: checkoutData.id,
+          shippingAddress: {
+            ...shippingAddress,
+            zip: validZip
+          }
+        }
+      }
+    });
+
+    console.log('✅ Checkout updated with postal code:', validZip);
+  } catch (error) {
+    console.error('❌ Error handling checkout:', error);
   }
 };
 

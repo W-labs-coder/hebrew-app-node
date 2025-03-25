@@ -47,30 +47,65 @@ app.post(
 
 app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
-    // Verify webhook
-    const hmac = req.get('X-Shopify-Hmac-Sha256');
-    const topic = req.get('X-Shopify-Topic');
-    
-    console.log('Received webhook:', {
-      topic,
-      body: req.body.toString('utf8')
+    console.log('📥 Webhook received:', {
+      headers: {
+        hmac: req.get('X-Shopify-Hmac-Sha256'),
+        topic: req.get('X-Shopify-Topic'),
+        shop: req.get('X-Shopify-Shop-Domain')
+      }
     });
 
     const shop = req.get('X-Shopify-Shop-Domain');
-    const orderData = JSON.parse(req.body);
+    const body = req.body.toString('utf8');
+    console.log('📦 Webhook body:', body);
+
+    const orderData = JSON.parse(body);
     
     // Get session for this shop
     const session = await shopify.config.sessionStorage.loadSession(shop);
     
-    // Call the handler
-    await webhooks.ORDERS_CREATE.callback(orderData, {
+    if (!session) {
+      console.log('❌ No session found for shop:', shop);
+      return res.status(401).send('No session found');
+    }
+
+    await handleOrderCreated(orderData, {
       locals: {
         shopify: { session }
       }
-    }, res);
+    });
+
+    res.status(200).send('OK');
 
   } catch (error) {
-    console.error('Webhook processing error:', error);
+    console.error('❌ Webhook processing error:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+app.post("/api/webhooks/checkouts/update", express.raw({type: '*/*'}), async (req, res) => {
+  try {
+    console.log('📥 Checkout webhook received:', {
+      shop: req.get('X-Shopify-Shop-Domain'),
+      topic: req.get('X-Shopify-Topic')
+    });
+
+    const shop = req.get('X-Shopify-Shop-Domain');
+    const body = req.body.toString('utf8');
+    const checkoutData = JSON.parse(body);
+    
+    const session = await shopify.config.sessionStorage.loadSession(shop);
+    
+    await webhooks.checkouts/update.callback(
+      'checkouts/update',
+      shop,
+      checkoutData,
+      null
+    );
+
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('❌ Webhook processing error:', error);
     res.status(500).send(error.message);
   }
 });
