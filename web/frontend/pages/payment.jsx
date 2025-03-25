@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { login } from "../store/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Form } from 'react-bootstrap';
+import { Icon } from '@iconify/react';
 
 export default function Payment() {
   return (
@@ -38,27 +39,27 @@ const PaymentSection = () => {
   const dispatch = useDispatch()
 
   const processors = [
-    { name: "American Express", icon: "american_express.png" },
-    { name: "Diners", icon: "diners.png" },
-    { name: "Apple Pay", icon: "apple_pay.png" },
-    { name: "Bit", icon: "bit.png" },
-    { name: "Iscracard", icon: "iscracard.png" },
-    { name: "Google Pay", icon: "google_pay.png" },
-    { name: "Visa", icon: "visa.png" },
-    { name: "Master Card", icon: "master_card.png" },
-    { name: "Paypal", icon: "paypal.png" },
+    { name: "American Express", icon: "logos:american-express" },
+    { name: "Diners", icon: "logos:diners-club" },
+    { name: "Apple Pay", icon: "logos:apple-pay" },
+    { name: "Bit", icon: "simple-icons:bit" },
+    { name: "Iscracard", icon: "cib:mastercard" }, // Using MasterCard as fallback since Isracard isn't available
+    { name: "Google Pay", icon: "logos:google-pay" },
+    { name: "Visa", icon: "logos:visa" },
+    { name: "Master Card", icon: "logos:mastercard" },
+    { name: "Paypal", icon: "logos:paypal" },
   ];
 
   const features = [
-    { name: "delivery", icon: "delivery-svg" },
-    { name: "package", icon: "package-svg" },
-    { name: "airplane", icon: "airplane-svg" },
-    { name: "sent", icon: "paper-plane-svg" },
+    { name: "delivery", icon: "mdi:truck-delivery-outline" },
+    { name: "package", icon: "mdi:package-variant-closed" },
+    { name: "airplane", icon: "mdi:airplane" },
+    { name: "sent", icon: "mdi:paper-plane" },
   ];
 
   const calendars = [
-    { name: "calendar", icon: "calendar-icon-svg" },
-    { name: "appointment", icon: "appointment-icon-svg" },
+    { name: "calendar", icon: "mdi:calendar" },
+    { name: "appointment", icon: "mdi:calendar-clock" },
   ];
 
   const shippings = [
@@ -322,10 +323,7 @@ const PaymentSection = () => {
                         className="fs14 fw500"
                         style={{ color: "#0D0D0D" }}
                       >
-                        <img
-                          src={`../components/pngs/payments/${processor.icon}`}
-                          alt={processor.name}
-                        />
+                        <Icon icon={processor.icon} width="32" height="32" />
                         <div>
                           <input
                             type="checkbox"
@@ -424,10 +422,7 @@ const PaymentSection = () => {
                           )}
                           onChange={handleInputChange}
                         />
-                        <img
-                          src={`../components/svgs/${feature.icon}.svg`}
-                          alt={feature.name}
-                        />
+                        <Icon icon={feature.icon} width="24" height="24" />
                       </label>
                     </div>
                   ))}
@@ -488,10 +483,7 @@ const PaymentSection = () => {
                           )}
                           onChange={handleInputChange}
                         />
-                        <img
-                          src={`../components/svgs/${calendar.icon}.svg`}
-                          alt={calendar.name}
-                        />
+                        <Icon icon={calendar.icon} width="24" height="24" />
                       </label>
                     </div>
                   ))}
