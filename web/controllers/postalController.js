@@ -38,8 +38,8 @@ const ORDERS_QUERY = `
 `;
 
 const UPDATE_CHECKOUT_MUTATION = `
-  mutation checkoutShippingAddressUpdateV2($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
-    checkoutShippingAddressUpdateV2(checkoutId: $checkoutId, shippingAddress: $shippingAddress) {
+  mutation checkoutShippingAddressUpdate($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
+    checkoutShippingAddressUpdate(checkoutId: $checkoutId, shippingAddress: $shippingAddress) {
       checkout {
         id
         shippingAddress {
@@ -48,7 +48,7 @@ const UPDATE_CHECKOUT_MUTATION = `
           zip
         }
       }
-      checkoutUserErrors {
+      userErrors {
         field
         message
       }
@@ -212,21 +212,30 @@ export const pollNewOrders = async (session) => {
 export const handleCheckoutUpdate = async (checkoutData, context) => {
   try {
     const shop = context.locals.shopify.session.shop;
-    console.log('🛒 Processing checkout for shop:', shop);
+    console.log('🛒 Processing checkout:', checkoutData);
 
     const user = await User.findOne({ shop });
+    console.log('👤 User settings:', user?.autofocusDetection);
+    
     if (!user || user.autofocusDetection !== 'enabled') {
+      console.log('⚠️ Autofocus not enabled for shop');
       return;
     }
 
-    const shippingAddress = checkoutData.shipping_address;
+    // Log raw checkout data
+    console.log('📦 Raw checkout data:', JSON.stringify(checkoutData, null, 2));
+
+    const shippingAddress = checkoutData.shipping_address || checkoutData.shippingAddress;
     if (!shippingAddress?.address1 || !shippingAddress?.city) {
+      console.log('❌ Missing address or city in checkout');
+      console.log('Address data:', shippingAddress);
       return;
     }
 
-    console.log('📦 Processing checkout address:', {
+    console.log('🏠 Processing address:', {
       address: shippingAddress.address1,
-      city: shippingAddress.city
+      city: shippingAddress.city,
+      current_zip: shippingAddress.zip
     });
 
     const validZip = await validateIsraeliPostalCode(
@@ -234,18 +243,35 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
       shippingAddress.city
     );
 
-    if (!validZip || shippingAddress.zip === validZip) {
+    console.log('📮 Validated zip code:', validZip);
+
+    if (!validZip) {
+      console.log('❌ Could not validate postal code');
       return;
     }
 
-    console.log('🔄 Updating checkout with zip:', validZip);
+    if (shippingAddress.zip === validZip) {
+      console.log('✓ Zip code already correct');
+      return;
+    }
 
-    const client = new shopify.api.clients.Graphql({ session: context.locals.shopify.session });
-    await client.request({
+    const session = {
+      shop,
+      accessToken: context.locals.shopify.session.accessToken,
+      isOnline: false
+    };
+
+    console.log('🔄 Updating checkout:', {
+      id: checkoutData.id || checkoutData.token,
+      zip: validZip
+    });
+
+    const client = new shopify.api.clients.Graphql({ session });
+    const response = await client.request({
       data: {
         query: UPDATE_CHECKOUT_MUTATION,
         variables: {
-          checkoutId: checkoutData.id,
+          checkoutId: checkoutData.id || checkoutData.token,
           shippingAddress: {
             ...shippingAddress,
             zip: validZip
@@ -254,9 +280,11 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
       }
     });
 
-    console.log('✅ Checkout updated with postal code:', validZip);
+    console.log('✅ Checkout update response:', JSON.stringify(response.body, null, 2));
+
   } catch (error) {
     console.error('❌ Error handling checkout:', error);
+    console.error('Error details:', error.response?.body || error.message);
   }
 };
 

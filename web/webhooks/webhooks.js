@@ -3,14 +3,31 @@ import { handleCheckoutUpdate } from "../controllers/postalController.js";
 import shopify from "../shopify.js";
 
 const webhookHandlers = {
-  'checkouts/update': {  // Changed from orders/create to checkouts/update
+  'checkouts/update': {
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks/checkouts/update",
     callback: async (topic, shop, body, webhookId) => {
-      console.log('Processing checkout webhook:', { topic, shop });
+      console.log('🎯 Webhook received:', { topic, shop });
       try {
         const data = typeof body === 'string' ? JSON.parse(body) : body;
-        await handleCheckoutUpdate(data, { locals: { shopify: { session: { shop } } } });
+        const session = await shopify.config.sessionStorage.loadSession(shop);
+        
+        if (!session) {
+          console.log('❌ No session found for shop:', shop);
+          return;
+        }
+
+        await handleCheckoutUpdate(data, { 
+          locals: { 
+            shopify: { 
+              session: {
+                shop,
+                accessToken: session.accessToken,
+                isOnline: false
+              }
+            } 
+          } 
+        });
       } catch (error) {
         console.error('Error in webhook callback:', error);
       }
