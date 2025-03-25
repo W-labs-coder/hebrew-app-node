@@ -11,6 +11,7 @@ import PrivacyWebhookHandlers from "./privacy.js";
 import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import User from "./models/User.js";
+import webhooks from "./webhooks/webhooks.js";
 
 // Add these lines after imports to define __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -46,6 +47,14 @@ app.post(
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
 
+app.post("/api/webhooks/orders/create", express.text({type: '*/*'}), async (req, res) => {
+  try {
+    await Shopify.Webhooks.Registry.process(req, res);
+  } catch (error) {
+    console.error('Webhook processing error:', error);
+    res.status(500).send(error.message);
+  }
+});
 
 app.use(
   "/api/*",
@@ -145,6 +154,23 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
     );
 });
 
-
+const afterAuth = async (req, res) => {
+  const session = res.locals.shopify.session;
+  
+  // Register webhooks
+  try {
+    await Shopify.Webhooks.Registry.register({
+      shop: session.shop,
+      accessToken: session.accessToken,
+      path: "/api/webhooks/orders/create",
+      topic: "ORDERS_CREATE",
+    });
+    console.log('Webhook registered successfully');
+  } catch (error) {
+    console.error('Failed to register webhook:', error);
+  }
+  
+  // ...rest of your afterAuth code...
+};
 
 app.listen(PORT);
