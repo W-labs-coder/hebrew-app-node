@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "86154af1674159ac797f5767f244100c"
-application_url = "https://electronics-pump-sept-collect.trycloudflare.com"
+application_url = "https://hebrew-app-node.onrender.com"
 embedded = true
 name = "Hebrew App"
 handle = "hebrew-app-new"
@@ -16,13 +16,13 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_orders,read_products,read_themes,write_orders,write_products"
+scopes = "read_themes,write_products,read_orders,write_orders,read_products"
 
 [auth]
 redirect_urls = [
-  "https://electronics-pump-sept-collect.trycloudflare.com/auth/callback",
-  "https://electronics-pump-sept-collect.trycloudflare.com/auth/shopify/callback",
-  "https://electronics-pump-sept-collect.trycloudflare.com/api/auth/callback"
+  "https://hebrew-app-node.onrender.com/auth/callback",
+  "https://hebrew-app-node.onrender.com/auth/shopify/callback",
+  "https://hebrew-app-node.onrender.com/api/auth/callback"
 ]
 
 [pos]
