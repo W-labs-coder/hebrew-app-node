@@ -26,38 +26,19 @@ import SendIcon from "../components/svgs/SendIcon";
 import CalendarIcon from "../components/svgs/CalendarIcon";
 import AppointmentIcon from "../components/svgs/AppointmentIcon";
 
-export default function Payment() {
-  return (
-    <div className="dashboard-container">
-      <Sidebar />
-      <div className="main-content">
-        <Page >
-          <Layout>
-            <Layout.Section>
-              <div>
-                <PaymentSection />
-              </div>
-            </Layout.Section>
-          </Layout>
-        </Page>
-      </div>
-    </div>
-  );
-}
-
 const PaymentSection = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const processors = [
     { name: "American Express", icon: <AmericanExpressIcon /> },
     { name: "Diners", icon: <DinersIcon /> },
     { name: "Apple Pay", icon: <ApplePayIcon /> },
     { name: "Bit", icon: <BitIcon /> },
-    { name: "Isracard", icon: <MasterCardIcon /> }, // Using MasterCard as fallback
+    { name: "Isracard", icon: <MasterCardIcon /> },
     { name: "Google Pay", icon: <GooglePayIcon /> },
     { name: "Visa", icon: <VisaIcon /> },
     { name: "Master Card", icon: <MasterCardIcon /> },
@@ -77,41 +58,13 @@ const PaymentSection = () => {
   ];
 
   const shippings = [
-    {
-      name: "משלוח חינם מ-₪5",
-      id: "משלוח חינם מ-₪5",
-      value: "משלוח חינם מ-₪5",
-    },
-    {
-      name: "משלוח חינם מ-₪10",
-      id: "משלוח חינם מ-₪10",
-      value: "משלוח חינם מ-₪10",
-    },
-    {
-      name: "משלוח חינם מ-₪20",
-      id: "משלוח חינם מ-₪20",
-      value: "משלוח חינם מ-₪20",
-    },
-    {
-      name: "משלוח חינם מ-₪25",
-      id: "משלוח חינם מ-₪25",
-      value: "משלוח חינם מ-₪25",
-    },
-    {
-      name: "משלוח חינם מ-₪30",
-      id: "משלוח חינם מ-₪30",
-      value: "משלוח חינם מ-₪30",
-    },
-    {
-      name: "משלוח חינם מ-₪35",
-      id: "משלוח חינם מ-₪35",
-      value: "משלוח חינם מ-₪35",
-    },
-    {
-      name: "משלוח חינם מ-₪40",
-      id: "משלוח חינם מ-₪40",
-      value: "משלוח חינם מ-₪40",
-    },
+    { name: "משלוח חינם מ-₪5", id: "משלוח חינם מ-₪5", value: "משלוח חינם מ-₪5" },
+    { name: "משלוח חינם מ-₪10", id: "משלוח חינם מ-₪10", value: "משלוח חינם מ-₪10" },
+    { name: "משלוח חינם מ-₪20", id: "משלוח חינם מ-₪20", value: "משלוח חינם מ-₪20" },
+    { name: "משלוח חינם מ-₪25", id: "משלוח חינם מ-₪25", value: "משלוח חינם מ-₪25" },
+    { name: "משלוח חינם מ-₪30", id: "משלוח חינם מ-₪30", value: "משלוח חינם מ-₪30" },
+    { name: "משלוח חינם מ-₪35", id: "משלוח חינם מ-₪35", value: "משלוח חינם מ-₪35" },
+    { name: "משלוח חינם מ-₪40", id: "משלוח חינם מ-₪40", value: "משלוח חינם מ-₪40" },
     { name: "Custom", id: "custom", value: "custom" },
   ];
 
@@ -126,7 +79,9 @@ const PaymentSection = () => {
     paymentBackgroundColor: user?.paymentBackgroundColor || "transparent",
   });
 
-  const [selectedBackground, setSelectedBackground] = useState(user?.paymentBackgroundColor || 'transparent');
+  const [selectedBackground, setSelectedBackground] = useState(
+    user?.paymentBackgroundColor || "transparent"
+  );
 
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -168,9 +123,9 @@ const PaymentSection = () => {
 
   const handleBackgroundChange = (e) => {
     setSelectedBackground(e.target.value);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      paymentBackground: e.target.value
+      paymentBackgroundColor: e.target.value,
     }));
   };
 
@@ -209,14 +164,13 @@ const PaymentSection = () => {
 
   const getPaymentEditorUrl = () => {
     const shopifyAdmin = "https://admin.shopify.com/store";
-    const themeIdMatch = user?.selectedTheme.match(/\/(\d+)$/);
+    const themeIdMatch = user?.selectedTheme?.match(/\/(\d+)$/);
     const themeId = themeIdMatch ? themeIdMatch[1] : "";
-    return `${shopifyAdmin}/${user?.shop.replace(
+    return `${shopifyAdmin}/${user?.shop?.replace(
       ".myshopify.com",
       ""
     )}/themes/${themeId}/editor?context=apps`;
   };
-
 
   return (
     <section>
@@ -589,3 +543,21 @@ const PaymentSection = () => {
     </section>
   );
 };
+
+// Ensure all components are properly wrapped and valid
+export default function Payment() {
+  return (
+    <div className="dashboard-container">
+      <Sidebar />
+      <div className="main-content">
+        <Page>
+          <Layout>
+            <Layout.Section>
+              <PaymentSection />
+            </Layout.Section>
+          </Layout>
+        </Page>
+      </div>
+    </div>
+  );
+}
