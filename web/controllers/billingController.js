@@ -191,7 +191,7 @@ export const confirmSubscription = async (req, res) => {
 
 export const getSubscriptions = async (req, res) => {
   try {
-    const subscriptions = await Subscription.find().sort({ _id: -1 });
+    const subscriptions = await Subscription.find().sort({ createdAt: -1 });
     res.status(200).json(subscriptions);
   } catch (error) {
     console.error("Error fetching subscriptions:", error);

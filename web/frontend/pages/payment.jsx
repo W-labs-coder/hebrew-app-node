@@ -11,6 +11,20 @@ import { login } from "../store/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Form } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
+import AmericanExpressIcon from "../components/svgs/AmericanExpressIcon";
+import DinersIcon from "../components/svgs/DinersIcon";
+import ApplePayIcon from "../components/svgs/ApplePayIcon";
+import BitIcon from "../components/svgs/BitIcon";
+import MasterCardIcon from "../components/svgs/MasterCardIcon";
+import GooglePayIcon from "../components/svgs/GooglePayIcon";
+import VisaIcon from "../components/svgs/VisaIcon";
+import PaypalIcon from "../components/svgs/PaypalIcon";
+import TruckDeliveryIcon from "../components/svgs/TruckDeliveryIcon";
+import PackageIcon from "../components/svgs/PackageIcon";
+import AirplaneIcon from "../components/svgs/AirplaneIcon";
+import SendIcon from "../components/svgs/SendIcon";
+import CalendarIcon from "../components/svgs/CalendarIcon";
+import AppointmentIcon from "../components/svgs/AppointmentIcon";
 
 export default function Payment() {
   return (
@@ -39,27 +53,27 @@ const PaymentSection = () => {
   const dispatch = useDispatch()
 
   const processors = [
-    { name: "American Express", icon: "logos:american-express" },
-    { name: "Diners", icon: "logos:diners-club" },
-    { name: "Apple Pay", icon: "logos:apple-pay" },
-    { name: "Bit", icon: "simple-icons:bit" },
-    { name: "Iscracard", icon: "cib:mastercard" }, // Using MasterCard as fallback since Isracard isn't available
-    { name: "Google Pay", icon: "logos:google-pay" },
-    { name: "Visa", icon: "logos:visa" },
-    { name: "Master Card", icon: "logos:mastercard" },
-    { name: "Paypal", icon: "logos:paypal" },
+    { name: "American Express", icon: <AmericanExpressIcon /> },
+    { name: "Diners", icon: <DinersIcon /> },
+    { name: "Apple Pay", icon: <ApplePayIcon /> },
+    { name: "Bit", icon: <BitIcon /> },
+    { name: "Isracard", icon: <MasterCardIcon /> }, // Using MasterCard as fallback
+    { name: "Google Pay", icon: <GooglePayIcon /> },
+    { name: "Visa", icon: <VisaIcon /> },
+    { name: "Master Card", icon: <MasterCardIcon /> },
+    { name: "Paypal", icon: <PaypalIcon /> },
   ];
 
   const features = [
-    { name: "delivery", icon: "mdi:truck-delivery-outline" },
-    { name: "package", icon: "mdi:package-variant-closed" },
-    { name: "airplane", icon: "mdi:airplane" },
-    { name: "sent", icon: "mdi:paper-plane" },
+    { name: "Delivery", icon: <TruckDeliveryIcon /> },
+    { name: "Package", icon: <PackageIcon /> },
+    { name: "Airplane", icon: <AirplaneIcon /> },
+    { name: "Sent", icon: <SendIcon /> },
   ];
 
   const calendars = [
-    { name: "calendar", icon: "mdi:calendar" },
-    { name: "appointment", icon: "mdi:calendar-clock" },
+    { name: "Calendar", icon: <CalendarIcon /> },
+    { name: "Appointment", icon: <AppointmentIcon /> },
   ];
 
   const shippings = [
@@ -102,14 +116,14 @@ const PaymentSection = () => {
   ];
 
   const [formData, setFormData] = useState({
-    selectedProcessors: user?.selectedProcessors ||  [],
+    selectedProcessors: user?.selectedProcessors || [],
     customProcessor: user?.customProcessor || { name: "", icon: null },
     selectedFeatures: user?.selectedFeatures || [],
     shipping: user?.shipping || "",
     customShipping: user?.customShipping || "",
     warranty: user?.warranty || "",
     selectedCalendars: user?.selectedCalendars || [],
-    paymentBackgroundColor: 'transparent',
+    paymentBackgroundColor: user?.paymentBackgroundColor || "transparent",
   });
 
   const [selectedBackground, setSelectedBackground] = useState(user?.paymentBackgroundColor || 'transparent');
@@ -163,7 +177,7 @@ const PaymentSection = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
-    setIsSubmitSuccessful(false); // Reset success state on new submission
+    setIsSubmitSuccessful(false);
     try {
       const response = await fetch("/api/settings/update-payment-settings", {
         method: "POST",
@@ -172,7 +186,7 @@ const PaymentSection = () => {
         },
         body: JSON.stringify({
           ...formData,
-          paymentBackgroundColor: selectedBackground
+          paymentBackgroundColor: selectedBackground,
         }),
       });
 
@@ -182,12 +196,11 @@ const PaymentSection = () => {
       }
 
       const data = await response.json();
-      dispatch(login({user : data.user}))
+      dispatch(login({ user: data.user }));
       setIsSubmitSuccessful(true);
-      toast.success('Payment methods added successfully')
+      toast.success("Payment methods added successfully");
     } catch (error) {
       console.error("Error submitting form:", error);
-      // Optionally, display an error message to the user
       toast.error("Could not add payment method");
     } finally {
       setIsSubmitting(false);
@@ -323,7 +336,7 @@ const PaymentSection = () => {
                         className="fs14 fw500"
                         style={{ color: "#0D0D0D" }}
                       >
-                        <Icon icon={processor.icon} width="32" height="32" />
+                        {processor.icon}
                         <div>
                           <input
                             type="checkbox"
@@ -422,7 +435,7 @@ const PaymentSection = () => {
                           )}
                           onChange={handleInputChange}
                         />
-                        <Icon icon={feature.icon} width="24" height="24" />
+                        {feature.icon}
                       </label>
                     </div>
                   ))}
@@ -483,7 +496,7 @@ const PaymentSection = () => {
                           )}
                           onChange={handleInputChange}
                         />
-                        <Icon icon={calendar.icon} width="24" height="24" />
+                        {calendar.icon}
                       </label>
                     </div>
                   ))}

@@ -34,40 +34,37 @@
 
 {%- capture payment_processor_images -%}
   {%- for processor in shop.metafields.custom.payment_processors.value -%}
-    {%- assign icon_name = processor | downcase | replace: ' ', '-' -%}
-    <span 
-      class="iconify payment-icon" 
-      data-icon="payment-{{ icon_name }}"
-      data-width="50"
-      data-height="30"
-      aria-label="{{ processor }}"
-    ></span>
+    <img 
+      src="{{ processor.icon }}" 
+      alt="{{ processor.name }}" 
+      width="50" 
+      height="30" 
+      class="payment-icon" 
+    />
   {%- endfor -%}
 {%- endcapture -%}
 
 {%- capture payment_features_images -%}
   {%- for feature in shop.metafields.custom.payment_features.value -%}
-    {%- assign icon_name = feature | downcase | replace: ' ', '-' -%}
-    <span 
-      class="iconify feature-icon" 
-      data-icon="feature-{{ icon_name }}"
-      data-width="50"
-      data-height="30"
-      aria-label="{{ feature }}"
-    ></span>
+    <img 
+      src="{{ feature.icon }}" 
+      alt="{{ feature.name }}" 
+      width="50" 
+      height="30" 
+      class="feature-icon" 
+    />
   {%- endfor -%}
 {%- endcapture -%}
 
 {%- capture selected_calendars -%}
   {%- for calendar in shop.metafields.custom.selected_calendars.value -%}
-    {%- assign icon_name = calendar | downcase | replace: ' ', '-' -%}
-    <span 
-      class="iconify calendar-icon" 
-      data-icon="calendar-{{ icon_name }}"
-      data-width="50"
-      data-height="30"
-      aria-label="{{ calendar }}"
-    ></span>
+    <img 
+      src="{{ calendar.icon }}" 
+      alt="{{ calendar.name }}" 
+      width="50" 
+      height="30" 
+      class="calendar-icon" 
+    />
   {%- endfor -%}
 {%- endcapture -%}
 
