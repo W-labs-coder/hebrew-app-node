@@ -280,7 +280,6 @@ const PaymentSection = () => {
                               height: "100px",
                               border: "1px solid #ddd",
                               borderRadius: "8px",
-                              display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                             }}
