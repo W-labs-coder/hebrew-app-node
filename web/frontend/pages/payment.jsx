@@ -309,37 +309,7 @@ const PaymentSection = () => {
                 </div>
               </div>
 
-              {/* <div style={{ marginTop: "16px" }}>
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "220px",
-                    height: "40px",
-                    padding: "8px 24px",
-                    gap: "10px",
-                    borderRadius: "24px",
-                    backgroundColor: "#021341",
-                    color: "#FFFFFF",
-                    fontSize: "14px",
-                    fontWeight: "700",
-                    textAlign: "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    style={{ display: "none" }}
-                  />
-                  <div className="d-flex gap-2 aic">
-                    הוסף שיטת תשלום
-                    <UploadIcon />
-                  </div>
-                </label>
-              </div> */}
+             
             </div>
             <div className="">
               <PaymentImage />
