@@ -9,8 +9,6 @@ import CheckLightIcon from "../components/svgs/CheckLightIcon";
 import { toast } from "react-toastify";
 import { login } from "../store/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { Form } from 'react-bootstrap';
-import { Icon } from '@iconify/react';
 import AmericanExpressIcon from "../components/svgs/AmericanExpressIcon";
 import DinersIcon from "../components/svgs/DinersIcon";
 import ApplePayIcon from "../components/svgs/ApplePayIcon";
@@ -166,10 +164,7 @@ const PaymentSection = () => {
     const shopifyAdmin = "https://admin.shopify.com/store";
     const themeIdMatch = user?.selectedTheme?.match(/\/(\d+)$/);
     const themeId = themeIdMatch ? themeIdMatch[1] : "";
-    return `${shopifyAdmin}/${user?.shop?.replace(
-      ".myshopify.com",
-      ""
-    )}/themes/${themeId}/editor?context=apps`;
+    return `${shopifyAdmin}/${user?.shop?.replace(".myshopify.com", "")}/themes/${themeId}/editor?context=apps`;
   };
 
   return (
@@ -265,16 +260,35 @@ const PaymentSection = () => {
                   {formData.customProcessor.icon && (
                     <div style={{ marginTop: "16px" }}>
                       <p>תצוגה מקדימה:</p>
-                      <img
-                        src={formData.customProcessor.icon}
-                        alt="Custom Processor Preview"
-                        style={{
-                          maxWidth: "100px",
-                          maxHeight: "100px",
-                          border: "1px solid #ddd",
-                          borderRadius: "8px",
-                        }}
-                      />
+                      <div>
+                        {typeof formData.customProcessor.icon === "string" ? (
+                          <img
+                            src={formData.customProcessor.icon}
+                            alt="Custom Processor Preview"
+                            style={{
+                              maxWidth: "100px",
+                              maxHeight: "100px",
+                              border: "1px solid #ddd",
+                              borderRadius: "8px",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              display: "inline-block",
+                              width: "100px",
+                              height: "100px",
+                              border: "1px solid #ddd",
+                              borderRadius: "8px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {formData.customProcessor.icon}
+                          </div>
+                        )}
+                      </div>
                       <p>{formData.customProcessor.name}</p>
                     </div>
                   )}
