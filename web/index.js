@@ -208,9 +208,30 @@ app.use("/proxy", (req, res) => {
             const script = document.createElement('script');
             script.src = "/assets/order-cancellation.js"; // Adjust path if necessary
             script.defer = true;
-            script.onerror = function (error) {
-              console.error("Failed to load order-cancellation.js", error);
-              appContainer.innerHTML = '<p style="color: red;">Error loading cancellation form. Please try again later.</p>';
+            script.onerror = function () {
+              console.error("Failed to load order-cancellation.js");
+              appContainer.innerHTML = \`
+                <div style="color: red; padding: 20px; border: 1px solid red; border-radius: 8px;">
+                  <p>Error loading cancellation form. Please try again later.</p>
+                  <form id="fallback-cancellation-form">
+                    <label for="fullName">Full Name:</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                    <label for="orderNumber">Order Number:</label>
+                    <input type="text" id="orderNumber" name="orderNumber" required>
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message"></textarea>
+                    <button type="submit">Submit</button>
+                  </form>
+                </div>
+              \`;
+              const fallbackForm = document.getElementById('fallback-cancellation-form');
+              fallbackForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                console.log('Fallback form submitted');
+                // Add fallback form submission logic here
+              });
             };
             document.body.appendChild(script);
           } catch (err) {
