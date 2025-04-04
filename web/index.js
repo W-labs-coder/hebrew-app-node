@@ -226,6 +226,8 @@ app.use("/proxy", (req, res) => {
     `);
 });
 
+app.use('/assets', express.static(join(__dirname, 'frontend/assets')));
+
 app.use("/api/billing", shopify.validateAuthenticatedSession());
 
 // Then add your billing routes
