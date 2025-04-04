@@ -209,7 +209,7 @@ app.use("/proxy", (req, res) => {
           if (appContainer) {
             try {
               const script = document.createElement('script');
-              script.src = "/assets/order-cancellation.js"; // Adjust path if necessary
+              script.src = "${process.env.APP_URL || 'http://localhost:3000'}/assets/order-cancellation.js"; // Use your app's URL
               script.defer = true;
               script.onerror = function () {
                 console.error("Failed to load order-cancellation.js");
