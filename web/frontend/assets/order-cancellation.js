@@ -23,7 +23,7 @@
   // Function to render the form
   function renderForm() {
     container.innerHTML = `
-      <div style="max-width: 800px; margin: 0 auto; padding: 20px; display: flex; gap: 20px;">
+      <div style="max-width: 100%; margin: 0 auto; padding: 20px; display: flex; gap: 20px;">
         <!-- Left Side: Cancellation Policy -->
         <div style="flex: 1; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
           <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">מדיניות ביטול עסקה</h1>
