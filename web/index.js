@@ -10,7 +10,7 @@ import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import storeDetails from "./routes/store-details.js";
 import webhooks from "./webhooks/webhooks.js";
-
+import crypto from "crypto"; // Add this import for HMAC calculation
 
 // Add these lines after imports to define __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -130,18 +130,28 @@ app.use(
         rawResponse: res,
       });
       const session = await shopify.config.sessionStorage.loadSession(sessionId);
-      console.log(sessionId);
+      console.log("Session ID:", sessionId);
+      console.log("Session Details:", session);
 
-      const shop = req.query.shop || session?.shop;
-      const host = req.query.host || session?.host; // Ensure host is extracted
+      if (!session) {
+        return res.status(401).json({ error: "Unauthorized: No session found" });
+      }
+
+      const shop = req.query.shop || session.shop;
+      const host = req.query.host || session.host;
 
       if (!shop || !host) {
         return res.status(400).json({ error: "Missing shop or host parameter" });
       }
 
-      res.locals.shopify = { session, shop, host }; // Attach host to locals
+      // Attach session and shop details to locals
+      res.locals.shopify = { session, shop, host };
+
+      // Set Authorization header for authenticated requests
+      req.headers["Authorization"] = `Bearer ${session.accessToken}`;
     } catch (e) {
-      console.error(e);
+      console.error("Error in middleware:", e);
+      return res.status(500).json({ error: "Internal server error" });
     }
 
     next();
@@ -149,11 +159,45 @@ app.use(
   shopify.validateAuthenticatedSession()
 );
 
-// app.use("/*", addSessionShopToReqParams);
-
 app.use(express.json());
 
+app.use("/proxy", (req, res) => {
 
+  console.log('here')
+  const { shop, host } = res.locals.shopify || {};
+  if (!shop || !host) {
+    return res.status(400).json({ error: "Missing shop or host parameter" });
+  }
+
+  // Extract query parameters
+  const query = req.query;
+  const { signature, ...params } = query;
+
+  // Verify HMAC signature
+  const sortedParams = Object.keys(params)
+    .sort()
+    .map((key) => `${key}=${params[key]}`)
+    .join("&");
+
+  const calculatedSignature = crypto
+    .createHmac("sha256", process.env.SHOPIFY_API_SECRET) // Use your app's shared secret
+    .update(sortedParams)
+    .digest("hex");
+
+  if (calculatedSignature !== signature) {
+    return res.status(403).json({ error: "Invalid signature" });
+  }
+
+  // Example response for the proxy route
+  res.json({
+    message: "Order Cancellation Proxy",
+    shop,
+    host,
+    data: {
+      info: "This is the order cancellation proxy response.",
+    },
+  });
+});
 
 
 // Add this line before your billing routes
