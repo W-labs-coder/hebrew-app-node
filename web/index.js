@@ -171,35 +171,30 @@ app.use((req, res, next) => {
 
 app.use("/proxy", (req, res) => {
   console.log('here');
-  // const { shop, host } = res.locals.shopify || {};
-  // if (!shop || !host) {
-  //   return res.status(400).json({ error: "Missing shop or host parameter" });
-  // }
-
   // Extract query parameters
   const query = req.query;
-  const { signature, hmac, ...params } = query; // Exclude both 'signature' and 'hmac'
+  const { signature, ...params } = query; // Exclude 'signature'
 
-  // Verify HMAC signature
+  // Verify signature
   const sortedParams = Object.keys(params)
     .sort()
-    .map((key) => `${key}=${params[key]}`)
-    .join("&");
+    .map((key) => `${key}=${Array.isArray(params[key]) ? params[key].join(',') : params[key]}`)
+    .join("");
 
-  const calculatedHmac = crypto
+  const calculatedSignature = crypto
     .createHmac("sha256", process.env.SHOPIFY_API_SECRET) // Use your app's shared secret
     .update(sortedParams)
     .digest("hex");
 
-  if (calculatedHmac !== hmac) { // Compare with 'hmac' instead of 'signature'
+  if (calculatedSignature !== signature) { // Compare with 'signature'
     return res.status(403).json({ error: "Invalid signature" });
   }
 
   // Example response for the proxy route
   res.json({
     message: "Order Cancellation Proxy",
-    shop,
-    host,
+    shop: query.shop,
+    host: query.host,
     data: {
       info: "This is the order cancellation proxy response.",
     },
