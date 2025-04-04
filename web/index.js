@@ -179,6 +179,8 @@ app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
 
+
+
 app.use("/proxy", (req, res) => {
   console.log('here');
   // Extract query parameters
@@ -241,8 +243,6 @@ app.use('/assets', express.static(join(__dirname, 'frontend/assets')));
 
 
 
-
-
 app.get("/debug", (req, res) => {
   console.log("Shopify Session:", res.locals.shopify);
   res.json(res.locals.shopify);
@@ -259,6 +259,7 @@ app.use(serveStatic(STATIC_PATH, { index: false }));
 
 app.use("/*", shopify.ensureInstalledOnShop(), async (req, res) => {
   const apiKey = process.env.SHOPIFY_API_KEY ?? "";
+  const host = req.query.host ?? ""; // Extract host from query parameters
 
   return res
     .status(200)
