@@ -170,10 +170,10 @@ app.use((req, res, next) => {
 
 app.use("/proxy", (req, res) => {
   console.log('here')
-  const { shop, host } = res.locals.shopify || {};
-  if (!shop || !host) {
-    return res.status(400).json({ error: "Missing shop or host parameter" });
-  }
+  // const { shop, host } = res.locals.shopify || {};
+  // if (!shop || !host) {
+  //   return res.status(400).json({ error: "Missing shop or host parameter" });
+  // }
 
   // Extract query parameters
   const query = req.query;
