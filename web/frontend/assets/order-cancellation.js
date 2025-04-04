@@ -111,7 +111,7 @@
       };
 
       // Submit form using fetch
-      fetch('/api/order-cancellation/submit', {
+      fetch(`${window.APP_HOST}/api/order-cancellation/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

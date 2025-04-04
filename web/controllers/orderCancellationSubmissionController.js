@@ -14,6 +14,8 @@ export const submitCancellationRequest = async (req, res) => {
       });
     }
 
+    const host = process.env.HOST || req.get('host');
+
     // Save to database with shop information
     const cancellation = new OrderCancellation({
       shop,

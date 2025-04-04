@@ -21,3 +21,19 @@ html, body {
   animation: none; /* Disable unintended animations */
   transition: none; /* Disable unintended transitions */
 }
+
+#order-cancellation-app input {
+  box-sizing: border-box; /* Ensure padding doesn't affect width/height */
+  width: 100%; /* Make inputs responsive */
+  max-width: 400px; /* Optional: Limit input width */
+  padding: 10px; /* Add consistent padding */
+  margin: 0; /* Remove unintended margins */
+  border: 1px solid #ccc; /* Add a consistent border */
+  border-radius: 4px; /* Optional: Rounded corners */
+  outline: none; /* Remove default outline */
+}
+
+#order-cancellation-app input:focus {
+  border-color: #007BFF; /* Highlight border on focus */
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add focus shadow */
+}
