@@ -257,7 +257,6 @@ app.use(serveStatic(STATIC_PATH, { index: false }));
 
 app.use("/*", shopify.ensureInstalledOnShop(), async (req, res) => {
   const apiKey = process.env.SHOPIFY_API_KEY ?? "";
-  const host = req.query.host ?? ""; // Extract host from query parameters
 
   return res
     .status(200)
