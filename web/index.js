@@ -10,7 +10,7 @@ import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import storeDetails from "./routes/store-details.js";
 import webhooks from "./webhooks/webhooks.js";
-import crypto from "crypto"; // Add this import for HMAC calculation
+
 
 // Add these lines after imports to define __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -161,8 +161,14 @@ app.use(
 
 app.use(express.json());
 
-app.use("/proxy", (req, res) => {
+// Global middleware to log all incoming requests
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.url}`);
+  console.log("Headers:", req.headers);
+  next();
+});
 
+app.use("/proxy", (req, res) => {
   console.log('here')
   const { shop, host } = res.locals.shopify || {};
   if (!shop || !host) {
@@ -198,7 +204,6 @@ app.use("/proxy", (req, res) => {
     },
   });
 });
-
 
 // Add this line before your billing routes
 app.use("/api/billing", shopify.validateAuthenticatedSession());

@@ -3,7 +3,7 @@
 client_id = "86154af1674159ac797f5767f244100c"
 name = "Hebrew App"
 handle = "hebrew-app-new"
-application_url = "https://lose-bind-sword-soldier.trycloudflare.com"
+application_url = "https://hebrew-app-node.onrender.com"
 embedded = true
 
 [build]
@@ -20,13 +20,13 @@ scopes = "read_orders,read_products,read_themes,write_content,write_orders,write
 
 [auth]
 redirect_urls = [
-  "https://lose-bind-sword-soldier.trycloudflare.com/auth/callback",
-  "https://lose-bind-sword-soldier.trycloudflare.com/auth/shopify/callback",
-  "https://lose-bind-sword-soldier.trycloudflare.com/api/auth/callback"
+  "https://hebrew-app-node.onrender.com/auth/callback",
+  "https://hebrew-app-node.onrender.com/auth/shopify/callback",
+  "https://hebrew-app-node.onrender.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://lose-bind-sword-soldier.trycloudflare.com/proxy"
+url = "https://hebrew-app-node.onrender.com/order-cancellation"
 subpath = "order-cancellation"
 prefix = "apps"
 embedded = false
