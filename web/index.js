@@ -170,7 +170,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/proxy", (req, res) => {
-  console.log('here')
+  console.log('here');
   // const { shop, host } = res.locals.shopify || {};
   // if (!shop || !host) {
   //   return res.status(400).json({ error: "Missing shop or host parameter" });
@@ -178,7 +178,7 @@ app.use("/proxy", (req, res) => {
 
   // Extract query parameters
   const query = req.query;
-  const { signature, ...params } = query;
+  const { signature, hmac, ...params } = query; // Exclude both 'signature' and 'hmac'
 
   // Verify HMAC signature
   const sortedParams = Object.keys(params)
@@ -186,12 +186,12 @@ app.use("/proxy", (req, res) => {
     .map((key) => `${key}=${params[key]}`)
     .join("&");
 
-  const calculatedSignature = crypto
+  const calculatedHmac = crypto
     .createHmac("sha256", process.env.SHOPIFY_API_SECRET) // Use your app's shared secret
     .update(sortedParams)
     .digest("hex");
 
-  if (calculatedSignature !== signature) {
+  if (calculatedHmac !== hmac) { // Compare with 'hmac' instead of 'signature'
     return res.status(403).json({ error: "Invalid signature" });
   }
 
