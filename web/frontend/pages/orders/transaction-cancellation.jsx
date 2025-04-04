@@ -150,8 +150,8 @@ const TransactionCancellationSettings = () => {
 
   const handleCopyOrderCancellationLink = () => {
     const orderCancellationPageUrl = `${
-      import.meta.env.VITE_SHOPIFY_APP_URL
-    }/order-cancellation?shop=${encodeURIComponent(user?.shop || '')}`;
+      user?.shop
+    }/apps/order-cancellation`;
     navigator.clipboard.writeText(orderCancellationPageUrl)
       .then(() => {
         toast.success('הקישור לעמוד ביטול עסקה הועתק בהצלחה!');
@@ -170,8 +170,8 @@ const TransactionCancellationSettings = () => {
     // Convert myshopify domain to store's primary domain
     const storeDomain = user.shop.replace('.myshopify.com', '');
     const termsLink = `${
-      import.meta.env.VITE_SHOPIFY_APP_URL
-    }/order-cancellation?shop=${encodeURIComponent(user.shop)}`;
+      user?.shop
+    }/apps/order-cancellation`;
     
     setFormData(prevState => ({
       ...prevState,

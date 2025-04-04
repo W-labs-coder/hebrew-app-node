@@ -111,35 +111,42 @@
       };
 
       // Submit form using fetch
-      fetch(`${window.APP_HOST}/api/order-cancellation/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+      fetch(
+        `https://hebrew-app-node.onrender.com/api/order-cancellation/submit`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success) {
-          messages.innerHTML = '<div style="padding: 15px; background-color: #d4edda; color: #155724; border-radius: 4px; margin-top: 20px;">בקשת הביטול נשלחה בהצלחה!</div>';
-          form.reset();
-        } else {
-          messages.innerHTML = `<div style="padding: 15px; background-color: #f8d7da; color: #721c24; border-radius: 4px; margin-top: 20px;">שגיאה: ${data.message || 'אירעה שגיאה בשליחת הבקשה'}</div>`;
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        messages.innerHTML = '<div style="padding: 15px; background-color: #f8d7da; color: #721c24; border-radius: 4px; margin-top: 20px;">שגיאה בשליחת הבקשה. נא לנסות שוב מאוחר יותר.</div>';
-      })
-      .finally(() => {
-        submitButton.disabled = false;
-        submitButton.textContent = originalButtonText;
-      });
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.success) {
+            messages.innerHTML =
+              '<div style="padding: 15px; background-color: #d4edda; color: #155724; border-radius: 4px; margin-top: 20px;">בקשת הביטול נשלחה בהצלחה!</div>';
+            form.reset();
+          } else {
+            messages.innerHTML = `<div style="padding: 15px; background-color: #f8d7da; color: #721c24; border-radius: 4px; margin-top: 20px;">שגיאה: ${
+              data.message || "אירעה שגיאה בשליחת הבקשה"
+            }</div>`;
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          messages.innerHTML =
+            '<div style="padding: 15px; background-color: #f8d7da; color: #721c24; border-radius: 4px; margin-top: 20px;">שגיאה בשליחת הבקשה. נא לנסות שוב מאוחר יותר.</div>';
+        })
+        .finally(() => {
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonText;
+        });
     });
   }
 
