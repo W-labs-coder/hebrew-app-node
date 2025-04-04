@@ -170,6 +170,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Then add your billing routes
+app.use("/api/billing", shopify.validateAuthenticatedSession(),billingRoutes);
+app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
+app.use("/api/store-details", storeDetails);
+app.use("/api/order-cancellation", orderCancellationRoutes);
+app.use('/uploads', express.static(join(__dirname, 'uploads')));
+
+
+
 app.use("/proxy", (req, res) => {
   console.log('here');
   // Extract query parameters
@@ -230,13 +239,6 @@ app.use("/proxy", (req, res) => {
 app.use('/assets', express.static(join(__dirname, 'frontend/assets')));
 
 
-
-// Then add your billing routes
-app.use("/api/billing", shopify.validateAuthenticatedSession(),billingRoutes);
-app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
-app.use("/api/store-details", storeDetails);
-app.use("/api/order-cancellation", orderCancellationRoutes);
-app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
 
