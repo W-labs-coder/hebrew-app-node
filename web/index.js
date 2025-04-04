@@ -190,58 +190,40 @@ app.use("/proxy", (req, res) => {
     return res.status(403).json({ error: "Invalid signature" });
   }
 
-  // Render the order-cancellation Liquid app block
+  // Render the order-cancellation form using Liquid
   const shop = query.shop;
   const host = query.host;
 
-  res.status(200).send(`
-    <div id="order-cancellation-app"
-      data-shop="${shop}"
-      data-host="${host}">
-      <div class="loading-state">Loading cancellation form...</div>
-    </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const appContainer = document.getElementById('order-cancellation-app');
-        if (appContainer) {
-          try {
-            const script = document.createElement('script');
-            script.src = "/assets/order-cancellation.js"; // Adjust path if necessary
-            script.defer = true;
-            script.onerror = function () {
-              console.error("Failed to load order-cancellation.js");
-              appContainer.innerHTML = \`
-                <div style="color: red; padding: 20px; border: 1px solid red; border-radius: 8px;">
-                  <p>Error loading cancellation form. Please try again later.</p>
-                  <form id="fallback-cancellation-form">
-                    <label for="fullName">Full Name:</label>
-                    <input type="text" id="fullName" name="fullName" required>
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
-                    <label for="orderNumber">Order Number:</label>
-                    <input type="text" id="orderNumber" name="orderNumber" required>
-                    <label for="message">Message:</label>
-                    <textarea id="message" name="message"></textarea>
-                    <button type="submit">Submit</button>
-                  </form>
-                </div>
-              \`;
-              const fallbackForm = document.getElementById('fallback-cancellation-form');
-              fallbackForm.addEventListener('submit', function (event) {
-                event.preventDefault();
-                console.log('Fallback form submitted');
-                // Add fallback form submission logic here
-              });
-            };
-            document.body.appendChild(script);
-          } catch (err) {
-            console.error("Error initializing order cancellation form:", err);
-            appContainer.innerHTML = '<p style="color: red;">Error initializing form. Please try again later.</p>';
+  res
+    .status(200)
+    .set("Content-Type", "application/liquid")
+    .send(`
+      <div id="order-cancellation-app"
+        data-shop="{{ shop.permanent_domain }}"
+        data-host="${host}">
+        <div class="loading-state">Loading cancellation form...</div>
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const appContainer = document.getElementById('order-cancellation-app');
+          if (appContainer) {
+            try {
+              const script = document.createElement('script');
+              script.src = "/assets/order-cancellation.js"; // Adjust path if necessary
+              script.defer = true;
+              script.onerror = function () {
+                console.error("Failed to load order-cancellation.js");
+                appContainer.innerHTML = '<p style="color: red;">Error loading cancellation form. Please try again later.</p>';
+              };
+              document.body.appendChild(script);
+            } catch (err) {
+              console.error("Error initializing order cancellation form:", err);
+              appContainer.innerHTML = '<p style="color: red;">Error initializing form. Please try again later.</p>';
+            }
           }
-        }
-      });
-    </script>
-  `);
+        });
+      </script>
+    `);
 });
 
 app.use("/api/billing", shopify.validateAuthenticatedSession());
