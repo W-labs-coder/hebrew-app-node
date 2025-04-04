@@ -29,7 +29,6 @@ redirect_urls = [
 url = "https://hebrew-app-node.onrender.com/proxy"
 subpath = "order-cancellation"
 prefix = "apps"
-embedded = false
 include_host = true
 
 [pos]
