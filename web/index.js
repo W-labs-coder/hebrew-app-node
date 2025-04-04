@@ -4,6 +4,7 @@ import express from "express";
 import serveStatic from "serve-static";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import crypto from "crypto"; // Add this line to import the crypto module
 import shopify from "./shopify.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import billingRoutes from "./routes/billingRoutes.js";
