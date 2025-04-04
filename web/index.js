@@ -10,6 +10,7 @@ import PrivacyWebhookHandlers from "./privacy.js";
 import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import storeDetails from "./routes/store-details.js";
+import orderCancellationRoutes from "./routes/order-cancellation.js";
 import webhooks from "./webhooks/webhooks.js";
 
 
@@ -228,12 +229,13 @@ app.use("/proxy", (req, res) => {
 
 app.use('/assets', express.static(join(__dirname, 'frontend/assets')));
 
-app.use("/api/billing", shopify.validateAuthenticatedSession());
+
 
 // Then add your billing routes
-app.use("/api/billing", billingRoutes);
+app.use("/api/billing", shopify.validateAuthenticatedSession(),billingRoutes);
 app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
 app.use("/api/store-details", storeDetails);
+app.use("/api/order-cancellation", orderCancellationRoutes);
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 

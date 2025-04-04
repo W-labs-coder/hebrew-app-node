@@ -1,0 +1,23 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+#order-cancellation-app {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#order-cancellation-app > div {
+  display: flex;
+  flex-wrap: wrap; /* Ensure proper wrapping on smaller screens */
+  gap: 20px;
+}
+
+#order-cancellation-app * {
+  animation: none; /* Disable unintended animations */
+  transition: none; /* Disable unintended transitions */
+}

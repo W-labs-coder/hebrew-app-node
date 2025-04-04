@@ -1,4 +1,16 @@
 (function() {
+  // Function to dynamically load the CSS file
+  function loadCSS(href) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  // Load the CSS file
+  loadCSS('/frontend/assets/order-cancellation.css');
+
   // Get the container element
   const container = document.getElementById('order-cancellation-app');
   if (!container) {

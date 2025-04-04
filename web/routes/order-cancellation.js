@@ -1,6 +1,6 @@
 import express from 'express';
-import { submitCancellationRequest, getCancellations } from '../../controllers/orderCancellationSubmissionController.js';
-import User from '../../models/User.js';
+import { submitCancellationRequest, getCancellations } from '../controllers/orderCancellationSubmissionController.js';
+import User from '../models/User.js';
 
 const router = express.Router();
 
