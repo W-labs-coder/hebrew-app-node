@@ -24,7 +24,9 @@ const orderCancellationSchema = new mongoose.Schema(
       required: true,
       index: true
     },
-    message: String,
+    message: {
+      type: String
+    },
     status: {
       type: String,
       enum: ['pending', 'approved', 'rejected', 'completed'],

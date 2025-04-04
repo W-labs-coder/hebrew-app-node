@@ -1,4 +1,5 @@
 import { Routes as ReactRouterRoutes, Route } from "react-router-dom";
+import OrderCancellation from "./pages/order-cancellation";
 
 /**
  * File-based routing.

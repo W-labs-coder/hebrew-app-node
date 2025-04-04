@@ -88,18 +88,18 @@ const RTLSection = ({ themes }) => {
         dispatch(login({ user: data.user }));
         setThemeLoading(false);
         setIsSubmitSuccessful(true);
-        toast.success('Theme Selected Successfully')
+        toast.success('הנושא נבחר בהצלחה')
       } else {
-        console.error("Failed to add theme");
+        console.error("הוספת העיצוב נכשלה");
         setIsSubmitSuccessful(false);
         setThemeLoading(false);
-        toast.error("Error Adding Theme");
+        toast.error("שגיאה בהוספת ערכת נושא");
       }
     } catch (error) {
-      console.error("Error adding theme:", error);
+      console.error("שגיאה בהוספת ערכת נושא:", error);
       setIsSubmitSuccessful(false);
       setThemeLoading(false);
-      toast.error("Error Adding Theme");
+      toast.error("שגיאה בהוספת ערכת נושא");
     }
   };
 

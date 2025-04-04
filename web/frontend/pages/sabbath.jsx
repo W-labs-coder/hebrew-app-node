@@ -341,6 +341,15 @@ const SabbathSection = ({ themes }) => {
               </div>
             </div>
           </div>
+          <div class="d-flex jcb aic">
+            <div class="d-flex aic gap-2">
+              <AlertDangerIcon />
+              <p class="fs14 fw500" style={{ color: "#0D0D0D" }}>
+                שימו לב שבמצב שבת, לקוחות לא יוכלו לגשת לחנות שלכם
+              </p>
+            </div>
+            <CancelIcon color="#0D0D0D" />
+          </div>
         </div>
 
         <div className="d-flex flex-column gap-2">
@@ -996,7 +1005,7 @@ const SabbathSection = ({ themes }) => {
                 imageUrl={fileUrl} // Use fileUrl instead of selectedFile
                 openingDay={openingDay}
                 openingTime={openingTime}
-                storeName={user?.shop?.replace('.myshopify.com', '')} // Format shop name
+                storeName={user?.shop?.replace(".myshopify.com", "")} // Format shop name
                 onClose={() => setShowPreview(false)}
               />
             </div>

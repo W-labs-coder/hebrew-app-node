@@ -1,10 +1,10 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "86154af1674159ac797f5767f244100c"
-application_url = "https://hebrew-app-node.onrender.com"
-embedded = true
 name = "Hebrew App"
 handle = "hebrew-app-new"
+application_url = "https://tips-aid-advertisements-sheffield.trycloudflare.com"
+embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
@@ -16,14 +16,30 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_themes,write_products,read_orders,write_orders,read_products"
+scopes = "read_orders,read_products,read_themes,write_content,write_orders,write_products"
 
 [auth]
 redirect_urls = [
-  "https://hebrew-app-node.onrender.com/auth/callback",
-  "https://hebrew-app-node.onrender.com/auth/shopify/callback",
-  "https://hebrew-app-node.onrender.com/api/auth/callback"
+  "https://tips-aid-advertisements-sheffield.trycloudflare.com/auth/callback",
+  "https://tips-aid-advertisements-sheffield.trycloudflare.com/auth/shopify/callback",
+  "https://tips-aid-advertisements-sheffield.trycloudflare.com/api/auth/callback"
 ]
+
+[app_proxy]
+url = "https://tips-aid-advertisements-sheffield.trycloudflare.com"
+subpath = "order-cancellation"
+prefix = "apps"
+embedded = false
+include_host = true
 
 [pos]
 embedded = false
+
+[extensions.theme]
+type = "theme_app_extension"
+build_dir = ".shopify/bundle"
+
+  [[extensions.theme.blocks]]
+  name = "Order Cancellation Form"
+  type = "order-cancellation-block"
+  target = "section"

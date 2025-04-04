@@ -4,15 +4,13 @@ import express from "express";
 import serveStatic from "serve-static";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
 import shopify from "./shopify.js";
-import productCreator from "./product-creator.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
-import User from "./models/User.js";
+import storeDetails from "./routes/store-details.js";
 import webhooks from "./webhooks/webhooks.js";
-import { setupWebhooks } from "./webhooks/webhooks.js";
+
 
 // Add these lines after imports to define __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -30,7 +28,8 @@ const STATIC_PATH =
     ? `${process.cwd()}/frontend/dist`
     : `${process.cwd()}/frontend/`;
 
-const app = express();
+    const app = express();
+
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
@@ -44,6 +43,9 @@ app.post(
   shopify.config.webhooks.path,
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
+
+
+
 
 app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
@@ -127,15 +129,17 @@ app.use(
         rawRequest: req,
         rawResponse: res,
       });
-      const session = await shopify.config.sessionStorage.loadSession(
-        sessionId
-      );
-      console.log(sessionId)
-      const shop = req.query.shop || session?.shop;
+      const session = await shopify.config.sessionStorage.loadSession(sessionId);
+      console.log(sessionId);
 
-      if (!shop) {
-        return undefined;
+      const shop = req.query.shop || session?.shop;
+      const host = req.query.host || session?.host; // Ensure host is extracted
+
+      if (!shop || !host) {
+        return res.status(400).json({ error: "Missing shop or host parameter" });
       }
+
+      res.locals.shopify = { session, shop, host }; // Attach host to locals
     } catch (e) {
       console.error(e);
     }
@@ -158,7 +162,7 @@ app.use("/api/billing", shopify.validateAuthenticatedSession());
 // Then add your billing routes
 app.use("/api/billing", billingRoutes);
 app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
-
+app.use("/api/store-details", storeDetails);
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
@@ -171,41 +175,17 @@ app.get("/debug", (req, res) => {
 
 
 
-app.get("/api/products/count", async (_req, res) => {
-  const client = new shopify.api.clients.Graphql({
-    session: res.locals.shopify.session,
-  });
 
-  const countData = await client.request(`
-    query shopifyProductCount {
-      productsCount {
-        count
-      }
-    }
-  `);
-
-  res.status(200).send({ count: countData.data.productsCount.count });
-});
-
-app.post("/api/products", async (_req, res) => {
-  let status = 200;
-  let error = null;
-
-  try {
-    await productCreator(res.locals.shopify.session);
-  } catch (e) {
-    console.log(`Failed to process products/create: ${e.message}`);
-    status = 500;
-    error = e.message;
-  }
-  res.status(status).send({ success: status === 200, error });
-});
 
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
-app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
+
+
+app.use("/*", shopify.ensureInstalledOnShop(), async (req, res) => {
   const apiKey = process.env.SHOPIFY_API_KEY ?? "";
+  const host = req.query.host ?? ""; // Extract host from query parameters
+
   return res
     .status(200)
     .set("Content-Type", "text/html")
@@ -213,6 +193,7 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res) => {
       readFileSync(join(STATIC_PATH, "index.html"))
         .toString()
         .replace("%VITE_SHOPIFY_API_KEY%", apiKey)
+        .replace("%VITE_SHOPIFY_HOST%", host) // Inject host into the HTML
     );
 });
 

@@ -148,6 +148,19 @@ const TransactionCancellationSettings = () => {
     }
   };
 
+  const handleCopyOrderCancellationLink = () => {
+    const orderCancellationPageUrl = `${
+      import.meta.env.VITE_SHOPIFY_APP_URL
+    }/order-cancellation?shop=${encodeURIComponent(user?.shop || '')}`;
+    navigator.clipboard.writeText(orderCancellationPageUrl)
+      .then(() => {
+        toast.success('הקישור לעמוד ביטול עסקה הועתק בהצלחה!');
+      })
+      .catch(() => {
+        toast.error('שגיאה בהעתקת הקישור לעמוד ביטול עסקה');
+      });
+  };
+
   const generateStoreTermsLink = () => {
     if (!user?.shop) {
       toast.error('Store information not available');
@@ -156,7 +169,9 @@ const TransactionCancellationSettings = () => {
     
     // Convert myshopify domain to store's primary domain
     const storeDomain = user.shop.replace('.myshopify.com', '');
-    const termsLink = `https://${storeDomain}.myshopify.com/pages/terms-of-service`;
+    const termsLink = `${
+      import.meta.env.VITE_SHOPIFY_APP_URL
+    }/order-cancellation?shop=${encodeURIComponent(user.shop)}`;
     
     setFormData(prevState => ({
       ...prevState,
@@ -266,41 +281,16 @@ const TransactionCancellationSettings = () => {
                         onChange={handleInputChange}
                         placeholder='הכנס כתובת דוא"ל...'
                       />
-                      <div className="d-flex gap-2 align-items-end">
-                        <div style={{ flex: 1 }}>
-                          <Input
-                            type="text"
-                            label="קישור לתנאי השימוש באתר:"
-                            id="termOfUse"
-                            name="termOfUse"
-                            value={formData.termOfUse}
-                            onChange={handleInputChange}
-                            placeholder="הקלד כאן את הקישור לאתר..."
-                            disabled={true} 
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "140px",
-                            height: "40px",
-                            padding: "8px 24px",
-                            gap: "10px",
-                            borderRadius: "24px",
-                            backgroundColor: "#021341",
-                            color: "#FFFFFF",
-                            fontSize: "14px",
-                            fontWeight: "700",
-                            textAlign: "center",
-                            cursor: "pointer",
-                          }}
-                          onClick={handleCopyTermsLink}
-                        >
-                          צור קישור
-                        </div>
-                      </div>
+                      <Input
+                        type="url"
+                        label="הקלד כאן את תנאי השימוש..."
+                        id="linkTermOfUseWebsite"
+                        name="linkTermOfUseWebsite"
+                        value={formData.linkTermOfUseWebsite}
+                        onChange={handleInputChange}
+                        placeholder='הכנס כתובת דוא"ל...'
+                      />
+
                       <div>
                         <p className="fs14 fw700">תנאי ביטול עסקה:</p>
                         <textarea
@@ -332,36 +322,42 @@ const TransactionCancellationSettings = () => {
                           איפוס תנאי ביטול עסקה
                         </div>
                       </div>
-                      <Input
-                        type="url"
-                        label="קישור לתנאי השימוש באתר:"
-                        id="linkTermOfUseWebsite"
-                        name="linkTermOfUseWebsite"
-                        value={formData.linkTermOfUseWebsite}
-                        onChange={handleInputChange}
-                        placeholder="הקלד כאן את הקישור לאתר..."
-                      />
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "140px",
-                          height: "40px",
-                          padding: "8px 24px",
-                          gap: "10px",
-                          borderRadius: "24px",
-                          backgroundColor: "#021341",
-                          color: "#FFFFFF",
-                          fontSize: "14px",
-                          fontWeight: "700",
-                          textAlign: "center",
-                          cursor: "pointer",
-                        }}
-                        onClick={handleCopyTermsLink}
-                      >
-                        העתקת קישור
+                      <div className="d-flex gap-2 align-items-end align-items-center">
+                        <div style={{ flex: 1 }}>
+                          <Input
+                            type="text"
+                            label="קישור לתנאי השימוש באתר:"
+                            id="termOfUse"
+                            name="termOfUse"
+                            value={formData.termOfUse}
+                            onChange={handleInputChange}
+                            placeholder="הקלד כאן את הקישור לאתר..."
+                            disabled={true}
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "140px",
+                            height: "40px",
+                            padding: "8px 24px",
+                            gap: "10px",
+                            borderRadius: "24px",
+                            backgroundColor: "#021341",
+                            color: "#FFFFFF",
+                            fontSize: "14px",
+                            fontWeight: "700",
+                            textAlign: "center",
+                            cursor: "pointer",
+                          }}
+                          onClick={handleCopyOrderCancellationLink}
+                        >
+                          צור קישור
+                        </div>
                       </div>
+                      
 
                       <div className="color-pickers-container mt-4">
                         <p className="fw700 fs14 mb-3">התאמת צבעים:</p>
@@ -618,8 +614,10 @@ const TransactionCancellationSettings = () => {
           <h4>הדרכה לשימוש במסך זה:</h4>
           {[
             'שלב 1 - הפעילו את מערכת ביטולי עסקאות ע"י לחיצה על הכפתור למעלה, כך שיופיע טקסט "מופעל".',
-            'שלב 2 - העתיקו את הקישור לעמוד דרך כפתור "העתק".',
-            "שלב 3 - שלבו את הקישור במקום בולט בתפריטי האתר כך שהלקוחות יוכלו לגשת אליו.",
+            'שלב 2 - כדי להוסיף את טופס ביטול העסקאות לחנות שלך, עליך להיכנס לעורך הנושא של שופיפיי (Shopify Theme Editor).',
+            'שלב 3 - בעורך הנושא, לחץ על "Add section" (הוסף מקטע), ואז בחר בקטגוריה "Apps". שם תמצא את הבלוק "Order Cancellation Form".',
+            'שלב 4 - לאחר הוספת הבלוק, תוכל להתאים את הגדרות העיצוב שלו ישירות מעורך הנושא ולפרסם את השינויים.',
+            'שלב 5 - לחלופין, אם העדפתך היא להשתמש בעמוד חיצוני, העתק את הקישור באמצעות כפתור "צור קישור" והוסף אותו לתפריט החנות שלך.',
           ].map((item) => (
             <div
               className="d-flex aic gap-3 mb-2"

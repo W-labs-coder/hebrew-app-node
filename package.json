@@ -1,5 +1,5 @@
 {
-  "name": "the-hebrew-app-react-node",
+  "name": "the-hebrew-app",
   "version": "1.0.0",
   "main": "web/index.js",
   "license": "UNLICENSED",
@@ -11,9 +11,7 @@
     "generate": "shopify app generate",
     "deploy": "shopify app deploy"
   },
-  "dependencies": {
-    
-  },
+  "dependencies": {},
   "author": "emmy",
   "private": true,
   "workspaces": [

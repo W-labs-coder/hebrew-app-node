@@ -14,6 +14,7 @@ import DinersIcon from "../components/svgs/DinersIcon";
 import ApplePayIcon from "../components/svgs/ApplePayIcon";
 import BitIcon from "../components/svgs/BitIcon";
 import MasterCardIcon from "../components/svgs/MasterCardIcon";
+import IsracardIcon from "../components/svgs/IsracardIcon";
 import GooglePayIcon from "../components/svgs/GooglePayIcon";
 import VisaIcon from "../components/svgs/VisaIcon";
 import PaypalIcon from "../components/svgs/PaypalIcon";
@@ -36,7 +37,7 @@ const PaymentSection = () => {
     { name: "Diners", icon: <DinersIcon /> },
     { name: "Apple Pay", icon: <ApplePayIcon /> },
     { name: "Bit", icon: <BitIcon /> },
-    { name: "Isracard", icon: <MasterCardIcon /> },
+    { name: "Isracard", icon: <IsracardIcon /> },
     { name: "Google Pay", icon: <GooglePayIcon /> },
     { name: "Visa", icon: <VisaIcon /> },
     { name: "Master Card", icon: <MasterCardIcon /> },
@@ -145,16 +146,16 @@ const PaymentSection = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Network response was not ok");
+        throw new Error(errorData.error || "תגובת הרשת לא הייתה בסדר");
       }
 
       const data = await response.json();
       dispatch(login({ user: data.user }));
       setIsSubmitSuccessful(true);
-      toast.success("Payment methods added successfully");
+      toast.success("אמצעי תשלום נוספו בהצלחה");
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("Could not add payment method");
+      console.error("שגיאה בשליחת הטופס:", error);
+      toast.error("לא ניתן להוסיף אמצעי תשלום");
     } finally {
       setIsSubmitting(false);
     }
@@ -210,16 +211,19 @@ const PaymentSection = () => {
                         id="transparent-background"
                         name="paymentBackgroundColor"
                         value="transparent"
-                        checked={selectedBackground === 'transparent'}
+                        checked={selectedBackground === "transparent"}
                         onChange={(e) => {
                           setSelectedBackground(e.target.value);
-                          setFormData(prev => ({
+                          setFormData((prev) => ({
                             ...prev,
-                            paymentBackgroundColor: e.target.value
+                            paymentBackgroundColor: e.target.value,
                           }));
                         }}
                       />
-                      <label className="form-check-label" htmlFor="transparent-background">
+                      <label
+                        className="form-check-label"
+                        htmlFor="transparent-background"
+                      >
                         צבע רקע שקוף
                       </label>
                     </div>
@@ -230,16 +234,19 @@ const PaymentSection = () => {
                         id="white-background"
                         name="paymentBackgroundColor"
                         value="white"
-                        checked={selectedBackground === 'white'}
+                        checked={selectedBackground === "white"}
                         onChange={(e) => {
                           setSelectedBackground(e.target.value);
-                          setFormData(prev => ({
+                          setFormData((prev) => ({
                             ...prev,
-                            paymentBackgroundColor: e.target.value
+                            paymentBackgroundColor: e.target.value,
                           }));
                         }}
                       />
-                      <label className="form-check-label" htmlFor="white-background">
+                      <label
+                        className="form-check-label"
+                        htmlFor="white-background"
+                      >
                         צבע רקע לבן
                       </label>
                     </div>
@@ -298,13 +305,13 @@ const PaymentSection = () => {
                 <p className="fw700 fs14">בחירת אמצעי תשלום:</p>
                 <div className="row">
                   {processors.map((processor) => (
-                    <div className="col-3" key={processor.name}>
+                    <div className="col-4" key={processor.name}>
                       <label
                         className="fs14 fw500"
-                        style={{ color: "#0D0D0D" }}
+                        style={{ color: "#0D0D0D", width: "100px" }}
                       >
                         {processor.icon}
-                        <div>
+                        <div className="d-flex">
                           <input
                             type="checkbox"
                             name="processor"
@@ -314,15 +321,15 @@ const PaymentSection = () => {
                             )}
                             onChange={handleInputChange}
                           />
-                          <span className="me-2">{processor.name}</span>
+                          <span className="me-2" style={{ whiteSpace: "nowrap" }}>
+                            {processor.name}
+                          </span>
                         </div>
                       </label>
                     </div>
                   ))}
                 </div>
               </div>
-
-             
             </div>
             <div className="">
               <PaymentImage />
@@ -361,7 +368,7 @@ const PaymentSection = () => {
                     <div className="col-3" key={feature.name}>
                       <label
                         className="fs14 fw500 d-flex gap-2"
-                        style={{ color: "#0D0D0D" }}
+                        style={{ color: "#0D0D0D", width: "60px" }}
                       >
                         <input
                           type="checkbox"
@@ -384,7 +391,7 @@ const PaymentSection = () => {
                     id="shipping"
                     name="shipping"
                     options={shippings}
-                    placeholder="Free shipping from $5"
+                    placeholder="לִבחוֹר"
                     onChange={handleInputChange}
                     value={formData.shipping}
                   />
@@ -422,7 +429,7 @@ const PaymentSection = () => {
                     <div className="col-3" key={calendar.name}>
                       <label
                         className="fs14 fw500 d-flex gap-2"
-                        style={{ color: "#0D0D0D" }}
+                        style={{ color: "#0D0D0D", width: "60px" }}
                       >
                         <input
                           type="checkbox"

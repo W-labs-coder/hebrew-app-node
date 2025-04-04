@@ -57,6 +57,7 @@ export const updatePaymentSettings = async (req, res) => {
     const metafields = [];
 
     if (selectedProcessors.length) {
+      console.log("Selected Processors:", selectedProcessors); // Debug log
       metafields.push({
         key: "payment_processors",
         namespace: "custom",

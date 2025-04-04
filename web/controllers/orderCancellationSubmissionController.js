@@ -5,69 +5,50 @@ import OrderCancellation from "../models/OrderCancellation.js";
 
 export const submitCancellationRequest = async (req, res) => {
   try {
-    const { fullName, email, phone, orderNumber, message } = req.body;
-    const shop = req.query.shop;
+    const { fullName, email, phone, orderNumber, message, shop } = req.body;
 
-    // Get store owner's email from User model
-    const user = await User.findOne({ shop });
-    if (!user || !user.email) {
-      throw new Error('Store configuration not found');
+    if (!shop) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Missing shop information" 
+      });
     }
 
-    // Create new cancellation record
+    // Save to database with shop information
     const cancellation = new OrderCancellation({
       shop,
       fullName,
       email,
       phone,
       orderNumber,
-      message
+      message,
     });
-
     await cancellation.save();
 
-    // Create email content
-    const emailContent = `
-      New Cancellation Request
-      -----------------------
-      Name: ${fullName}
-      Email: ${email}
-      Phone: ${phone}
-      Order Number: ${orderNumber}
-      Message: ${message}
-      Shop: ${shop}
-    `;
+    // Find store owner's email from the User model
+    const storeUser = await User.findOne({ shop });
+    const notificationEmail = storeUser?.ownerWebsiteEmail || process.env.ADMIN_EMAIL;
 
-    // Send email to store owner
+    // Optionally send email notification
     const transporter = nodemailer.createTransport({
-      // Configure your email service
-      service: 'gmail',
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-      }
+        pass: process.env.EMAIL_PASSWORD,
+      },
     });
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: user.email,
+      to: notificationEmail,
       subject: `New Order Cancellation Request - ${orderNumber}`,
-      text: emailContent
+      text: `Store: ${shop}\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone}\nOrder Number: ${orderNumber}\nMessage: ${message}`,
     });
 
-    res.status(200).json({
-      success: true,
-      message: "Cancellation request submitted successfully",
-      cancellationId: cancellation._id
-    });
-
+    res.status(200).json({ success: true, message: "Cancellation request submitted successfully" });
   } catch (error) {
     console.error("Error submitting cancellation request:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to submit cancellation request",
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: "Failed to submit cancellation request" });
   }
 };
 
