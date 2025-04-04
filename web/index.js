@@ -208,8 +208,8 @@ app.use("/proxy", (req, res) => {
             const script = document.createElement('script');
             script.src = "/assets/order-cancellation.js"; // Adjust path if necessary
             script.defer = true;
-            script.onerror = function () {
-              console.error("Failed to load order-cancellation.js");
+            script.onerror = function (error) {
+              console.error("Failed to load order-cancellation.js", error);
               appContainer.innerHTML = '<p style="color: red;">Error loading cancellation form. Please try again later.</p>';
             };
             document.body.appendChild(script);
