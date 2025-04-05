@@ -38,30 +38,7 @@
   // Function to render the form
   function renderForm() {
     container.innerHTML = `
-    <!-- Modal -->
-    <div id="termsModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-      <div class="modal-content" style="background-color: ${store?.termOfUseBgColor}; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; border-radius: 8px; position: relative;">
-        <span class="close" style="position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #666;">&times;</span>
-        <h2 style="color: ${store?.termOfUseTextColor}">תנאי שימוש</h2>
-        <div id="termsContent" style="max-height: 60vh; overflow-y: auto;">
-
-        <p style="color: ${store?.termOfUseTextColor}">${store?.termOfUseShortMessage}</p>
-
-        <div style="color: ${store?.termOfUseTextColor}; display:flex; gap:3px; justify-content:center; align-items:center">
-        <p>
-        ${store?.termOfUseFullName}
-        </p>
-        <p>
-        ${store?.termOfUseEmail}
-        </p>
-        <p>
-        ${store?.termOfUsePhone}
-        </p>
-        </div>
-          <a href="${store?.linkTermOfUseWebsite}" style="width: 100%; border: none;"></a>
-        </div>
-      </div>
-    </div>
+    
 
     <div>
       <h1 style="font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 20px;">${store?.pageTitle}</h1>
