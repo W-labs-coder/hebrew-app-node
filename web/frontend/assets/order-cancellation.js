@@ -1,14 +1,21 @@
 (function() {
   let store;
   try {
-    store = window.STORE_DATA;
-    if (!store) {
-      throw new Error('Store data not found');
+    if (typeof window.STORE_DATA === 'string') {
+      store = JSON.parse(window.STORE_DATA);
+    } else {
+      store = window.STORE_DATA;
+    }
+    
+    if (!store || typeof store !== 'object') {
+      throw new Error('Invalid store data format');
     }
   } catch (err) {
-    console.error('Error initializing store data:', err);
-    document.getElementById('order-cancellation-app').innerHTML = 
-      '<p style="color: red;">Error loading store configuration. Please try again later.</p>';
+    console.error('Error parsing store data:', err);
+    const container = document.getElementById('order-cancellation-app');
+    if (container) {
+      container.innerHTML = '<p style="color: red; padding: 20px;">Error loading store configuration. Please try again later.</p>';
+    }
     return;
   }
 

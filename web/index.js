@@ -198,13 +198,15 @@ app.use("/proxy", async(req, res) => {
 
   const store = await User.findOne({shop})
   
-  // Sanitize store data to prevent XSS and ensure proper JSON encoding
-  const sanitizedStoreData = JSON.stringify(store)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  // Properly escape the store data for safe injection into JavaScript
+  const safeStoreData = JSON.stringify(store)
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/\//g, '\\/')
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"');
 
   res
     .status(200)
@@ -216,32 +218,27 @@ app.use("/proxy", async(req, res) => {
         <div class="loading-state">Loading cancellation form...</div>
       </div>
       <script>
-        try {
-          window.STORE_DATA = JSON.parse('${sanitizedStoreData}');
-          window.APP_HOST = '${process.env.HOST || 'http://localhost:3000'}';
+        window.STORE_DATA = JSON.parse("${safeStoreData}");
+        window.APP_HOST = '${process.env.HOST || 'http://localhost:3000'}';
 
-          document.addEventListener('DOMContentLoaded', function () {
-            const appContainer = document.getElementById('order-cancellation-app');
-            if (appContainer) {
-              try {
-                const script = document.createElement('script');
-                script.src = window.APP_HOST + "/assets/order-cancellation.js";
-                script.defer = true;
-                script.onerror = function () {
-                  console.error("Failed to load order-cancellation.js");
-                  appContainer.innerHTML = '<p style="color: red;">Error loading cancellation form. Please try again later.</p>';
-                };
-                document.body.appendChild(script);
-              } catch (err) {
-                console.error("Error initializing order cancellation form:", err);
-                appContainer.innerHTML = '<p style="color: red;">Error initializing form. Please try again later.</p>';
-              }
+        document.addEventListener('DOMContentLoaded', function () {
+          const appContainer = document.getElementById('order-cancellation-app');
+          if (appContainer) {
+            try {
+              const script = document.createElement('script');
+              script.src = window.APP_HOST + "/assets/order-cancellation.js";
+              script.defer = true;
+              script.onerror = function () {
+                console.error("Failed to load order-cancellation.js");
+                appContainer.innerHTML = '<p style="color: red;">Error loading cancellation form. Please try again later.</p>';
+              };
+              document.body.appendChild(script);
+            } catch (err) {
+              console.error("Error initializing order cancellation form:", err);
+              appContainer.innerHTML = '<p style="color: red;">Error initializing form. Please try again later.</p>';
             }
-          });
-        } catch (err) {
-          console.error("Error parsing store data:", err);
-          document.getElementById('order-cancellation-app').innerHTML = '<p style="color: red;">Error loading store data. Please try again later.</p>';
-        }
+          }
+        });
       </script>
     `);
 });
