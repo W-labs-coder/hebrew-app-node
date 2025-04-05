@@ -139,6 +139,7 @@ app.use(
         return res.status(401).json({ error: "Unauthorized: No session found" });
       }
 
+      // Ensure shop and host are set
       const shop = req.query.shop || session.shop;
       const host = req.query.host || session.host;
 
