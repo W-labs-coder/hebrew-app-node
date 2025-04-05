@@ -195,11 +195,17 @@ app.use("/proxy", async(req, res) => {
   const shop = query.shop;
   const host = query.host;
 
-
-  const store = await User.findOne({shop})
+  const store = await User.findOne({shop});
+  const session = await shopify.config.sessionStorage.loadSession(shop);
+  
+  // Include session access token in store data
+  const storeData = {
+    ...store.toObject(),
+    accessToken: session?.accessToken
+  };
   
   // Properly escape the store data for safe injection into JavaScript
-  const safeStoreData = JSON.stringify(store)
+  const safeStoreData = JSON.stringify(storeData)
     .replace(/\u2028/g, '\\u2028')
     .replace(/\u2029/g, '\\u2029')
     .replace(/</g, '\\u003c')
