@@ -230,7 +230,7 @@ const userSchema = new mongoose.Schema(
     },
     termOfUseFullName: {
       type: String,
-      default: 'שם מלא'
+      default: ''
     },
     termOfUseEmail: {
       type: String,

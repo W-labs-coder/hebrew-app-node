@@ -263,16 +263,6 @@ const TransactionCancellationSettings = () => {
                       </div>
                       {/* end steps 1 */}
                       <Input
-                        type="select"
-                        label="עמוד ביטול עסקה"
-                        id="transactionCancellation"
-                        name="transactionCancellation"
-                        options={transactionCancellations}
-                        value={formData.transactionCancellation}
-                        onChange={handleInputChange}
-                        placeholder="מכובה"
-                      />
-                      <Input
                         type="email"
                         label="דואר אלקטרוני של בעל האתר:"
                         id="email"
@@ -536,7 +526,7 @@ const TransactionCancellationSettings = () => {
                         placeholder="הקלד את מספר ההזמנה שלך כאן..."
                       />
 
-                      <div>
+                      {/* <div>
                         <p className="fs14 fw700">הודעה קצרה וברורה</p>
                         <textarea
                           id="termOfUseShortMessage"
@@ -545,7 +535,7 @@ const TransactionCancellationSettings = () => {
                           onChange={handleInputChange}
                           style={{ width: "100%", height: "200px" }}
                         ></textarea>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 

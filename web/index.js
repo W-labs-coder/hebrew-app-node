@@ -169,7 +169,7 @@ app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
 
-app.use("/proxy", (req, res) => {
+app.use("/proxy", async (req, res) => {
   console.log('here');
   // Extract query parameters
   const query = req.query;
@@ -194,22 +194,29 @@ app.use("/proxy", (req, res) => {
   const shop = query.shop;
   const host = query.host;
 
+
+  const store = await User.findOne({shop})
+
   res
     .status(200)
     .set("Content-Type", "application/liquid")
     .send(`
       <div id="order-cancellation-app"
-        data-shop="{{ shop.permanent_domain }}"
-        data-host="${host}">
+        data-shop="${shop}"
+        data-host="${host}"
+        data-store-data='${JSON.stringify(store)}'>
         <div class="loading-state">Loading cancellation form...</div>
       </div>
       <script>
+        window.STORE_DATA = ${JSON.stringify(store)};
+        window.APP_HOST = '${process.env.HOST || 'http://localhost:3000'}';
+
         document.addEventListener('DOMContentLoaded', function () {
           const appContainer = document.getElementById('order-cancellation-app');
           if (appContainer) {
             try {
               const script = document.createElement('script');
-              script.src = "${process.env.HOST || 'http://localhost:3000'}/assets/order-cancellation.js"; // Use your app's URL
+              script.src = window.APP_HOST + "/assets/order-cancellation.js";
               script.defer = true;
               script.onerror = function () {
                 console.error("Failed to load order-cancellation.js");

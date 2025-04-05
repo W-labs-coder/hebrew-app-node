@@ -1,4 +1,7 @@
 (function() {
+  const store = window.STORE_DATA;
+  const host = window.APP_HOST;
+
   // Function to dynamically load the CSS file
   function loadCSS(href) {
     const link = document.createElement('link');
@@ -35,26 +38,47 @@
   // Function to render the form
   function renderForm() {
     container.innerHTML = `
+    <!-- Modal -->
+    <div id="termsModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+      <div class="modal-content" style="background-color: ${store?.termOfUseBgColor}; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 700px; border-radius: 8px; position: relative;">
+        <span class="close" style="position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #666;">&times;</span>
+        <h2 style="color: ${store?.termOfUseTextColor}">תנאי שימוש</h2>
+        <div id="termsContent" style="max-height: 60vh; overflow-y: auto;">
+
+        <p style="color: ${store?.termOfUseTextColor}">${store?.termOfUseShortMessage}</p>
+
+        <div style="color: ${store?.termOfUseTextColor}; display:flex; gap:3px; justify-content:center; align-items:center">
+        <p>
+        ${store?.termOfUseFullName}
+        </p>
+        <p>
+        ${store?.termOfUseEmail}
+        </p>
+        <p>
+        ${store?.termOfUsePhone}
+        </p>
+        </div>
+          <a href="${store?.linkTermOfUseWebsite}" style="width: 100%; border: none;"></a>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h1 style="font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 20px;">${store?.pageTitle}</h1>
+      
       <div style="max-width: 100%; margin: 0 auto; padding: 20px; display: flex; gap: 20px;">
-        <!-- Left Side: Cancellation Policy -->
+      <!-- Left Side: Cancellation Policy -->
         <div style="flex: 1; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
-          <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 20px;">מדיניות ביטול עסקה</h1>
-          <p style="font-size: 14px; font-weight: 500; margin-bottom: 10px;">
-            רגע לפני שתבטלו עסקה, אנחנו מזמינים אתכם ליצור איתנו קשר.<br>
-            אם בכל זאת החלטתם לבטל, מלאו את פרטיכם בטופס משמאל ואנו ניצור איתכם קשר בהקדם.
-          </p>
-          <ul style="font-size: 14px; font-weight: 500; line-height: 1.6; padding-left: 20px;">
-            <li>א. ביטול עסקה ייעשה תוך 14 ימים מיום קבלת המוצר, או מסמך הגילוי לפי המאוחר ביניהם.</li>
-            <li>ב. בהתאם לחוק הגנת הצרכן, בגין ביטול העסקה תחוייבו בדמי ביטול בשיעור של %5 או 100 ש”ח לפי הנמוך ביניהם.</li>
-            <li>ג. המוצר יוחזר ככל שהדבר אפשרי באריזתו המקורית.</li>
-            <li>ד. החברה תמסור לצרכן עותק של הודעת הזיכוי שמסר העסק לחברת האשראי.</li>
-            <li>ה. לא ניתן לבטל רכישה של מוצרים פסידים, מוצרים שיוצרו במיוחד עבור הצרכן וכן מוצרים הניתנים להקלטה, העתקה ושכפול שהצרכן פתח את אריזתם המקורית.</li>
-          </ul>
+        <h2 style="font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 20px;">${store?.titleOfCancellationCondition}</h2>
+          <p>${store?.cancellationConditions}</p>
+          <button id="openTermsBtn" style="background-color:${store?.termOfUseBtnBackgroundColor}; color: ${store?.termOfUseBtnTextColor}; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">
+            ${store?.termOfUseButtonText}
+          </button>
         </div>
 
         <!-- Right Side: Cancellation Form -->
         <div style="flex: 1; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff;">
-          <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px;">בקשה לביטול עסקה</h2>
+          <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px;">${store?.formTitle}</h2>
           <form id="cancellation-form">
             <div class="form-group" style="margin-bottom: 15px;">
               <label for="fullName" style="display: block; font-size: 14px; font-weight: 700; margin-bottom: 8px;">שם מלא *</label>
@@ -77,7 +101,7 @@
               <textarea id="message" name="message" style="width: 100%; height: 150px; resize: vertical; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="הודעה"></textarea>
             </div>
             <div style="margin-top: 25px;">
-              <button type="submit" style="min-width: 120px; height: 45px; border-radius: 8px; background-color: ${buttonColor}; border: none; color: #FFFFFF; font-size: 16px; font-weight: 500; cursor: pointer; padding: 0 20px;">
+              <button type="submit" style="min-width: 120px; height: 45px; border-radius: 8px; background-color:${store?.termOfUseBtnBackgroundColor}; color: ${store?.termOfUseBtnTextColor}; border: none; font-size: 16px; font-weight: 500; cursor: pointer; padding: 0 20px;">
                 ${buttonText}
               </button>
             </div>
@@ -85,7 +109,27 @@
           <div id="form-messages" style="margin-top: 15px;"></div>
         </div>
       </div>
+      </div>
     `;
+
+    // Add modal functionality
+    const modal = document.getElementById("termsModal");
+    const openTermsBtn = document.getElementById("openTermsBtn");
+    const closeBtn = document.querySelector(".close");
+
+    openTermsBtn.onclick = function() {
+      modal.style.display = "block";
+    }
+
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
 
     // Add form submission handler
     const form = document.getElementById('cancellation-form');
@@ -112,7 +156,7 @@
 
       // Submit form using fetch
       fetch(
-        `https://hebrew-app-node.onrender.com/api/order-cancellation/submit`,
+        `${host}/api/order-cancellation/submit`,
         {
           method: "POST",
           headers: {
