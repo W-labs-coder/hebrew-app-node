@@ -131,30 +131,17 @@ app.use(
         rawRequest: req,
         rawResponse: res,
       });
-      const session = await shopify.config.sessionStorage.loadSession(sessionId);
-      console.log("Session ID:", sessionId);
-      console.log("Session Details:", session);
+      const session = await shopify.config.sessionStorage.loadSession(
+        sessionId
+      );
+      console.log(sessionId);
+      const shop = req.query.shop || session?.shop;
 
-      if (!session) {
-        return res.status(401).json({ error: "Unauthorized: No session found" });
+      if (!shop) {
+        return undefined;
       }
-
-      // Ensure shop and host are set
-      const shop = req.query.shop || session.shop;
-      const host = req.query.host || session.host;
-
-      if (!shop || !host) {
-        return res.status(400).json({ error: "Missing shop or host parameter" });
-      }
-
-      // Attach session and shop details to locals
-      res.locals.shopify = { session, shop, host };
-
-      // Set Authorization header for authenticated requests
-      req.headers["Authorization"] = `Bearer ${session.accessToken}`;
     } catch (e) {
-      console.error("Error in middleware:", e);
-      return res.status(500).json({ error: "Internal server error" });
+      console.error(e);
     }
 
     next();
