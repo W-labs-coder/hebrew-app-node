@@ -164,7 +164,7 @@
 
       // Get form data
       const formData = {
-        shop: shop,
+        shop: store?.shop,
         fullName: form.fullName.value,
         email: form.email.value,
         phone: form.phone.value,
