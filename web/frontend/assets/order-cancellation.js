@@ -1,6 +1,6 @@
 (function() {
-  const store = window.STORE_DATA;
-  const host = window.APP_HOST;
+  // const store = window.STORE_DATA;
+  // const host = window.APP_HOST;
 
   // Function to dynamically load the CSS file
   function loadCSS(href) {
@@ -22,7 +22,7 @@
   }
 
   // Get shop details and admin preferences from data attributes
-  const shop = container.getAttribute('data-shop');
+  const store = container.getAttribute('data-store');
   const shopName = container.getAttribute('data-shop-name');
   const shopEmail = container.getAttribute('data-shop-email');
   const shopPhone = container.getAttribute('data-shop-phone');
@@ -30,7 +30,7 @@
   const buttonText = container.getAttribute('data-button-text') || 'שלח הודעה';
   const buttonColor = container.getAttribute('data-button-color') || '#25D366';
 
-  if (!shop) {
+  if (!store) {
     container.innerHTML = '<p style="color: red;">Error: Shop information not found.</p>';
     return;
   }
