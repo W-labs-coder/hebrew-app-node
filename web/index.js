@@ -12,6 +12,7 @@ import settingsRoutes from "./routes/settingsRoutes.js";
 import storeDetails from "./routes/store-details.js";
 import orderCancellationRoutes from "./routes/order-cancellation.js";
 import webhooks from "./webhooks/webhooks.js";
+import User from "./models/User.js";
 
 
 // Add these lines after imports to define __dirname equivalent
