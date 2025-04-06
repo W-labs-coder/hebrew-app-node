@@ -286,18 +286,19 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 // Helper function to validate postal code with Israel Post
 async function validateIsraeliPostalCode(address, city) {
   try {
-    // Using Israel Post's Mikud API
-    const baseUrl = 'https://www.israelpost.co.il/zip_data.nsf/SearchZip';
+    // Using Israel Post's updated API endpoint
+    const baseUrl = 'https://services.israelpost.co.il/zip_data.nsf/SearchZip';
     const params = new URLSearchParams({
-      'Location': encodeURIComponent(city),
-      'Street': encodeURIComponent(address),
+      'OpenAgent': '',
+      'Location': city,
+      'POB': '',
+      'Street': address,
       'House': '',
-      'Entrance': '',
-      'OpenStreetMap': '0' 
+      'Entrance': ''
     });
 
     const url = `${baseUrl}?${params.toString()}`;
-    console.log('Requesting Mikud API:', url);
+    console.log('Requesting Israel Post API:', url);
 
     const response = await fetch(url, {
       method: 'GET',
@@ -309,7 +310,7 @@ async function validateIsraeliPostalCode(address, city) {
     });
 
     if (!response.ok) {
-      console.error('Mikud API error:', {
+      console.error('Israel Post API error:', {
         status: response.status,
         statusText: response.statusText
       });
@@ -317,11 +318,11 @@ async function validateIsraeliPostalCode(address, city) {
     }
 
     const text = await response.text();
-    console.log('Raw Mikud response:', text);
+    console.log('Raw Israel Post response:', text);
 
     // Check if the response is valid JSON
     if (text.trim().startsWith('<')) {
-      console.error('Mikud API returned HTML instead of JSON');
+      console.error('Israel Post API returned HTML instead of JSON');
       return null;
     }
 
@@ -336,7 +337,7 @@ async function validateIsraeliPostalCode(address, city) {
         return match.zip || null;
       }
     } catch (parseError) {
-      console.error('Failed to parse Mikud response:', parseError);
+      console.error('Failed to parse Israel Post response:', parseError);
     }
 
     return null;
