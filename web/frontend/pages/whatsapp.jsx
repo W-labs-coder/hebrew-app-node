@@ -949,74 +949,7 @@ const WhatsappSettings = () => {
               </div>
             </div>
 
-            {/* Right side - Preview */}
-            <div>
-              <p className="fw700 fs14 mb-2">תצוגה מקדימה חיה</p>
-              <div className="preview-container">
-                <div className="preview-frame">
-                  <div
-                    className="preview-content"
-                    style={{
-                      position: "relative",
-                      height: "100px",
-                      backgroundColor: "#FBFBFB",
-                      border: "1px solid #C6C6C6",
-                      borderRadius: "10px 10px 0 0",
-                      padding: "10px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row-reverse",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        backgroundColor: "#05B457",
-                        padding: "8px 8px 8px 58px",
-                        borderRadius: "10px",
-                        width: "233px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: "#FFFFFF",
-                          fontSize: "12px",
-                          fontWeight: "500",
-                          flexGrow: 1,
-                          textAlign: "right",
-                        }}
-                      >
-                        {welcomeSettings.welcomeMessage ||
-                          "היי! איך אפשר לעזור היום?"}
-                      </span>
-                      <WhatsappIconPreview color="#FFFFFF" />
-                    </div>
-                  </div>
-                  <div className="preview-color-row">
-                    <span>:צבע רקע</span>
-                    <div
-                      className="color-square"
-                      style={{ backgroundColor: "#05B457" }}
-                    />
-                  </div>
-                  <div
-                    className="preview-color-row"
-                    style={{
-                      borderRadius: "0 0 10px 10px",
-                    }}
-                  >
-                    <span>:צבע האייקון</span>
-                    <div
-                      className="color-square"
-                      style={{
-                        backgroundColor: "#FFFFFF",
-                        border: "1px solid #C6C6C6",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+           
           </div>
         </div>
         {/* End Section 2 */}
