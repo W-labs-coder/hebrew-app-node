@@ -51,10 +51,10 @@ router.post('/submit', validateShopOrigin, async (req, res) => {
       throw new Error('No session found for shop');
     }
 
-    const client = new shopify.api.clients.Rest({
-      session,
-      apiVersion: shopify.api.REST_RESOURCES.ApiVersion.January24
-    });
+    // const client = new shopify.api.clients.Rest({
+    //   session,
+    //   apiVersion: shopify.api.REST_RESOURCES.ApiVersion.January24
+    // });
 
     // Process the order cancellation request
     await submitCancellationRequest(req, res);

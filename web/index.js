@@ -30,10 +30,11 @@ const STATIC_PATH =
   process.env.NODE_ENV === "production"
     ? `${process.cwd()}/frontend/dist`
     : `${process.cwd()}/frontend/`;
-
+    
     const app = express();
 
-
+    
+    
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
@@ -163,11 +164,11 @@ app.use((req, res, next) => {
 app.use("/api/billing", shopify.validateAuthenticatedSession(),billingRoutes);
 app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
 app.use("/api/store-details", storeDetails);
-app.use("/api/order-cancellation", orderCancellationRoutes);
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
 
+app.use("/cancel-order", orderCancellationRoutes);
 
 
 app.use("/proxy", async(req, res) => {
