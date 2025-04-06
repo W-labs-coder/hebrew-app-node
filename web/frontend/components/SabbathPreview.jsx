@@ -56,6 +56,8 @@ const MainContent = styled.div`
   gap: 32px;
   width: 730px;
   margin: 0 auto;
+  background: ${(props) => props.bgColor || "#FFFFFF"};
+  color: ${(props) => props.textColor || "#000000"};
 `;
 
 const Banner = styled.div`
@@ -300,36 +302,39 @@ const SabbathPreview = ({
       <CloseButton onClick={onClose}>×</CloseButton>
       <Header>
         <Logo>
-          <h1>{storeName || 'Store'}</h1>
+          <h1>{storeName || "Store"}</h1>
         </Logo>
-          <h1 style={{ cursor: 'pointer' }}>Contact us</h1>
+        <h1 style={{ cursor: "pointer" }}>צור איתנו קשר</h1>
       </Header>
 
-      <MainContent>
+      <MainContent bgColor={bannerBgColor} textColor={bannerTextColor}>
         <div>
-            <h2 className="fw900 fs22 text-center">STORE CLOSED!!!</h2>
-          <p className="fs16 fw500" style={{ color : '#777' }}>{bannerText || "היי, שיהיה לכם שבת שלום! נראה אתכם אחרי צאת שבת"}</p>
+          <h2 className="fw900 fs22 text-center">החנות סגורה!!!</h2>
+          <p className="fs16 fw500" style={{ color: "#777" }}>
+            {bannerText || "היי, שיהיה לכם שבת שלום! נראה אתכם אחרי צאת שבת"}
+          </p>
         </div>
-        <Banner 
-          bgColor={bannerBgColor} 
+        <Banner
+          bgColor={bannerBgColor}
           textColor={bannerTextColor}
           imageUrl={imageUrl}
-          style={{ 
-            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
+          style={{
+            backgroundImage: imageUrl ? `url(${imageUrl})` : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        ></Banner>
+
+        <div
+          style={{
+            marginTop: "32px",
+            "box-shadow": "0px 5px 10px -2px #00000026",
+            border: "1px solid  #C6C6C6",
+            borderRadius: "16px",
+            padding: "24px",
           }}
         >
-          
-        </Banner>
-
-        <div style={{ marginTop: '32px',
-            'box-shadow': '0px 5px 10px -2px #00000026',
-border: '1px solid  #C6C6C6',
-borderRadius : '16px',
-padding:'24px'
-        }}>
-          <h3 className="text-center fw900 fs26">Store opens on</h3>
+          <h3 className="text-center fw900 fs26">החנות נפתחת ב</h3>
           <Countdown>
             <TimeBox>
               <span className="number">{timeLeft?.days || 0}</span>
@@ -354,16 +359,16 @@ padding:'24px'
           <SocialIconsGrid>
             {socialLinks?.map((link, index) => {
               const platform = detectSocialPlatform(link);
-              
+
               return (
-                <a 
-                  key={index} 
-                  href={link} 
-                  target="_blank" 
+                <a
+                  key={index}
+                  href={link}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center' }}
+                  style={{ display: "flex", alignItems: "center" }}
                 >
-                  {SocialSvgs[platform] || SocialSvgs['default']}
+                  {SocialSvgs[platform] || SocialSvgs["default"]}
                 </a>
               );
             })}

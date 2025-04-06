@@ -11,7 +11,7 @@
 {% assign whatsapp_bg_color = shop.metafields.custom.whatsapp_bg_color.value | default: '#25D366' %}
 {% assign whatsapp_text_color = shop.metafields.custom.whatsapp_text_color.value | default: '#FFFFFF' %}
 {% assign whatsapp_icon_color = shop.metafields.custom.whatsapp_icon_color.value | default: '#FFFFFF' %}
-{% assign button_label = shop.metafields.custom.whatsapp_button_label.value | default: 'Contact Us' %}
+{% assign button_label = shop.metafields.custom.whatsapp_button_label.value | default: 'צור איתנו קשר' %}
 
 {% assign enable_welcome_message = shop.metafields.custom.whatsapp_welcome_enabled.value | default: false %}
 {% assign welcome_message = shop.metafields.custom.whatsapp_welcome_message.value | default: "היי! איך אפשר לעזור היום?" %}
@@ -1002,12 +1002,12 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="store-logo">
       <h1>{{ shop.name }}</h1>
     </div>
-    <p class="contact-us">Contact us</p>
+    <p class="contact-us">צור איתנו קשר</p>
   </div>
 
-  <div class="sabbath-content">
+  <div class="sabbath-content" style="background-color: {{ banner_bg_color }}; color: {{ banner_text_color }};">
     <div class="sabbath-title">
-      <h2>STORE CLOSED!!!</h2>
+      <h2>החנות סגורה!!!</h2>
       <p>{{ banner_text | default: "היי, שיהיה לכם שבת שלום! נראה אתכם אחרי צאת שבת" }}</p>
     </div>
     
@@ -1020,7 +1020,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 
     <div class="countdown-wrapper">
-      <h3>Store opens on</h3>
+      <h3>החנות נפתחת ב</h3>
       <div class="countdown" 
            data-opening-day="{{ opening_day }}"
            data-opening-time="{{ opening_time }}">
