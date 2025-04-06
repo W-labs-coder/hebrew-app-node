@@ -40,12 +40,12 @@ export const submitCancellationRequest = async (req, res) => {
       },
     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: notificationEmail,
-      subject: `New Order Cancellation Request - ${orderNumber}`,
-      text: `Store: ${shop}\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone}\nOrder Number: ${orderNumber}\nMessage: ${message}`,
-    });
+    // await transporter.sendMail({
+    //   from: process.env.EMAIL_USER,
+    //   to: notificationEmail,
+    //   subject: `New Order Cancellation Request - ${orderNumber}`,
+    //   text: `Store: ${shop}\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone}\nOrder Number: ${orderNumber}\nMessage: ${message}`,
+    // });
 
     res.status(200).json({ success: true, message: "Cancellation request submitted successfully" });
   } catch (error) {
