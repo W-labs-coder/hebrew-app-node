@@ -13,7 +13,7 @@ import storeDetails from "./routes/store-details.js";
 import orderCancellationRoutes from "./routes/order-cancellation.js";
 import webhooks from "./webhooks/webhooks.js";
 import User from "./models/User.js";
-
+import cors from 'cors';
 
 // Add these lines after imports to define __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -33,8 +33,12 @@ const STATIC_PATH =
     
     const app = express();
 
-    
-    
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(

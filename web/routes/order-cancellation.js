@@ -1,9 +1,13 @@
 import express from 'express';
+import cors from 'cors';
 import { submitCancellationRequest, getCancellations } from '../controllers/orderCancellationSubmissionController.js';
 import User from '../models/User.js';
 import shopify from '../shopify.js';
 
 const router = express.Router();
+
+// Enable CORS for all routes in this router
+router.use(cors());
 
 // Middleware to check request origin
 const validateShopOrigin = async (req, res, next) => {
