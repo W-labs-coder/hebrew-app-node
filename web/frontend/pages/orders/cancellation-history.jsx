@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { DataTable, EmptyState, Layout, LegacyCard, Page } from "@shopify/polaris";
+import { DataTable, EmptyState, Layout, LegacyCard, Page, Spinner } from "@shopify/polaris";
 import Sidebar from "../../components/Sidebar";
 import Input from "../../components/form/Input";
 import Button from "../../components/form/Button";
@@ -79,27 +79,33 @@ const CancellationHistorySettings = () => {
         </p>
       </div>
 
-      <LegacyCard>
-        <DataTable
-          className="rtl"
-          columnContentTypes={["text", "text", "text", "text", "text"]}
-          headings={["מספר הזמנה", "שם הלקוח", "אימייל", "טלפון", "תאריך בקשה"]}
-          rows={cancellations}
-          loading={isLoading}
-          pagination={{
-            hasNext: hasNextPage,
-            onNext: handleNextPage,
-          }}
-        />
-        {cancellations.length === 0 && (
-          <EmptyState
-            heading="No History"
-            image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-          >
-            <p>Track and display all orders cancelled.</p>
-          </EmptyState>
-        )}
-      </LegacyCard>
+      {isLoading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+          <Spinner size="large" />
+        </div>
+      ) : (
+        <LegacyCard>
+          <DataTable
+            className="rtl"
+            columnContentTypes={["text", "text", "text", "text", "text"]}
+            headings={["מספר הזמנה", "שם הלקוח", "אימייל", "טלפון", "תאריך בקשה"]}
+            rows={cancellations}
+            loading={isLoading}
+            pagination={{
+              hasNext: hasNextPage,
+              onNext: handleNextPage,
+            }}
+          />
+          {cancellations.length === 0 && (
+            <EmptyState
+              heading="No History"
+              image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+            >
+              <p>Track and display all orders cancelled.</p>
+            </EmptyState>
+          )}
+        </LegacyCard>
+      )}
     </section>
   );
 };
