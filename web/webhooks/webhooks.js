@@ -8,6 +8,30 @@ const webhookHandlers = {
     callbackUrl: "/api/webhooks/checkouts/update",
     callback: async (topic, shop, body, webhookId) => {
       console.log('🎯 Processing webhook:', { topic, shop });
+      
+      if (!body.shipping_address || !body.shipping_address.zip) {
+        console.error('❌ Missing postal code in shipping address');
+        throw new Error('Missing postal code in shipping address');
+      }
+
+      const postalCode = body.shipping_address.zip.trim().toUpperCase();
+      console.log('📫 Processing postal code:', postalCode);
+
+      try {
+        // Validate postal code format
+        if (!/^\d{5}(-\d{4})?$/.test(postalCode) && !/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/.test(postalCode)) {
+          console.error('❌ Invalid postal code format:', postalCode);
+          throw new Error('Invalid postal code format');
+        }
+
+        // Add any additional postal code processing logic here
+        
+        console.log('✅ Postal code processed successfully');
+      } catch (error) {
+        console.error('❌ Error processing postal code:', error);
+        throw error;
+      }
+
       try {
         const data = typeof body === 'string' ? JSON.parse(body) : body;
         const session = await shopify.config.sessionStorage.loadSession(`offline_${shop}`);

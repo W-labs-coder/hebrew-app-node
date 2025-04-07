@@ -101,29 +101,50 @@ app.post("/api/webhooks/checkouts/update", express.raw({type: '*/*'}), async (re
     });
 
     const shop = req.get('X-Shopify-Shop-Domain');
+    if (!shop) {
+      console.error('❌ No shop domain provided in webhook');
+      return res.status(400).send('No shop domain provided');
+    }
+
     const body = req.body.toString('utf8');
     const checkoutData = JSON.parse(body);
+    
+    console.log('Checkout data received:', {
+      checkout_id: checkoutData.id,
+      shipping_address: checkoutData.shipping_address,
+      billing_address: checkoutData.billing_address
+    });
     
     // Try to get offline session directly
     let session = await shopify.config.sessionStorage.loadSession(`offline_${shop}`);
     
     if (!session) {
-      console.log('❌ No offline session found');
-      return res.status(401).send('No session found');
+      console.log('❌ No offline session found, trying to load online session');
+      session = await shopify.config.sessionStorage.loadSession(shop);
+      if (!session) {
+        console.error('❌ No session found for shop:', shop);
+        return res.status(401).send('No session found');
+      }
     }
     
-    console.log('✅ Found offline session for shop:', shop);
+    console.log('✅ Found session for shop:', shop);
+
+    if (!webhooks['checkouts/update'] || typeof webhooks['checkouts/update'].callback !== 'function') {
+      console.error('❌ Checkout update webhook handler not properly configured');
+      return res.status(500).send('Webhook handler not configured');
+    }
 
     await webhooks['checkouts/update'].callback(
       'checkouts/update',
       shop,
       checkoutData,
-      null
+      session
     );
 
     res.status(200).send('OK');
   } catch (error) {
     console.error('❌ Webhook processing error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).send(error.message);
   }
 });

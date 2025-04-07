@@ -212,74 +212,43 @@ export const pollNewOrders = async (session) => {
 
 export const handleCheckoutUpdate = async (checkoutData, context) => {
   try {
-    console.log('🔍 Full checkout data:', JSON.stringify(checkoutData, null, 2));
-
-    const shop = context.locals.shopify.session.shop;
-    const accessToken = context.locals.shopify.session.accessToken;
-
-    // Early validation
-    if (!checkoutData.token && !checkoutData.id) {
-      console.log('❌ No checkout token/id found in data');
-      return;
+    const { shipping_address } = checkoutData;
+    
+    if (!shipping_address || !shipping_address.zip) {
+      throw new Error('Missing shipping address or postal code');
     }
 
-    const user = await User.findOne({ shop });
-    if (!user || user.autofocusDetection !== 'enabled') {
-      console.log('⚠️ Autofocus not enabled for shop:', shop);
-      return;
+    const postalCode = shipping_address.zip.trim().toUpperCase();
+    console.log('Processing postal code:', postalCode);
+
+    // Validate postal code format (US and Canadian formats)
+    if (!/^\d{5}(-\d{4})?$/.test(postalCode) && !/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/.test(postalCode)) {
+      throw new Error(`Invalid postal code format: ${postalCode}`);
     }
 
-    const shippingAddress = checkoutData.shipping_address || checkoutData.deliveryAddress;
-
-    // Check if the address is incomplete
-    if (!shippingAddress?.address1 || !shippingAddress?.city) {
-      console.log('⚠️ Incomplete address detected. Skipping postal code validation:', shippingAddress);
-      return; // Exit early if the address is incomplete
-    }
-
-    const validZip = await validateIsraeliPostalCode(
-      shippingAddress.address1,
-      shippingAddress.city
-    );
-
-    if (!validZip || shippingAddress.zip === validZip) {
-      console.log('⏭️ Skip update:', { currentZip: shippingAddress.zip, validZip });
-      return;
-    }
-
-    console.log('📝 Attempting checkout update:', {
-      checkoutId: checkoutData.token || checkoutData.id,
-      validZip
-    });
-
-    const client = new shopify.api.clients.Graphql({
-      session: { shop, accessToken, isOnline: false }
-    });
-
-    const response = await client.request({
-      data: {
-        query: UPDATE_CHECKOUT_MUTATION,
-        variables: {
-          input: {
-            checkoutId: checkoutData.token || checkoutData.id,
-            deliveryAddress: {
-              ...shippingAddress,
-              zip: validZip
+    // Get the client for API calls
+    const client = new context.locals.shopify.session.client;
+    
+    // Update checkout if needed
+    const checkoutId = checkoutData.id;
+    if (checkoutId) {
+      await client.put({
+        path: `checkouts/${checkoutId}`,
+        data: {
+          checkout: {
+            shipping_address: {
+              ...shipping_address,
+              zip: postalCode
             }
           }
         }
-      }
-    });
-
-    console.log('✅ Mutation response:', JSON.stringify(response.body, null, 2));
-
-    if (response.body.data?.checkoutDeliveryAddressUpdateV2?.checkoutUserErrors?.length > 0) {
-      console.error('🚨 Mutation errors:', response.body.data.checkoutDeliveryAddressUpdateV2.checkoutUserErrors);
+      });
     }
 
+    return { success: true, postalCode };
   } catch (error) {
-    console.error('❌ Checkout update failed:', error.message);
-    console.error('Stack:', error.stack);
+    console.error('Error in handleCheckoutUpdate:', error);
+    throw error;
   }
 };
 
