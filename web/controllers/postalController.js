@@ -4,7 +4,23 @@ import shopify from "../shopify.js";
 // Add this function after the existing imports
 const getLocationFromIP = async (ipAddress) => {
   try {
-    const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+    // If no IP address provided
+    if (!ipAddress) {
+      console.error('No IP address provided');
+      return null;
+    }
+
+    // Clean the IP address - take only the first IP if multiple are present
+    const cleanIP = ipAddress.split(',')[0].trim();
+    
+    // Basic IP format validation
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipRegex.test(cleanIP)) {
+      console.error('Invalid IP address format:', cleanIP);
+      return null;
+    }
+
+    const response = await fetch(`https://ipapi.co/${cleanIP}/json/`);
     const data = await response.json();
     
     if (data.error) {
