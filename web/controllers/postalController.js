@@ -2,39 +2,54 @@ import User from "../models/User.js";
 import shopify from "../shopify.js";
 
 // Add this function after the existing imports
-const getLocationFromIP = async (ipAddress) => {
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const getLocationFromIP = async (ipAddress, retries = 3, initialDelay = 1000) => {
   try {
-    // If no IP address provided
     if (!ipAddress) {
       console.error('No IP address provided');
       return null;
     }
 
-    // Clean the IP address - take only the first IP if multiple are present
     const cleanIP = ipAddress.split(',')[0].trim();
     
-    // Basic IP format validation
     const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
     if (!ipRegex.test(cleanIP)) {
       console.error('Invalid IP address format:', cleanIP);
       return null;
     }
 
-    const response = await fetch(`https://ipapi.co/${cleanIP}/json/`);
-    const data = await response.json();
-    
-    if (data.error) {
-      console.error('Error fetching location data:', data);
-      return null;
+    for (let attempt = 0; attempt < retries; attempt++) {
+      if (attempt > 0) {
+        // Exponential backoff: 1s, 2s, 4s
+        const backoffDelay = initialDelay * Math.pow(2, attempt - 1);
+        console.log(`Rate limited. Retrying in ${backoffDelay}ms... (Attempt ${attempt + 1}/${retries})`);
+        await delay(backoffDelay);
+      }
+
+      const response = await fetch(`https://ipapi.co/${cleanIP}/json/`);
+      const data = await response.json();
+      
+      if (!data.error) {
+        return {
+          address: data.street,
+          city: data.city,
+          country: data.country_name,
+          postal: data.postal,
+          region: data.region
+        };
+      }
+
+      if (data.reason !== 'RateLimited') {
+        console.error('Error fetching location data:', data);
+        return null;
+      }
+
+      // Continue loop if rate limited
     }
 
-    return {
-      address: data.street,
-      city: data.city,
-      country: data.country_name,
-      postal: data.postal,
-      region: data.region
-    };
+    console.error('Max retries reached for IP geolocation');
+    return null;
   } catch (error) {
     console.error('Error getting location from IP:', error);
     return null;
