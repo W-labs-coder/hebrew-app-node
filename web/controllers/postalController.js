@@ -8,7 +8,7 @@ const getLocationFromIP = async (ipAddress) => {
     const data = await response.json();
     
     if (data.error) {
-      console.error('Error fetching location data:', data.error);
+      console.error('Error fetching location data:', data);
       return null;
     }
 
