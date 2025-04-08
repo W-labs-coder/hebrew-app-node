@@ -1,6 +1,30 @@
 import User from "../models/User.js";
 import shopify from "../shopify.js";
 
+// Add this function after the existing imports
+const getLocationFromIP = async (ipAddress) => {
+  try {
+    const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('Error fetching location data:', data.error);
+      return null;
+    }
+
+    return {
+      address: data.street,
+      city: data.city,
+      country: data.country_name,
+      postal: data.postal,
+      region: data.region
+    };
+  } catch (error) {
+    console.error('Error getting location from IP:', error);
+    return null;
+  }
+};
+
 // Add Shopify GraphQL mutation for updating order
 const UPDATE_ORDER_MUTATION = `
   mutation orderUpdate($input: OrderInput!) {
@@ -213,43 +237,109 @@ export const pollNewOrders = async (session) => {
 export const handleCheckoutUpdate = async (checkoutData, context) => {
   try {
     const { shipping_address } = checkoutData;
+    const shop = context.locals.shopify.session.shop;
     
-    if (!shipping_address || !shipping_address.zip) {
-      throw new Error('Missing shipping address or postal code');
+    // Find user settings first
+    const user = await User.findOne({ shop });
+    
+    if (!user || user.autofocusDetection !== 'enabled') {
+      console.log('⚠️ Address prefill disabled for shop:', shop);
+      return { success: false, reason: 'feature_disabled' };
     }
 
-    const postalCode = shipping_address.zip.trim().toUpperCase();
-    console.log('Processing postal code:', postalCode);
+    // If no shipping address, try to get it from IP
+    if (!shipping_address) {
+      const ipAddress = context.req.headers['x-forwarded-for'] || 
+                       checkoutData.client_details?.browser_ip;
+      
+      if (!ipAddress) {
+        throw new Error('Could not determine customer IP address');
+      }
 
-    // Validate postal code format (US and Canadian formats)
-    if (!/^\d{5}(-\d{4})?$/.test(postalCode) && !/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/.test(postalCode)) {
-      throw new Error(`Invalid postal code format: ${postalCode}`);
-    }
-
-    // Get the client for API calls
-    const client = new context.locals.shopify.session.client;
-    
-    // Update checkout if needed
-    const checkoutId = checkoutData.id;
-    if (checkoutId) {
-      await client.put({
-        path: `checkouts/${checkoutId}`,
-        data: {
-          checkout: {
-            shipping_address: {
-              ...shipping_address,
-              zip: postalCode
-            }
+      console.log('🔍 Getting location from IP:', ipAddress);
+      const locationData = await getLocationFromIP(ipAddress);
+      
+      if (locationData) {
+        // For Israeli addresses, validate postal code
+        if (locationData.country === 'Israel') {
+          const validZip = await validateIsraeliPostalCode(
+            locationData.address,
+            locationData.city
+          );
+          if (validZip) {
+            locationData.postal = validZip;
           }
         }
-      });
+
+        console.log('📍 Found location:', locationData);
+        const updatedCheckout = await updateCheckoutWithAddress(
+          checkoutData.id, 
+          locationData,
+          context
+        );
+        return { success: true, checkout: updatedCheckout };
+      }
+      
+      console.log('❌ Could not determine location from IP');
+      return { success: false, reason: 'location_not_found' };
     }
 
-    return { success: true, postalCode };
+    // If address exists but no postal code, validate it
+    if (shipping_address && !shipping_address.zip) {
+      if (shipping_address.country_code === 'IL') {
+        const validZip = await validateIsraeliPostalCode(
+          shipping_address.address1,
+          shipping_address.city
+        );
+        
+        if (validZip) {
+          shipping_address.zip = validZip;
+          const updatedCheckout = await updateCheckoutWithAddress(
+            checkoutData.id,
+            {
+              address: shipping_address.address1,
+              city: shipping_address.city,
+              country: shipping_address.country,
+              postal: validZip,
+              region: shipping_address.province
+            },
+            context
+          );
+          return { success: true, checkout: updatedCheckout };
+        }
+      }
+    }
+
+    return { success: true, message: 'No update needed' };
   } catch (error) {
     console.error('Error in handleCheckoutUpdate:', error);
     throw error;
   }
+};
+
+// Helper function to update checkout with new address
+const updateCheckoutWithAddress = async (checkoutId, addressData, context) => {
+  const client = new shopify.api.clients.Graphql({ session: context.locals.shopify.session });
+  
+  const response = await client.request({
+    data: {
+      query: UPDATE_CHECKOUT_MUTATION,
+      variables: {
+        input: {
+          checkoutId: checkoutId,
+          deliveryAddress: {
+            address1: addressData.address,
+            city: addressData.city,
+            country: addressData.country,
+            zip: addressData.postal,
+            province: addressData.region
+          }
+        }
+      }
+    }
+  });
+
+  return response.body.data.checkoutDeliveryAddressUpdateV2.checkout;
 };
 
 // Helper function to validate postal code with Israel Post
@@ -315,3 +405,45 @@ async function validateIsraeliPostalCode(address, city) {
     return null;
   }
 }
+
+export const prefillCheckoutAddress = async (req, res) => {
+  try {
+    // Get IP address from request
+    const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    // Get location data
+    const locationData = await getLocationFromIP(ipAddress);
+    
+    if (!locationData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not determine location from IP'
+      });
+    }
+
+    // If the address is in Israel, validate postal code
+    if (locationData.country === 'Israel') {
+      const validZip = await validateIsraeliPostalCode(
+        locationData.address,
+        locationData.city
+      );
+      
+      if (validZip) {
+        locationData.postal = validZip;
+      }
+    }
+
+    // Return the location data
+    res.status(200).json({
+      success: true,
+      data: locationData
+    });
+  } catch (error) {
+    console.error('Error in prefillCheckoutAddress:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get address information',
+      error: error.message
+    });
+  }
+};

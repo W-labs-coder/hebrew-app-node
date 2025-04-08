@@ -149,6 +149,37 @@ app.post("/api/webhooks/checkouts/update", express.raw({type: '*/*'}), async (re
   }
 });
 
+// Add this webhook registration
+app.post("/api/webhooks/checkout/created", express.raw({type: '*/*'}), async (req, res) => {
+  try {
+    // Verify webhook
+    const shop = req.get('X-Shopify-Shop-Domain');
+    const hmac = req.get('X-Shopify-Hmac-Sha256');
+    
+    // Get the customer's IP address from the checkout data
+    const checkoutData = JSON.parse(req.body.toString('utf8'));
+    const clientIp = checkoutData.client_details?.browser_ip;
+
+    const session = await shopify.config.sessionStorage.loadSession(shop);
+    
+    if (!session) {
+      console.log('❌ No session found for shop:', shop);
+      return res.status(401).send('No session found');
+    }
+
+    // Handle the checkout creation
+    await handleCheckoutUpdate(checkoutData, {
+      req: { headers: { 'x-forwarded-for': clientIp } },
+      locals: { shopify: { session } }
+    });
+
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('❌ Webhook processing error:', error);
+    res.status(500).send(error.message);
+  }
+});
+
 app.use(
   "/api/*",
   async (req, res, next) => {

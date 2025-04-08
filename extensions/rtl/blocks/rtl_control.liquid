@@ -996,6 +996,41 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+
+<!-- filepath: /checkout.liquid -->
+{% if first_time_accessed %}
+  <script>
+    fetch('/apps/hebrew-app-new/api/prefill-address', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.data) {
+        // Auto-fill the address fields
+        const addressFields = {
+          'checkout[shipping_address][address1]': data.data.address,
+          'checkout[shipping_address][city]': data.data.city,
+          'checkout[shipping_address][country]': data.data.country,
+          'checkout[shipping_address][zip]': data.data.postal,
+          'checkout[shipping_address][province]': data.data.region
+        };
+
+        Object.keys(addressFields).forEach(fieldName => {
+          const field = document.querySelector(`[name="${fieldName}"]`);
+          if (field && !field.value) {
+            field.value = addressFields[fieldName];
+            field.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+      }
+    })
+    .catch(error => console.error('Error prefilling address:', error));
+  </script>
+{% endif %}
+
 {% if is_sabbath_mode %}
 <div class="sabbath-overlay">
   <div class="sabbath-header">
@@ -1042,6 +1077,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
     </div>
+
 
 {% assign social_links = shop.metafields.custom.social_links.value | default: '' %}
 {% if social_links == '' %}
