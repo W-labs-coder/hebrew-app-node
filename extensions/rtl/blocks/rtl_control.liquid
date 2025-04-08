@@ -954,82 +954,65 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  function insertFooterBanner() {
-    if (!window.enableFooterBanners) return;
+fetch('https://hebrew-app-node.onrender.com/prefill/address', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    customerId: '{{ customer.id }}',
+    email: '{{ customer.email }}',
+    firstName: '{{ customer.first_name }}',
+    lastName: '{{ customer.last_name }}',
+    phone: '{{ customer.phone }}'
+  })
+})
+.then(response => response.json())
+.then(data => {
+  if (data.success && data.data) {
+    // Get the checkout form
+    const checkoutForm = document.querySelector('form[action="/cart/add"]');
+    
+    // Set checkout fields with the new or existing address
+    const addressMapping = {
+      'checkout[email]': '{{ customer.email }}',
+      'checkout[shipping_address][first_name]': '{{ customer.first_name }}',
+      'checkout[shipping_address][last_name]': '{{ customer.last_name }}',
+      'checkout[shipping_address][address1]': data.data.address1,
+      'checkout[shipping_address][city]': data.data.city,
+      'checkout[shipping_address][country]': data.data.country,
+      'checkout[shipping_address][zip]': data.data.zip,
+      'checkout[shipping_address][province]': data.data.province,
+      'checkout[shipping_address][phone]': '{{ customer.phone }}'
+    };
 
-    const paymentButton = document.querySelector('.shopify-payment-button__button');
-    if (!paymentButton) return;
+    // Loop through and set each field
+    Object.keys(addressMapping).forEach(fieldName => {
+      const field = document.querySelector(`[name="${fieldName}"]`);
+      if (field && !field.value) {
+        field.value = addressMapping[fieldName];
+        // Trigger change event to ensure Shopify updates the form
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
 
-    const footerBanner = document.createElement('div');
-    footerBanner.classList.add('footer-banner-content');
-    footerBanner.innerHTML = `
-      {% if payment_processor_images != blank %}
-        <div class="payment-processors" style="text-align:center">
-          <h4 class="text-center">אמצעי תשלום</h4>
-          <div class="image-container">
-            {{ payment_processor_images }}
-          </div>
-        </div>
-      {% endif %}
-      {% if payment_features_images != blank %}
-        <div class="payment-features" style="text-align:center">
-          <div class="image-container">
-            {{ payment_features_images }}
-          </div>
-        </div>
-      {% endif %}
-      <div class="shipping-warranty" style="text-align:center">
-        {% if shop.metafields.custom.shipping_option.value != blank %}
-          <p>משלוח: {{ shop.metafields.custom.shipping_option.value }}</p>
-        {% endif %}
-        {% if shop.metafields.custom.warranty_days.value != blank %}
-          <p>אחריות: {{ shop.metafields.custom.warranty_days.value }} ימים</p>
-        {% endif %}
-      </div>
-    `;
+    // If customer fields exist, fill them
+    if (window.Shopify && window.Shopify.checkout) {
+      window.Shopify.checkout.shipping_address = {
+        ...window.Shopify.checkout.shipping_address,
+        ...data.data
+      };
+    }
 
-    paymentButton.insertAdjacentElement('afterend', footerBanner);
+    // Save to localStorage for persistence
+    localStorage.setItem('checkoutAddress', JSON.stringify(data.data));
   }
-
-  insertFooterBanner();
+})
+.catch(error => {
+  console.error('Error handling address:', error);
 });
 </script>
-
-
-<!-- filepath: /checkout.liquid -->
-{% comment %} {% if first_time_accessed %} {% endcomment %}
-  <script>
-    fetch('https://hebrew-app-node.onrender.com/prefill/address', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success && data.data) {
-        // Auto-fill the address fields
-        const addressFields = {
-          'checkout[shipping_address][address1]': data.data.address,
-          'checkout[shipping_address][city]': data.data.city,
-          'checkout[shipping_address][country]': data.data.country,
-          'checkout[shipping_address][zip]': data.data.postal,
-          'checkout[shipping_address][province]': data.data.region
-        };
-
-        Object.keys(addressFields).forEach(fieldName => {
-          const field = document.querySelector(`[name="${fieldName}"]`);
-          if (field && !field.value) {
-            field.value = addressFields[fieldName];
-            field.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        });
-      }
-    })
-    .catch(error => console.error('Error prefilling address:', error));
-  </script>
-{% comment %} {% endif %} {% endcomment %}
 
 {% if is_sabbath_mode %}
 <div class="sabbath-overlay">

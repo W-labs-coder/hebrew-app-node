@@ -3,7 +3,7 @@
 client_id = "86154af1674159ac797f5767f244100c"
 name = "Hebrew App"
 handle = "hebrew-app-new"
-application_url = "https://integrating-hub-microwave-clara.trycloudflare.com"
+application_url = "https://thumb-g-italy-mpegs.trycloudflare.com"
 embedded = true
 
 [build]
@@ -20,13 +20,13 @@ scopes = "read_orders,read_products,read_themes,write_content,write_orders,write
 
 [auth]
 redirect_urls = [
-  "https://integrating-hub-microwave-clara.trycloudflare.com/auth/callback",
-  "https://integrating-hub-microwave-clara.trycloudflare.com/auth/shopify/callback",
-  "https://integrating-hub-microwave-clara.trycloudflare.com/api/auth/callback"
+  "https://thumb-g-italy-mpegs.trycloudflare.com/auth/callback",
+  "https://thumb-g-italy-mpegs.trycloudflare.com/auth/shopify/callback",
+  "https://thumb-g-italy-mpegs.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://integrating-hub-microwave-clara.trycloudflare.com/proxy"
+url = "https://thumb-g-italy-mpegs.trycloudflare.com/proxy"
 subpath = "order-cancellation"
 prefix = "apps"
 include_host = true

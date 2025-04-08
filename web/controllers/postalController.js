@@ -111,6 +111,25 @@ const UPDATE_CHECKOUT_MUTATION = `
   }
 `;
 
+// Add this mutation at the top with other GraphQL queries
+const UPDATE_CUSTOMER_ADDRESS_MUTATION = `
+  mutation customerAddressUpdate($address: CustomerAddressInput!, $addressId: ID!, $defaultAddress: Boolean) {
+    customerAddressUpdate(address: $address, addressId: $addressId, defaultAddress: $defaultAddress) {
+      customerAddress {
+        id
+        address1
+        city
+        zip
+        country
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 export const updatePostalSettings = async (req, res) => {
   try {
     const { autofocusDetection, autofocusCorrection } = req.body;
@@ -438,41 +457,102 @@ async function validateIsraeliPostalCode(address, city) {
 
 export const prefillCheckoutAddress = async (req, res) => {
   try {
-    // Get IP address from request
-    const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    
-    // Get location data
-    const locationData = await getLocationFromIP(ipAddress);
-    
-    if (!locationData) {
-      return res.status(404).json({
+    const session = res.locals.shopify.session;
+    if (!session) {
+      return res.status(401).json({
         success: false,
-        message: 'Could not determine location from IP'
+        message: 'Unauthorized: Session not found'
       });
     }
 
-    // If the address is in Israel, validate postal code
+    const client = new shopify.api.clients.Graphql({ session });
+    const { customerId } = req.body;
+
+    if (!customerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer ID is required'
+      });
+    }
+
+    // Get location from IP
+    const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const locationData = await getLocationFromIP(ipAddress);
+
+    if (!locationData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Could not determine location'
+      });
+    }
+
+    let zipCode = null;
     if (locationData.country === 'Israel') {
-      const validZip = await validateIsraeliPostalCode(
+      zipCode = await validateIsraeliPostalCode(
         locationData.address,
         locationData.city
       );
-      
-      if (validZip) {
-        locationData.postal = validZip;
-      }
+    } else {
+      zipCode = locationData.postal;
     }
 
-    // Return the location data
-    res.status(200).json({
-      success: true,
-      data: locationData
+    // Prepare address data
+    const addressData = {
+      address1: locationData.address || '',
+      city: locationData.city || '',
+      country: locationData.country || '',
+      zip: zipCode,
+      province: locationData.region || '',
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      phone: req.body.phone
+    };
+
+    // Create new address
+    const response = await client.request({
+      data: {
+        query: `
+          mutation customerAddressCreate($address: MailingAddressInput!, $customerId: ID!) {
+            customerAddressCreate(address: $address, customerId: $customerId) {
+              customerAddress {
+                id
+                address1
+                city
+                country
+                zip
+                province
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `,
+        variables: {
+          customerId: customerId,
+          address: addressData
+        }
+      }
     });
+
+    if (response.body.data.customerAddressCreate.userErrors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        errors: response.body.data.customerAddressCreate.userErrors
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: response.body.data.customerAddressCreate.customerAddress
+    });
+
   } catch (error) {
     console.error('Error in prefillCheckoutAddress:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get address information',
+      message: 'Failed to create customer address',
       error: error.message
     });
   }

@@ -44,6 +44,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get("/address", prefillCheckoutAddress);
+router.post("/address", prefillCheckoutAddress);
 
 export default router;
