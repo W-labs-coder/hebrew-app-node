@@ -1000,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- filepath: /checkout.liquid -->
 {% comment %} {% if first_time_accessed %} {% endcomment %}
   <script>
-    fetch('/prefill/address', {
+    fetch('https://hebrew-app-node.onrender.com/prefill/address', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
