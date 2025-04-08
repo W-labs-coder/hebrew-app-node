@@ -21,31 +21,30 @@ const getLocationFromIP = async (ipAddress, retries = 3, initialDelay = 1000) =>
 
     for (let attempt = 0; attempt < retries; attempt++) {
       if (attempt > 0) {
-        // Exponential backoff: 1s, 2s, 4s
         const backoffDelay = initialDelay * Math.pow(2, attempt - 1);
-        console.log(`Rate limited. Retrying in ${backoffDelay}ms... (Attempt ${attempt + 1}/${retries})`);
+        console.log(`Retrying in ${backoffDelay}ms... (Attempt ${attempt + 1}/${retries})`);
         await delay(backoffDelay);
       }
 
-      const response = await fetch(`https://ipapi.co/${cleanIP}/json/`);
+      const response = await fetch(`https://ipwho.is/${cleanIP}`);
       const data = await response.json();
       
-      if (!data.error) {
+      if (data.success === true) {
         return {
-          address: data.street,
+          address: data.connection?.organization || '',
           city: data.city,
-          country: data.country_name,
+          country: data.country,
           postal: data.postal,
           region: data.region
         };
       }
 
-      if (data.reason !== 'RateLimited') {
-        console.error('Error fetching location data:', data);
+      console.error('Error fetching location data:', data);
+      
+      // Only retry on server errors (5xx)
+      if (!response.ok && response.status < 500) {
         return null;
       }
-
-      // Continue loop if rate limited
     }
 
     console.error('Max retries reached for IP geolocation');
