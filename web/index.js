@@ -225,7 +225,7 @@ app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
 app.use("/cancel-order", orderCancellationRoutes);
-app.use("/prefill", storeDetails);
+app.use("/api/prefill", storeDetails);
 
 
 app.use("/proxy", async(req, res) => {
