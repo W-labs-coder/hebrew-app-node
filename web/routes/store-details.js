@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import { prefillCheckoutAddress } from '../controllers/postalController.js';
 
 const router = express.Router();
 
@@ -42,5 +43,7 @@ router.get('/', async (req, res) => {
     });
   }
 });
+
+router.get("/address", prefillCheckoutAddress);
 
 export default router;

@@ -998,9 +998,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <!-- filepath: /checkout.liquid -->
-{% if first_time_accessed %}
+{% comment %} {% if first_time_accessed %} {% endcomment %}
   <script>
-    fetch('/apps/hebrew-app-new/api/prefill-address', {
+    fetch('/prefill/address', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -1029,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error('Error prefilling address:', error));
   </script>
-{% endif %}
+{% comment %} {% endif %} {% endcomment %}
 
 {% if is_sabbath_mode %}
 <div class="sabbath-overlay">
