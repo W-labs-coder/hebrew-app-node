@@ -370,7 +370,7 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 
 
 // Helper function to validate postal code with Israel Post
-async function validateIsraeliPostalCode(address, city) {
+export const validateIsraeliPostalCode(address, city) {
   try {
     // Using Israel Post's updated API endpoint
     const baseUrl = 'https://services.israelpost.co.il/zip_data.nsf/SearchZip';
