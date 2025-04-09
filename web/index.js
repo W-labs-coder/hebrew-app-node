@@ -63,9 +63,6 @@ app.post(
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
 
-
-
-
 app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
     console.log('📥 Webhook received:', {
@@ -104,62 +101,6 @@ app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, 
   }
 });
 
-app.post("/api/webhooks/checkouts/update", express.raw({type: '*/*'}), async (req, res) => {
-  try {
-    console.log('📥 Checkout webhook received:', {
-      shop: req.get('X-Shopify-Shop-Domain'),
-      topic: req.get('X-Shopify-Topic')
-    });
-
-    const shop = req.get('X-Shopify-Shop-Domain');
-    if (!shop) {
-      console.error('❌ No shop domain provided in webhook');
-      return res.status(400).send('No shop domain provided');
-    }
-
-    const body = req.body.toString('utf8');
-    const checkoutData = JSON.parse(body);
-    
-    console.log('Checkout data received:', {
-      checkout_id: checkoutData.id,
-      shipping_address: checkoutData.shipping_address,
-      billing_address: checkoutData.billing_address
-    });
-    
-    // Try to get offline session directly
-    let session = await shopify.config.sessionStorage.loadSession(`offline_${shop}`);
-    
-    if (!session) {
-      console.log('❌ No offline session found, trying to load online session');
-      session = await shopify.config.sessionStorage.loadSession(shop);
-      if (!session) {
-        console.error('❌ No session found for shop:', shop);
-        return res.status(401).send('No session found');
-      }
-    }
-    
-    console.log('✅ Found session for shop:', shop);
-
-    if (!webhooks['checkouts/update'] || typeof webhooks['checkouts/update'].callback !== 'function') {
-      console.error('❌ Checkout update webhook handler not properly configured');
-      return res.status(500).send('Webhook handler not configured');
-    }
-
-    await webhooks['checkouts/update'].callback(
-      'checkouts/update',
-      shop,
-      checkoutData,
-      session
-    );
-
-    res.status(200).send('OK');
-  } catch (error) {
-    console.error('❌ Webhook processing error:', error);
-    console.error('Error stack:', error.stack);
-    res.status(500).send(error.message);
-  }
-});
-
 // Add this webhook registration
 app.post("/api/webhooks/checkout/created", express.raw({type: '*/*'}), async (req, res) => {
   try {
@@ -183,6 +124,42 @@ app.post("/api/webhooks/checkout/created", express.raw({type: '*/*'}), async (re
       req: { headers: { 'x-forwarded-for': clientIp } },
       locals: { shopify: { session } }
     });
+
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error('❌ Webhook processing error:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+// Add this after your existing webhook routes
+
+app.post("/api/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, res) => {
+  try {
+    console.log('📥 Checkout webhook received:', {
+      headers: {
+        hmac: req.get('X-Shopify-Hmac-Sha256'),
+        topic: req.get('X-Shopify-Topic'),
+        shop: req.get('X-Shopify-Shop-Domain')
+      }
+    });
+
+    const shop = req.get('X-Shopify-Shop-Domain');
+    const body = req.body.toString('utf8');
+    
+    const session = await shopify.config.sessionStorage.loadSession(shop);
+    
+    if (!session) {
+      console.log('❌ No session found for shop:', shop);
+      return res.status(401).send('No session found');
+    }
+
+    // Process the webhook
+    await webhookHandlers['checkouts/create'].callback(
+      'checkouts/create',
+      shop,
+      body
+    );
 
     res.status(200).send('OK');
   } catch (error) {
@@ -236,7 +213,6 @@ app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
 app.use("/cancel-order", orderCancellationRoutes);
-app.use("/prefill", storeDetails);
 
 
 app.use("/proxy", async(req, res) => {
@@ -320,22 +296,13 @@ app.use("/proxy", async(req, res) => {
 
 app.use('/assets', express.static(join(__dirname, 'frontend/assets')));
 
-
-
-
 app.get("/debug", (req, res) => {
   console.log("Shopify Session:", res.locals.shopify);
   res.json(res.locals.shopify);
 });
 
-
-
-
-
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
-
-
 
 app.use("/*", shopify.ensureInstalledOnShop(), async (req, res) => {
   const apiKey = process.env.SHOPIFY_API_KEY ?? "";
