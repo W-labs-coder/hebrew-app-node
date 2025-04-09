@@ -101,38 +101,6 @@ app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, 
   }
 });
 
-// Add this webhook registration
-app.post("/api/webhooks/checkout/created", express.raw({type: '*/*'}), async (req, res) => {
-  try {
-    // Verify webhook
-    const shop = req.get('X-Shopify-Shop-Domain');
-    const hmac = req.get('X-Shopify-Hmac-Sha256');
-    
-    // Get the customer's IP address from the checkout data
-    const checkoutData = JSON.parse(req.body.toString('utf8'));
-    const clientIp = checkoutData.client_details?.browser_ip;
-
-    const session = await shopify.config.sessionStorage.loadSession(shop);
-    
-    if (!session) {
-      console.log('❌ No session found for shop:', shop);
-      return res.status(401).send('No session found');
-    }
-
-    // Handle the checkout creation
-    await handleCheckoutUpdate(checkoutData, {
-      req: { headers: { 'x-forwarded-for': clientIp } },
-      locals: { shopify: { session } }
-    });
-
-    res.status(200).send('OK');
-  } catch (error) {
-    console.error('❌ Webhook processing error:', error);
-    res.status(500).send(error.message);
-  }
-});
-
-// Add this after your existing webhook routes
 
 app.post("/api/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
@@ -144,14 +112,29 @@ app.post("/api/webhooks/checkouts/create", express.raw({type: '*/*'}), async (re
       }
     });
 
+    // Verify webhook HMAC
+    const hmac = req.get('X-Shopify-Hmac-Sha256');
+    const topic = req.get('X-Shopify-Topic');
     const shop = req.get('X-Shopify-Shop-Domain');
+
+    if (!hmac || !topic || !shop) {
+      console.error('❌ Missing required headers');
+      return res.status(401).send('Missing required headers');
+    }
+
+    // Get raw body before parsing
     const body = req.body.toString('utf8');
     
-    const session = await shopify.config.sessionStorage.loadSession(shop);
-    
-    if (!session) {
-      console.log('❌ No session found for shop:', shop);
-      return res.status(401).send('No session found');
+    // Verify webhook
+    const verified = shopify.api.webhooks.validate({
+      rawBody: body,
+      hmac,
+      secret: process.env.SHOPIFY_API_SECRET
+    });
+
+    if (!verified) {
+      console.error('❌ Invalid webhook signature');
+      return res.status(401).send('Invalid webhook signature');
     }
 
     // Process the webhook
