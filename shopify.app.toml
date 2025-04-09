@@ -3,7 +3,7 @@
 client_id = "86154af1674159ac797f5767f244100c"
 name = "Hebrew App"
 handle = "hebrew-app-new"
-application_url = "https://thumb-g-italy-mpegs.trycloudflare.com"
+application_url = "https://volt-pale-departure-lit.trycloudflare.com"
 embedded = true
 
 [build]
@@ -20,13 +20,13 @@ scopes = "read_orders,read_products,read_themes,write_content,write_orders,write
 
 [auth]
 redirect_urls = [
-  "https://thumb-g-italy-mpegs.trycloudflare.com/auth/callback",
-  "https://thumb-g-italy-mpegs.trycloudflare.com/auth/shopify/callback",
-  "https://thumb-g-italy-mpegs.trycloudflare.com/api/auth/callback"
+  "https://volt-pale-departure-lit.trycloudflare.com/auth/callback",
+  "https://volt-pale-departure-lit.trycloudflare.com/auth/shopify/callback",
+  "https://volt-pale-departure-lit.trycloudflare.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://thumb-g-italy-mpegs.trycloudflare.com/proxy"
+url = "https://volt-pale-departure-lit.trycloudflare.com/proxy"
 subpath = "order-cancellation"
 prefix = "apps"
 include_host = true

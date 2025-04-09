@@ -954,11 +954,41 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-fetch('https://hebrew-app-node.onrender.com/api/prefill/address', {
+const authenticatedFetch = async (url, options = {}) => {
+  // Get shop from meta tag or another source
+  const shop = Shopify.shop || document.querySelector('meta[name="shopify-shop-id"]')?.content;
+  
+  if (!shop) {
+    throw new Error('Shop identifier not found');
+  }
+
+  // Add authorization headers
+  const headers = {
+    ...options.headers,
+    'Content-Type': 'application/json',
+    'X-Shopify-Shop-Domain': shop
+  };
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Fetch error:', error);
+    throw error;
+  }
+};
+
+// Use the authenticated fetch
+authenticatedFetch('https://hebrew-app-node.onrender.com/api/prefill/address', {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
   body: JSON.stringify({
     customerId: '{{ customer.id }}',
     email: '{{ customer.email }}',
@@ -991,21 +1021,20 @@ fetch('https://hebrew-app-node.onrender.com/api/prefill/address', {
       const field = document.querySelector(`[name="${fieldName}"]`);
       if (field && !field.value) {
         field.value = addressMapping[fieldName];
-        // Trigger change event to ensure Shopify updates the form
         field.dispatchEvent(new Event('change', { bubbles: true }));
         field.dispatchEvent(new Event('input', { bubbles: true }));
       }
     });
 
-    // If customer fields exist, fill them
-    if (window.Shopify && window.Shopify.checkout) {
+    // Update Shopify.checkout if it exists
+    if (window.Shopify?.checkout) {
       window.Shopify.checkout.shipping_address = {
         ...window.Shopify.checkout.shipping_address,
         ...data.data
       };
     }
 
-    // Save to localStorage for persistence
+    // Save to localStorage
     localStorage.setItem('checkoutAddress', JSON.stringify(data.data));
   }
 })
