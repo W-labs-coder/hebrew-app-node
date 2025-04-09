@@ -33,29 +33,21 @@ const STATIC_PATH =
     
     const app = express();
 
-app.use(
-  cors({
-    origin: true, // Allow all origins
-    credentials: true, // Allow credentials
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "X-Shopify-Shop-Domain", "Authorization"],
-    exposedHeaders: ["set-cookie"],
-  })
-);
+// Update the CORS configuration
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'X-Shopify-Shop-Domain',
+    'Authorization'
+  ]
+}));
 
-// Add CORS preflight handler
-app.options("*", cors());
-
-// Add security headers middleware
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, X-Shopify-Shop-Domain, Authorization"
-  );
-  res.header("Access-Control-Allow-Credentials", true);
-  next();
+// Add this preflight handler right after the CORS middleware
+app.options('*', (req, res) => {
+  res.status(200).end();
 });
 
 // Set up Shopify authentication and webhook handling

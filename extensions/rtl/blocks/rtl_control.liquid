@@ -954,30 +954,25 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
+// Update the authenticatedFetch function
 const authenticatedFetch = async (url, options = {}) => {
-  // Get shop from meta tag or another source
   const shop = Shopify.shop || document.querySelector('meta[name="shopify-shop-id"]')?.content;
   
   if (!shop) {
     throw new Error('Shop identifier not found');
   }
 
-  // Add authorization and CORS headers
+  // Simplify headers to essential ones only
   const headers = {
-    ...options.headers,
     'Content-Type': 'application/json',
-    'X-Shopify-Shop-Domain': shop,
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, X-Shopify-Shop-Domain'
+    'X-Shopify-Shop-Domain': shop
   };
 
   try {
     const response = await fetch(url, {
       ...options,
       headers,
-      credentials: 'include', // This is important for CORS
-      mode: 'cors' // Explicitly set CORS mode
+      credentials: 'include'
     });
 
     if (!response.ok) {
