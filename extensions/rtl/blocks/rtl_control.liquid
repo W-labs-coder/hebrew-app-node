@@ -987,7 +987,7 @@ const authenticatedFetch = async (url, options = {}) => {
 };
 
 // Use the authenticated fetch
-authenticatedFetch('https://hebrew-app-node.onrender.com/api/prefill/address', {
+authenticatedFetch('https://hebrew-app-node.onrender.com/prefill/address', {
   method: 'POST',
   body: JSON.stringify({
     customerId: '{{ customer.id }}',
