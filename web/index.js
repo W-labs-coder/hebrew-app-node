@@ -55,12 +55,20 @@ shopify.api.webhooks.addHandlers({
   "checkouts/create": {
     deliveryMethod: shopify.api.webhooks.DeliveryMethod.Http,
     callbackUrl: "/api/webhooks/checkouts/create",
-    callback: async (topic, shop, body) => {
-      console.log("Received checkout creation webhook", { topic, shop, body });
-      // Add your checkout processing logic here
-    },
+    callback: webhookHandlers['checkouts/create'].callback
   },
 });
+
+const webhookHandlers = {
+  'checkouts/create': {
+    callback: async (topic, shop, body) => {
+      console.log('Processing checkout webhook:', { topic, shop });
+      const checkoutData = JSON.parse(body);
+      // Add your checkout processing logic here
+      console.log('Checkout data:', checkoutData);
+    }
+  }
+};
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
@@ -116,7 +124,9 @@ app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, 
 
 app.post("/api/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
-    // Add more detailed logging
+    console.log('🔍 Debug: Webhook endpoint hit');
+    console.log('🔍 Request path:', req.path);
+    console.log('🔍 Method:', req.method);
     console.log('📥 Raw webhook body:', req.body);
     console.log('📥 Content-Type:', req.get('Content-Type'));
     console.log('📥 All Headers:', req.headers);
@@ -299,6 +309,26 @@ app.use('/assets', express.static(join(__dirname, 'frontend/assets')));
 app.get("/debug", (req, res) => {
   console.log("Shopify Session:", res.locals.shopify);
   res.json(res.locals.shopify);
+});
+
+app.get('/debug/webhooks', async (req, res) => {
+  try {
+    const shop = req.query.shop;
+    const session = await shopify.config.sessionStorage.loadSession(shop);
+    
+    if (!session) {
+      return res.status(401).json({ error: 'No session found' });
+    }
+
+    const webhooks = await shopify.api.rest.Webhook.all({
+      session: session
+    });
+
+    res.json(webhooks);
+  } catch (error) {
+    console.error('Failed to fetch webhooks:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.use(shopify.cspHeaders());
