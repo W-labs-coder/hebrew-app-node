@@ -66,6 +66,11 @@ const webhookHandlers = {
       try {
         // Parse checkout data
         const checkout = JSON.parse(body);
+        console.log('📦 Checkout data received:', {
+          shop,
+          hasShippingAddress: !!checkout.shipping_address,
+          token: checkout.token
+        });
         
         // Get user settings
         const user = await User.findOne({ shop });
@@ -73,6 +78,11 @@ const webhookHandlers = {
           console.log('❌ User not found for shop:', shop);
           return;
         }
+
+        console.log('👤 User settings:', {
+          autofocusDetection: user.autofocusDetection,
+          autofocusCorrection: user.autofocusCorrection
+        });
 
         // Check if features are enabled
         const { autofocusDetection, autofocusCorrection } = user;
@@ -87,14 +97,21 @@ const webhookHandlers = {
           return;
         }
 
+        console.log('📍 Address details:', {
+          zip: address.zip,
+          country_code: address.country_code,
+          city: address.city,
+          address1: address.address1
+        });
+
         // Determine if we need to process the postal code
         const needsPostalCode = !address.zip && autofocusDetection === 'enabled';
         const shouldVerifyPostalCode = address.zip && autofocusCorrection === 'enabled';
 
-        if (!needsPostalCode && !shouldVerifyPostalCode) {
-          console.log('ℹ️ No postal code processing needed');
-          return;
-        }
+        console.log('🔍 Processing conditions:', {
+          needsPostalCode,
+          shouldVerifyPostalCode
+        });
 
         // Only process Israeli addresses
         if (address.country_code !== 'IL') {

@@ -50,6 +50,18 @@ app.options('*', (req, res) => {
   res.status(200).end();
 });
 
+// Add this near the top of your file where other webhook registrations are
+shopify.api.webhooks.addHandlers({
+  "checkouts/create": {
+    deliveryMethod: shopify.api.webhooks.DeliveryMethod.Http,
+    callbackUrl: "/api/webhooks/checkouts/create",
+    callback: async (topic, shop, body) => {
+      console.log("Received checkout creation webhook", { topic, shop, body });
+      // Add your checkout processing logic here
+    },
+  },
+});
+
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
@@ -104,6 +116,11 @@ app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, 
 
 app.post("/api/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
+    // Add more detailed logging
+    console.log('📥 Raw webhook body:', req.body);
+    console.log('📥 Content-Type:', req.get('Content-Type'));
+    console.log('📥 All Headers:', req.headers);
+
     console.log('📥 Checkout webhook received:', {
       headers: {
         hmac: req.get('X-Shopify-Hmac-Sha256'),
