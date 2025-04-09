@@ -55,6 +55,30 @@ export const shopifyMiddleware = async (req, res, next) => {
   }
 };
 
+// Add this to your afterAuth handler or app installation logic
+const registerWebhooks = async (session) => {
+  const webhooks = [
+    {
+      path: '/api/webhooks/checkouts/create',
+      topic: 'checkouts/create',
+      deliveryMethod: DeliveryMethod.Http
+    }
+  ];
+
+  for (const webhookConfig of webhooks) {
+    try {
+      await shopify.api.webhooks.register({
+        session,
+        path: webhookConfig.path,
+        topic: webhookConfig.topic,
+        deliveryMethod: webhookConfig.deliveryMethod
+      });
+      console.log(`✅ Webhook registered: ${webhookConfig.topic}`);
+    } catch (error) {
+      console.error(`❌ Failed to register webhook ${webhookConfig.topic}:`, error);
+    }
+  }
+};
 
 mongoose
   .connect(process.env.MONGO_URI)
