@@ -50,15 +50,7 @@ app.options('*', (req, res) => {
   res.status(200).end();
 });
 
-// Add this near the top of your file where other webhook registrations are
-shopify.api.webhooks.addHandlers({
-  "checkouts/create": {
-    deliveryMethod: shopify.api.webhooks.DeliveryMethod.Http,
-    callbackUrl: "/api/webhooks/checkouts/create",
-    callback: webhookHandlers['checkouts/create'].callback
-  },
-});
-
+// First define the webhook handlers
 const webhookHandlers = {
   'checkouts/create': {
     callback: async (topic, shop, body) => {
@@ -69,6 +61,15 @@ const webhookHandlers = {
     }
   }
 };
+
+// Then register the webhooks
+shopify.api.webhooks.addHandlers({
+  "checkouts/create": {
+    deliveryMethod: "http", // Changed from DeliveryMethod.Http to "http"
+    callbackUrl: "/api/webhooks/checkouts/create",
+    callback: webhookHandlers['checkouts/create'].callback
+  },
+});
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
