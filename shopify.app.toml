@@ -3,7 +3,7 @@
 client_id = "86154af1674159ac797f5767f244100c"
 name = "Hebrew App"
 handle = "hebrew-app-new"
-application_url = "https://volt-pale-departure-lit.trycloudflare.com"
+application_url = "https://hebrew-app-node.onrender.com"
 embedded = true
 
 [build]
@@ -20,13 +20,13 @@ scopes = "read_orders,read_products,read_themes,write_content,write_orders,write
 
 [auth]
 redirect_urls = [
-  "https://volt-pale-departure-lit.trycloudflare.com/auth/callback",
-  "https://volt-pale-departure-lit.trycloudflare.com/auth/shopify/callback",
-  "https://volt-pale-departure-lit.trycloudflare.com/api/auth/callback"
+  "https://hebrew-app-node.onrender.com/auth/callback",
+  "https://hebrew-app-node.onrender.com/auth/shopify/callback",
+  "https://hebrew-app-node.onrender.com/api/auth/callback"
 ]
 
 [app_proxy]
-url = "https://volt-pale-departure-lit.trycloudflare.com/proxy"
+url = "https://hebrew-app-node.onrender.com/proxy"
 subpath = "order-cancellation"
 prefix = "apps"
 include_host = true
