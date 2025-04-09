@@ -315,19 +315,31 @@ app.get("/debug", (req, res) => {
 app.get('/debug/webhooks', async (req, res) => {
   try {
     const shop = req.query.shop;
-    const session = await shopify.config.sessionStorage.loadSession(shop);
+    const hmac = req.get('X-Shopify-Hmac-Sha256');
     
-    if (!session) {
-      return res.status(401).json({ error: 'No session found' });
+    // Verify the request is coming from Shopify
+    const verified = shopify.api.webhooks.validate({
+      rawBody: JSON.stringify(req.body || {}),
+      hmac,
+      secret: process.env.SHOPIFY_API_SECRET
+    });
+
+    if (!verified) {
+      console.error('❌ Invalid webhook signature');
+      return res.status(401).send('Invalid webhook signature');
     }
 
+    // List registered webhooks without requiring authentication
     const webhooks = await shopify.api.rest.Webhook.all({
-      session: session
+      session: {
+        shop,
+        accessToken: process.env.SHOPIFY_API_SECRET
+      }
     });
 
     res.json(webhooks);
   } catch (error) {
-    console.error('Failed to fetch webhooks:', error);
+    console.error('❌ Failed to fetch webhooks:', error);
     res.status(500).json({ error: error.message });
   }
 });
