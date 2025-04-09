@@ -24,7 +24,7 @@ if (!process.env.SHOPIFY_API_SECRET) {
 export const registerWebhooks = async (session) => {
   const webhooks = [
     {
-      path: '/api/webhooks/checkouts/create',
+      path: '/webhooks/checkouts/create',
       topic: 'checkouts/create',
       deliveryMethod: DeliveryMethod.Http
     }
@@ -63,7 +63,7 @@ const shopify = shopifyApp({
     },
   },
   webhooks: {
-    path: "/api/webhooks",
+    path: "/webhooks",
   },
   sessionStorage: new MongoDBSessionStorage(process.env.MONGO_URI),
 });

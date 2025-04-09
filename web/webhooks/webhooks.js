@@ -6,7 +6,7 @@ import shopify from "../shopify.js";
 const webhookHandlers = {
   'checkouts/update': {
     deliveryMethod: DeliveryMethod.Http,
-    callbackUrl: "/api/webhooks/checkouts/update",
+    callbackUrl: "/webhooks/checkouts/update",
     callback: async (topic, shop, body, webhookId) => {
       console.log('🎯 Processing webhook:', { topic, shop });
       
@@ -61,7 +61,7 @@ const webhookHandlers = {
 
   'checkouts/create': {
     deliveryMethod: DeliveryMethod.Http,
-    callbackUrl: "/api/webhooks/checkouts/create",
+    callbackUrl: "/webhooks/checkouts/create",
     callback: async (topic, shop, body) => {
       try {
         // Parse checkout data
