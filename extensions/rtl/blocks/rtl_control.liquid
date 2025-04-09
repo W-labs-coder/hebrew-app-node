@@ -962,17 +962,22 @@ const authenticatedFetch = async (url, options = {}) => {
     throw new Error('Shop identifier not found');
   }
 
-  // Add authorization headers
+  // Add authorization and CORS headers
   const headers = {
     ...options.headers,
     'Content-Type': 'application/json',
-    'X-Shopify-Shop-Domain': shop
+    'X-Shopify-Shop-Domain': shop,
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Shopify-Shop-Domain'
   };
 
   try {
     const response = await fetch(url, {
       ...options,
-      headers
+      headers,
+      credentials: 'include', // This is important for CORS
+      mode: 'cors' // Explicitly set CORS mode
     });
 
     if (!response.ok) {
