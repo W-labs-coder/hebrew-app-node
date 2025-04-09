@@ -62,11 +62,11 @@ const webhookHandlers = {
   }
 };
 
-// Then register the webhooks
+// Update the webhook registration
 shopify.api.webhooks.addHandlers({
   "checkouts/create": {
-    deliveryMethod: "http", // Changed from DeliveryMethod.Http to "http"
-    callbackUrl: "/api/webhooks/checkouts/create",
+    deliveryMethod: "http",
+    callbackUrl: "/webhooks/checkouts/create", // Remove /api/
     callback: webhookHandlers['checkouts/create'].callback
   },
 });
@@ -84,7 +84,8 @@ app.post(
   shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
 );
 
-app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, res) => {
+// Move these routes BEFORE the /api/* middleware
+app.post("/webhooks/orders/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
     console.log('📥 Webhook received:', {
       headers: {
@@ -122,8 +123,7 @@ app.post("/api/webhooks/orders/create", express.raw({type: '*/*'}), async (req, 
   }
 });
 
-
-app.post("/api/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, res) => {
+app.post("/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
     console.log('🔍 Debug: Webhook endpoint hit');
     console.log('🔍 Request path:', req.path);
@@ -179,6 +179,7 @@ app.post("/api/webhooks/checkouts/create", express.raw({type: '*/*'}), async (re
   }
 });
 
+// Keep the API authentication middleware for other routes
 app.use(
   "/api/*",
   async (req, res, next) => {
@@ -329,6 +330,25 @@ app.get('/debug/webhooks', async (req, res) => {
       return res.status(401).send('Invalid webhook signature');
     }
 
+    // List registered webhooks without requiring authentication
+    const webhooks = await shopify.api.rest.Webhook.all({
+      session: {
+        shop,
+        accessToken: process.env.SHOPIFY_API_SECRET
+      }
+    });
+
+    res.json(webhooks);
+  } catch (error) {
+    console.error('❌ Failed to fetch webhooks:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/webhooks/debug', async (req, res) => {
+  try {
+    const shop = req.query.shop;
+    
     // List registered webhooks without requiring authentication
     const webhooks = await shopify.api.rest.Webhook.all({
       session: {
