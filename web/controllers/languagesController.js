@@ -37,7 +37,6 @@ export const addSelectedLanguage = async (req, res) => {
       }
     }
 
-    // Debug log to verify themeId
     console.log("Final themeId being used in Admin API:", themeId);
 
     // Initialize OpenAI client if API key is provided
@@ -46,51 +45,49 @@ export const addSelectedLanguage = async (req, res) => {
       openai = new OpenAI({ apiKey: openaiApiKey });
     }
 
-    // Create a client for the Admin GraphQL API
     const client = new shopify.api.clients.Graphql({ session });
 
-    // Confirm the theme exists
-    const themeResponse = await client.query({
-      data: {
-        query: `
-          query GetTheme($id: ID!) {
-            theme(id: $id) {
-              id
-              name
+    // Fetch themes and verify existence
+    const themesResponse = await client.request({
+      query: `
+        query {
+          themes(first: 50) {
+            edges {
+              node {
+                id
+                name
+                role
+              }
             }
           }
-        `,
-        variables: {
-          id: themeId,
-        },
-      },
+        }
+      `,
     });
 
-    // Check for errors in the theme query response
-    const theme = themeResponse.body.data?.theme;
+    const themes = themesResponse.body.data.themes.edges;
+    const theme = themes.find((t) => t.node.id === themeId)?.node;
+
     if (!theme) {
       console.error("Theme not found or invalid ID:", themeId);
       return res.status(404).json({ error: "Theme not found" });
     }
 
     // Fetch translatable resources
-    const translatableResourcesResponse = await client.query({
-      data: {
-        query: `
-          query GetTranslatableResources($themeId: ID!) {
-            translatableResources(
-              first: 100,
-              resourceType: ONLINE_STORE_THEME,
-              themeId: $themeId
-            ) {
-              edges {
-                node {
-                  resourceId
-                  translatableContent {
-                    key
-                    value
-                    digest
-                  }
+    const translatableResourcesResponse = await client.request({
+      query: `
+        query GetTranslatableResources($themeId: ID!) {
+          translatableResources(
+            first: 100,
+            resourceType: ONLINE_STORE_THEME,
+            themeId: $themeId
+          ) {
+            edges {
+              node {
+                resourceId
+                translatableContent {
+                  key
+                  value
+                  digest
                 }
               }
               pageInfo {
@@ -100,9 +97,8 @@ export const addSelectedLanguage = async (req, res) => {
             }
           }
         `,
-        variables: {
-          themeId: themeId, // Use updated themeId here
-        },
+      variables: {
+        themeId,
       },
     });
 
@@ -152,29 +148,27 @@ export const addSelectedLanguage = async (req, res) => {
         });
       }
 
-      // Register translations with Shopify
+      // Register translations
       if (translations.length > 0) {
         try {
-          const registerResponse = await client.query({
-            data: {
-              query: `
-                mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
-                  translationsRegister(resourceId: $resourceId, translations: $translations) {
-                    translations {
-                      key
-                      locale
-                    }
-                    userErrors {
-                      field
-                      message
-                    }
+          const registerResponse = await client.request({
+            query: `
+              mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+                translationsRegister(resourceId: $resourceId, translations: $translations) {
+                  translations {
+                    key
+                    locale
+                  }
+                  userErrors {
+                    field
+                    message
                   }
                 }
-              `,
-              variables: {
-                resourceId: resource.resourceId,
-                translations,
-              },
+              }
+            `,
+            variables: {
+              resourceId: resource.resourceId,
+              translations,
             },
           });
 
