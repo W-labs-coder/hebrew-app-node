@@ -28,7 +28,7 @@ export const addSelectedLanguage = async (req, res) => {
 
     let themeId = user.selectedTheme;
 
-    // Ensure the themeId is in the correct format (gid://shopify/Theme/{themeId})
+    // Ensure valid theme ID format
     if (!themeId.includes("gid://shopify/Theme/")) {
       if (themeId.includes("OnlineStoreTheme")) {
         themeId = themeId.replace("OnlineStoreTheme", "Theme");
@@ -37,7 +37,7 @@ export const addSelectedLanguage = async (req, res) => {
       }
     }
 
-    // Debug log to check the final themeId
+    // Debug log to verify themeId
     console.log("Final themeId being used in Admin API:", themeId);
 
     // Initialize OpenAI client if API key is provided
@@ -66,8 +66,10 @@ export const addSelectedLanguage = async (req, res) => {
       },
     });
 
-    const theme = themeResponse.body.data.theme;
+    // Check for errors in the theme query response
+    const theme = themeResponse.body.data?.theme;
     if (!theme) {
+      console.error("Theme not found or invalid ID:", themeId);
       return res.status(404).json({ error: "Theme not found" });
     }
 
@@ -99,7 +101,7 @@ export const addSelectedLanguage = async (req, res) => {
           }
         `,
         variables: {
-          themeId: themeId, // Use the updated themeId
+          themeId: themeId, // Use updated themeId here
         },
       },
     });

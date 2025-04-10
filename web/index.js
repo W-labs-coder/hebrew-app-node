@@ -137,8 +137,17 @@ const webhookHandlers = {
                   return;
                 }
 
-                // Create GraphQL client
-                const client = new shopify.api.clients.Graphql({ session });
+                // Create an offline session
+                const offlineSession = new shopify.api.session.Session({
+                  id: `offline_${shop}`,
+                  shop: shop,
+                  state: 'offline',
+                  isOnline: false,
+                  accessToken: session.accessToken
+                });
+
+                // Create GraphQL client with offline session
+                const client = new shopify.api.clients.Graphql({ session: offlineSession });
 
                 try {
                   // Update the checkout with the valid postal code
