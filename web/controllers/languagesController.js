@@ -13,6 +13,7 @@ export const addSelectedLanguage = async (req, res) => {
 
     const shopId = session.shop;
 
+    // Update user's selected language
     const user = await User.findOneAndUpdate(
       { shop: shopId },
       { $set: { selectedLanguage: language } },
@@ -20,9 +21,9 @@ export const addSelectedLanguage = async (req, res) => {
     );
 
     if (!user.selectedTheme) {
-      return res.status(400).json({
-        error: "No theme selected. Please select a theme first.",
-      });
+      return res
+        .status(400)
+        .json({ error: "No theme selected. Please select a theme first." });
     }
 
     let themeId = user.selectedTheme;
@@ -37,14 +38,16 @@ export const addSelectedLanguage = async (req, res) => {
 
     console.log("Final themeId being used in Admin API:", themeId);
 
+    // Initialize OpenAI
     let openai = null;
     if (openaiApiKey) {
       openai = new OpenAI({ apiKey: openaiApiKey });
     }
 
+    // Create GraphQL client
     const client = new shopify.api.clients.Graphql({ session });
 
-    // Get theme info
+    // Confirm theme exists
     const themeResponse = await client.request({
       query: `
         query GetTheme($id: ID!) {
@@ -54,17 +57,15 @@ export const addSelectedLanguage = async (req, res) => {
           }
         }
       `,
-      variables: {
-        id: themeId,
-      },
+      variables: { id: themeId },
     });
 
-    const theme = themeResponse?.body?.data?.theme;
+    const theme = themeResponse.body?.data?.theme;
     if (!theme) {
-      console.error("Theme not found or invalid ID:", themeId);
       return res.status(404).json({ error: "Theme not found" });
     }
 
+    // Fetch translatable resources
     const translatableResourcesResponse = await client.request({
       query: `
         query GetTranslatableResources($themeId: ID!) {
@@ -90,17 +91,16 @@ export const addSelectedLanguage = async (req, res) => {
           }
         }
       `,
-      variables: {
-        themeId: themeId,
-      },
+      variables: { themeId },
     });
 
     const translatableResources =
-      translatableResourcesResponse?.body?.data?.translatableResources?.edges ||
+      translatableResourcesResponse.body?.data?.translatableResources?.edges ||
       [];
 
     let translationCount = 0;
-    const testBatch = translatableResources.slice(0, 5);
+    const initialBatchSize = 5;
+    const testBatch = translatableResources.slice(0, initialBatchSize);
 
     for (const edge of testBatch) {
       const resource = edge.node;
@@ -134,24 +134,19 @@ export const addSelectedLanguage = async (req, res) => {
           }
         }
 
-        if (translatedValue && translatedValue.trim()) {
-          translations.push({
-            key: content.key,
-            locale: language,
-            value: translatedValue,
-          });
-        }
+        translations.push({
+          key: content.key,
+          locale: language,
+          value: translatedValue,
+        });
       }
 
       if (translations.length > 0) {
         console.log(
-          "Registering translations for resourceId:",
+          "Registering translations for resource:",
           resource.resourceId
         );
-        console.log(
-          "Translations payload:",
-          JSON.stringify(translations, null, 2)
-        );
+        console.log("Translations:", translations);
 
         try {
           const registerResponse = await client.request({
@@ -176,8 +171,7 @@ export const addSelectedLanguage = async (req, res) => {
           });
 
           const userErrors =
-            registerResponse?.body?.data?.translationsRegister?.userErrors ||
-            [];
+            registerResponse.body?.data?.translationsRegister?.userErrors || [];
           if (userErrors.length > 0) {
             console.warn("Translation registration warnings:", userErrors);
           }
