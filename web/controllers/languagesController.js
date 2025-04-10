@@ -20,37 +20,35 @@ export const addSelectedLanguage = async (req, res) => {
       { new: true, upsert: true }
     );
 
-    // Check if user has a selected theme
     if (!user.selectedTheme) {
       return res.status(400).json({
         error: "No theme selected. Please select a theme first.",
       });
     }
 
-    const themeId = user.selectedTheme;
+    // Convert OnlineStoreTheme GID to Theme GID
+    const themeId = user.selectedTheme.replace("OnlineStoreTheme", "Theme");
 
     // Initialize OpenAI client if API key is provided
     let openai = null;
     if (openaiApiKey) {
-      openai = new OpenAI({
-        apiKey: openaiApiKey,
-      });
+      openai = new OpenAI({ apiKey: openaiApiKey });
     }
 
     // Create a client for the Admin GraphQL API
     const client = new shopify.api.clients.Graphql({ session });
 
-    // First, get the theme to ensure it exists and to get its ID in the correct format
+    // Confirm the theme exists
     const themeResponse = await client.query({
       data: {
         query: `
-  query GetOnlineStoreTheme($id: ID!) {
-    onlineStoreTheme(id: $id) {
-      id
-      name
-    }
-  }
-`,
+          query GetTheme($id: ID!) {
+            theme(id: $id) {
+              id
+              name
+            }
+          }
+        `,
         variables: {
           id: themeId,
         },
@@ -58,20 +56,19 @@ export const addSelectedLanguage = async (req, res) => {
     });
 
     const theme = themeResponse.body.data.theme;
-
     if (!theme) {
       return res.status(404).json({ error: "Theme not found" });
     }
 
-    // Use the updated query for translatable resources
+    // Fetch translatable resources
     const translatableResourcesResponse = await client.query({
       data: {
         query: `
-          query GetTranslatableResources {
+          query GetTranslatableResources($themeId: ID!) {
             translatableResources(
-              first: 100, 
-              resourceType: ONLINE_STORE_THEME, 
-              themeId: "${themeId}"
+              first: 100,
+              resourceType: ONLINE_STORE_THEME,
+              themeId: $themeId
             ) {
               edges {
                 node {
@@ -90,18 +87,19 @@ export const addSelectedLanguage = async (req, res) => {
             }
           }
         `,
+        variables: {
+          themeId: user.selectedTheme, // original value works here for translatable resources
+        },
       },
     });
 
     const translatableResources =
       translatableResourcesResponse.body.data.translatableResources.edges;
-    let translationCount = 0;
 
-    // Start with a small test batch
+    let translationCount = 0;
     const initialBatchSize = 5;
     const testBatch = translatableResources.slice(0, initialBatchSize);
 
-    // Process the test batch first
     for (const edge of testBatch) {
       const resource = edge.node;
       const translations = [];
@@ -111,7 +109,6 @@ export const addSelectedLanguage = async (req, res) => {
 
         let translatedValue = content.value;
 
-        // If OpenAI is configured, use it for translation
         if (openai) {
           try {
             const translationResponse = await openai.chat.completions.create({
@@ -132,7 +129,6 @@ export const addSelectedLanguage = async (req, res) => {
             translatedValue = translationResponse.choices[0].message.content;
           } catch (translationError) {
             console.error("Translation error:", translationError);
-            // Continue with original value if translation fails
           }
         }
 
@@ -164,12 +160,11 @@ export const addSelectedLanguage = async (req, res) => {
               `,
               variables: {
                 resourceId: resource.resourceId,
-                translations: translations,
+                translations,
               },
             },
           });
 
-          // Check for user errors
           const userErrors =
             registerResponse.body.data.translationsRegister.userErrors;
           if (userErrors && userErrors.length > 0) {

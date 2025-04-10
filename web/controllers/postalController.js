@@ -370,73 +370,41 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 
 
 // Helper function to validate postal code with Israel Post
-export const validateIsraeliPostalCode = async(address, city) => {
+export const validateIsraeliPostalCode = async (address, city) => {
+  const apiKey = "pk.1a833b107bda9119c258960d47f4b2b9"; // Replace with your real API key
+  const query = encodeURIComponent(`${address}, ${city}, Israel`);
+  const url = `https://us1.locationiq.com/v1/search.php?key=${apiKey}&q=${query}&format=json`;
+
   try {
-    // Using Israel Post's updated API endpoint
-    const baseUrl = 'https://services.israelpost.co.il/zip_data.nsf/SearchZip';
-    const params = new URLSearchParams({
-      'OpenAgent': '',
-      'Location': city,
-      'POB': '',
-      'Street': address,
-      'House': '',
-      'Entrance': ''
-    });
-
-    const url = `${baseUrl}?${params.toString()}`;
-    console.log('Requesting Israel Post API:', url);
-
     const response = await fetch(url, {
-      method: 'GET',
       headers: {
-        'Accept': 'application/json, text/html',
-        'Accept-Language': 'he',
-        'Cache-Control': 'no-cache'
-      }
+        Accept: "application/json",
+      },
     });
 
     if (!response.ok) {
-      console.error('Israel Post API error:', {
+      console.error("LocationIQ API error:", {
         status: response.status,
-        statusText: response.statusText
+        statusText: response.statusText,
       });
       return null;
     }
 
-    const text = await response.text();
-    console.log('Raw Israel Post response:', text);
+    const data = await response.json();
 
-    // First try parsing as JSON
-    try {
-      const cleanJson = text.replace(/\\"/g, '"').replace(/^"/, '').replace(/"$/, '');
-      const data = JSON.parse(cleanJson);
+    // Sometimes it's an array of results
+    const addressData = data?.[0]?.address;
+    const postalCode = addressData?.postcode || null;
 
-      if (data && data.length > 0) {
-        const match = data[0];
-        return match.zip || null;
-      }
-    } catch (parseError) {
-      // If JSON parsing fails, try extracting from HTML response
-      if (text.includes('<body')) {
-        // Extract content from body tag
-        const bodyMatch = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-        if (bodyMatch && bodyMatch[1]) {
-          // Clean up the extracted text and look for numbers
-          const bodyText = bodyMatch[1].trim();
-          // Look for a 5-7 digit number pattern (Israeli postal codes)
-          const postalMatch = bodyText.match(/\b\d{5,7}\b/);
-          if (postalMatch) {
-            return postalMatch[0];
-          }
-        }
-      }
+    if (!postalCode) {
+      console.warn("Postal code not found in response:", data);
     }
 
-    console.log('Could not extract postal code from response');
-    return null;
+    return postalCode;
   } catch (error) {
-    console.error('Error in validateIsraeliPostalCode:', error);
+    console.error("Error calling LocationIQ API:", error);
     return null;
   }
-}
+};
+
 
