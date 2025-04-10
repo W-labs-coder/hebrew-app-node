@@ -14,6 +14,29 @@ import orderCancellationRoutes from "./routes/order-cancellation.js";
 import webhooks from "./webhooks/webhooks.js";
 import User from "./models/User.js";
 import cors from 'cors';
+import { validateIsraeliPostalCode } from './controllers/postalController.js'; // First, import the validateIsraeliPostalCode function at the top of the file
+
+// Add this GraphQL mutation at the top of your file
+const UPDATE_CHECKOUT_MUTATION = `
+  mutation checkoutShippingAddressUpdateV2($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
+    checkoutShippingAddressUpdateV2(checkoutId: $checkoutId, $shippingAddress: $shippingAddress) {
+      checkout {
+        id
+        shippingAddress {
+          address1
+          city
+          zip
+          country
+        }
+      }
+      checkoutUserErrors {
+        code
+        field
+        message
+      }
+    }
+  }
+`;
 
 // Add these lines after imports to define __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -54,10 +77,61 @@ app.options('*', (req, res) => {
 const webhookHandlers = {
   'checkouts/create': {
     callback: async (topic, shop, body) => {
-      console.log('Processing checkout webhook:', { topic, shop });
-      const checkoutData = JSON.parse(body);
-      // Add your checkout processing logic here
-      console.log('Checkout data:', checkoutData);
+      try {
+        console.log('Processing checkout webhook:', { topic, shop });
+        const checkoutData = JSON.parse(body);
+        console.log('Checkout data:', checkoutData);
+
+        // Check if this is an Israeli address
+        const address = checkoutData.shipping_address || 
+                       checkoutData.customer?.default_address;
+
+        if (address && address.country_code === 'IL') {
+          console.log('🔍 Validating Israeli postal code for address:', {
+            address1: address.address1,
+            city: address.city
+          });
+
+          const validPostalCode = await validateIsraeliPostalCode(
+            address.address1,
+            address.city
+          );
+
+          if (validPostalCode && validPostalCode !== address.zip) {
+            // Load session for the shop
+            const session = await shopify.config.sessionStorage.loadSession(shop);
+            if (!session) {
+              console.log('❌ No session found for shop:', shop);
+              return;
+            }
+
+            // Create GraphQL client
+            const client = new shopify.api.clients.Graphql({ session });
+
+            // Update the checkout with the valid postal code
+            const response = await client.request({
+              data: {
+                query: UPDATE_CHECKOUT_MUTATION,
+                variables: {
+                  checkoutId: checkoutData.id,
+                  shippingAddress: {
+                    ...address,
+                    zip: validPostalCode
+                  }
+                }
+              }
+            });
+
+            console.log('✅ Checkout updated with valid postal code:', response);
+          } else {
+            console.log('⚠️ Could not validate postal code for address');
+          }
+        } else {
+          console.log('📝 Not an Israeli address, skipping validation');
+        }
+      } catch (error) {
+        console.error('❌ Error processing checkout webhook:', error);
+      }
     }
   }
 };
