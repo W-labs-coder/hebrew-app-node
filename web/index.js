@@ -60,24 +60,22 @@ const UPDATE_CUSTOMER_ADDRESS_MUTATION = `
   }
 `;
 
-// Update the mutation at the top of your file
+// Update the cart mutation at the top of the file
 const CART_UPDATE_MUTATION = `
-  mutation cartDeliveryAddressesUpdate($addresses: [CartSelectableAddressUpdateInput!]!, $cartId: ID!) {
-    cartDeliveryAddressesUpdate(addresses: $addresses, cartId: $cartId) {
+  mutation cartDeliveryAddressesUpdate($cartId: ID!, $addresses: [CartDeliveryAddressInput!]!) {
+    cartDeliveryAddressesUpdate(cartId: $cartId, addresses: $addresses) {
       cart {
         id
         deliveryGroups {
           deliveryAddress {
             address1
+            city
+            zip
           }
         }
       }
       userErrors {
         field
-        message
-      }
-      warnings {
-        code
         message
       }
     }
@@ -195,33 +193,32 @@ const webhookHandlers = {
                     data: {
                       query: CART_UPDATE_MUTATION,
                       variables: {
-                        cartId: `gid://shopify/Cart/${checkoutData.cart_token || checkoutData.token}`, // Use checkout data instead
+                        cartId: checkoutData.cart_token 
+                          ? `gid://shopify/Cart/${checkoutData.cart_token}`
+                          : `gid://shopify/Cart/${checkoutData.token}`,
                         addresses: [{
-                          address: {
-                            deliveryAddress: {
-                              address1: finalAddress.address1,
-                              address2: finalAddress.address2 || "",
-                              city: finalAddress.city,
-                              province: finalAddress.province || "",
-                              countryCode: "IL",
-                              zip: validPostalCode,
-                              firstName: finalAddress.firstName || "",
-                              lastName: finalAddress.lastName || "",
-                              phone: finalAddress.phone || ""
-                            },
-                            selected: true,
-                            validationStrategy: "COUNTRY_CODE_ONLY"
+                          deliveryAddress: {
+                            address1: finalAddress.address1,
+                            address2: finalAddress.address2 || "",
+                            city: finalAddress.city,
+                            province: finalAddress.province || "",
+                            country: "IL",
+                            zip: validPostalCode,
+                            firstName: finalAddress.firstName || "",
+                            lastName: finalAddress.lastName || "",
+                            phone: finalAddress.phone || ""
                           }
                         }]
                       }
                     }
                   });
 
-                  // Add debug logging
-                  console.log('🛒 Cart update payload:', {
-                    token: checkoutData.cart_token || checkoutData.token,
-                    address: finalAddress
-                  });
+                  // Add logging to debug the request
+                  console.log('🔍 Cart update request:', JSON.stringify({
+                    cartId: checkoutData.cart_token || checkoutData.token,
+                    address: finalAddress,
+                    validPostalCode
+                  }, null, 2));
 
                   // Update error handling
                   if (response.body.data?.cartDeliveryAddressesUpdate?.userErrors?.length > 0) {
