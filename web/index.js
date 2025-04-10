@@ -15,6 +15,7 @@ import webhooks from "./webhooks/webhooks.js";
 import User from "./models/User.js";
 import cors from 'cors';
 import { validateIsraeliPostalCode } from './controllers/postalController.js'; // First, import the validateIsraeliPostalCode function at the top of the file
+import { Session } from "@shopify/shopify-api"; // Add this import at the top of your file
 
 // Add these GraphQL mutations at the top of your file
 const UPDATE_CUSTOMER_ADDRESS_MUTATION = `
@@ -134,6 +135,8 @@ const webhookHandlers = {
                   // Get offline session directly using Shopify's session storage
                   const offlineSessionId = `offline_${shop}`;
                   const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
+
+                  
               
                   if (!shopifySession || !shopifySession.accessToken) {
                     console.log('❌ No offline session found for shop:', shop);
@@ -141,7 +144,7 @@ const webhookHandlers = {
                   }
               
                   // Create offline session using the stored access token
-                  const offlineSession = new shopify.api.session.Session({
+                  const offlineSession = new Session({
                     id: offlineSessionId,
                     shop: shop,
                     state: 'offline',
@@ -150,6 +153,7 @@ const webhookHandlers = {
                   });
               
                   // Create GraphQL client with offline session
+                  
                   const client = new shopify.api.clients.Graphql({ session: offlineSession });
               
                   // Update the checkout with the valid postal code
