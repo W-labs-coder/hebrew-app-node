@@ -1,6 +1,6 @@
+import shopify from "../shopify.js";
 import User from "../models/User.js";
 import OpenAI from "openai";
-import shopify from "../shopify.js";
 
 export const addSelectedLanguage = async (req, res) => {
   try {
@@ -13,7 +13,7 @@ export const addSelectedLanguage = async (req, res) => {
 
     const shopId = session.shop;
 
-    // Get user data which includes the selected theme
+    // Update user's selected language
     const user = await User.findOneAndUpdate(
       { shop: shopId },
       { $set: { selectedLanguage: language } },
@@ -40,12 +40,39 @@ export const addSelectedLanguage = async (req, res) => {
     // Create a client for the Admin GraphQL API
     const client = new shopify.api.clients.Graphql({ session });
 
-    // Get translatable content from the theme
+    // First, get the theme to ensure it exists and to get its ID in the correct format
+    const themeResponse = await client.query({
+      data: {
+        query: `
+          query GetTheme($id: ID!) {
+            theme(id: $id) {
+              id
+              name
+            }
+          }
+        `,
+        variables: {
+          id: `gid://shopify/Theme/${themeId}`,
+        },
+      },
+    });
+
+    const theme = themeResponse.body.data.theme;
+
+    if (!theme) {
+      return res.status(404).json({ error: "Theme not found" });
+    }
+
+    // Use the updated query for translatable resources
     const translatableResourcesResponse = await client.query({
       data: {
         query: `
-          query GetTranslatableResources($themeId: ID!) {
-            translatableResources(first: 100, resourceType: ONLINE_STORE_THEME, resourceId: $themeId) {
+          query GetTranslatableResources {
+            translatableResources(
+              first: 100, 
+              resourceType: ONLINE_STORE_THEME, 
+              themeId: "${themeId}"
+            ) {
               edges {
                 node {
                   resourceId
@@ -63,9 +90,6 @@ export const addSelectedLanguage = async (req, res) => {
             }
           }
         `,
-        variables: {
-          themeId: themeId,
-        },
       },
     });
 
@@ -158,22 +182,6 @@ export const addSelectedLanguage = async (req, res) => {
         }
       }
     }
-
-    // If test batch was successful and you want to process all resources, uncomment this
-    /*
-    // Process remaining resources in batches
-    const batchSize = 20;
-    if (translatableResources.length > initialBatchSize) {
-      const remainingResources = translatableResources.slice(initialBatchSize);
-      
-      for (let i = 0; i < remainingResources.length; i += batchSize) {
-        const batch = remainingResources.slice(i, i + batchSize);
-        
-        // Process each resource in the batch (similar code as above)
-        // ...
-      }
-    }
-    */
 
     res.status(200).json({
       message: "Language added successfully and sample translations completed",

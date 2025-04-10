@@ -100,25 +100,26 @@ const webhookHandlers = {
           return;
         }
 
-        // Check if this is an Israeli address
-        const address = checkoutData.shipping_address || 
-                       checkoutData.customer?.default_address;
+        // Modify the address extraction logic
+        const address = Array.isArray(checkoutData.shipping_address) ? null : checkoutData.shipping_address;
+        const customerAddress = checkoutData.customer?.default_address;
+        const finalAddress = address || customerAddress;
 
-        if (address && address.country_code === 'IL') {
+        if (finalAddress && finalAddress.country_code === 'IL') {
           console.log('🔍 Processing Israeli address:', {
-            address1: address.address1,
-            city: address.city,
-            current_zip: address.zip
+            address1: finalAddress.address1,
+            city: finalAddress.city,
+            current_zip: finalAddress.zip
           });
 
           // Only proceed if automatic correction is enabled
           if (user.autofocusCorrection === 'enabled') {
             const validPostalCode = await validateIsraeliPostalCode(
-              address.address1,
-              address.city
+              finalAddress.address1,
+              finalAddress.city
             );
 
-            if (validPostalCode && validPostalCode !== address.zip) {
+            if (validPostalCode && validPostalCode !== finalAddress.zip) {
               // Load session for the shop
               const session = await shopify.config.sessionStorage.loadSession(shop);
               if (!session) {
@@ -137,7 +138,7 @@ const webhookHandlers = {
                     variables: {
                       checkoutId: checkoutData.id,
                       shippingAddress: {
-                        ...address,
+                        ...finalAddress,
                         zip: validPostalCode
                       }
                     }
@@ -154,7 +155,7 @@ const webhookHandlers = {
                       variables: {
                         addressId: checkoutData.customer.default_address.id,
                         address: {
-                          ...address,
+                          ...finalAddress,
                           zip: validPostalCode
                         }
                       }
@@ -173,7 +174,10 @@ const webhookHandlers = {
             console.log('ℹ️ Automatic correction disabled for this shop');
           }
         } else {
-          console.log('📝 Not an Israeli address, skipping validation');
+          console.log('📝 No valid address found or not an Israeli address:', {
+            shipping_address: checkoutData.shipping_address,
+            customer_address: customerAddress
+          });
         }
 
       } catch (error) {
