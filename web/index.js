@@ -16,21 +16,32 @@ import User from "./models/User.js";
 import cors from 'cors';
 import { validateIsraeliPostalCode } from './controllers/postalController.js'; // First, import the validateIsraeliPostalCode function at the top of the file
 
-// Add this GraphQL mutation at the top of your file
+// Add these GraphQL mutations at the top of your file
+const UPDATE_CUSTOMER_ADDRESS_MUTATION = `
+  mutation customerAddressUpdate($addressId: ID!, $address: MailingAddressInput!) {
+    customerAddressUpdate(addressId: $addressId, address: $address) {
+      customerAddress {
+        id
+        zip
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 const UPDATE_CHECKOUT_MUTATION = `
   mutation checkoutShippingAddressUpdateV2($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
-    checkoutShippingAddressUpdateV2(checkoutId: $checkoutId, $shippingAddress: $shippingAddress) {
+    checkoutShippingAddressUpdateV2(checkoutId: $checkoutId, shippingAddress: $shippingAddress) {
       checkout {
         id
         shippingAddress {
-          address1
-          city
           zip
-          country
         }
       }
       checkoutUserErrors {
-        code
         field
         message
       }
@@ -78,57 +89,93 @@ const webhookHandlers = {
   'checkouts/create': {
     callback: async (topic, shop, body) => {
       try {
-        console.log('Processing checkout webhook:', { topic, shop });
+        console.log('🛒 Processing checkout webhook:', { topic, shop });
         const checkoutData = JSON.parse(body);
-        console.log('Checkout data:', checkoutData);
+        console.log('📦 Checkout data:', checkoutData);
+
+        // Find user settings for this shop
+        const user = await User.findOne({ shop });
+        if (!user) {
+          console.log('❌ No user settings found for shop:', shop);
+          return;
+        }
 
         // Check if this is an Israeli address
         const address = checkoutData.shipping_address || 
                        checkoutData.customer?.default_address;
 
         if (address && address.country_code === 'IL') {
-          console.log('🔍 Validating Israeli postal code for address:', {
+          console.log('🔍 Processing Israeli address:', {
             address1: address.address1,
-            city: address.city
+            city: address.city,
+            current_zip: address.zip
           });
 
-          const validPostalCode = await validateIsraeliPostalCode(
-            address.address1,
-            address.city
-          );
+          // Only proceed if automatic correction is enabled
+          if (user.autofocusCorrection === 'enabled') {
+            const validPostalCode = await validateIsraeliPostalCode(
+              address.address1,
+              address.city
+            );
 
-          if (validPostalCode && validPostalCode !== address.zip) {
-            // Load session for the shop
-            const session = await shopify.config.sessionStorage.loadSession(shop);
-            if (!session) {
-              console.log('❌ No session found for shop:', shop);
-              return;
-            }
-
-            // Create GraphQL client
-            const client = new shopify.api.clients.Graphql({ session });
-
-            // Update the checkout with the valid postal code
-            const response = await client.request({
-              data: {
-                query: UPDATE_CHECKOUT_MUTATION,
-                variables: {
-                  checkoutId: checkoutData.id,
-                  shippingAddress: {
-                    ...address,
-                    zip: validPostalCode
-                  }
-                }
+            if (validPostalCode && validPostalCode !== address.zip) {
+              // Load session for the shop
+              const session = await shopify.config.sessionStorage.loadSession(shop);
+              if (!session) {
+                console.log('❌ No session found for shop:', shop);
+                return;
               }
-            });
 
-            console.log('✅ Checkout updated with valid postal code:', response);
+              // Create GraphQL client
+              const client = new shopify.api.clients.Graphql({ session });
+
+              try {
+                // Update the checkout with the valid postal code
+                const response = await client.request({
+                  data: {
+                    query: UPDATE_CHECKOUT_MUTATION,
+                    variables: {
+                      checkoutId: checkoutData.id,
+                      shippingAddress: {
+                        ...address,
+                        zip: validPostalCode
+                      }
+                    }
+                  }
+                });
+
+                console.log('✅ Checkout updated with valid postal code:', validPostalCode);
+                
+                // Also update customer's default address if available
+                if (checkoutData.customer?.id && checkoutData.customer?.default_address?.id) {
+                  await client.request({
+                    data: {
+                      query: UPDATE_CUSTOMER_ADDRESS_MUTATION,
+                      variables: {
+                        addressId: checkoutData.customer.default_address.id,
+                        address: {
+                          ...address,
+                          zip: validPostalCode
+                        }
+                      }
+                    }
+                  });
+                  console.log('✅ Customer default address updated');
+                }
+
+              } catch (apiError) {
+                console.error('❌ Failed to update checkout:', apiError);
+              }
+            } else {
+              console.log('ℹ️ No postal code update needed');
+            }
           } else {
-            console.log('⚠️ Could not validate postal code for address');
+            console.log('ℹ️ Automatic correction disabled for this shop');
           }
         } else {
           console.log('📝 Not an Israeli address, skipping validation');
         }
+
       } catch (error) {
         console.error('❌ Error processing checkout webhook:', error);
       }

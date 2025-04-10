@@ -13,12 +13,21 @@ export const addSelectedLanguage = async (req, res) => {
 
     const shopId = session.shop;
 
-    // Update user's selected language
+    // Get user data which includes the selected theme
     const user = await User.findOneAndUpdate(
       { shop: shopId },
       { $set: { selectedLanguage: language } },
       { new: true, upsert: true }
     );
+
+    // Check if user has a selected theme
+    if (!user.selectedTheme) {
+      return res.status(400).json({
+        error: "No theme selected. Please select a theme first.",
+      });
+    }
+
+    const themeId = user.selectedTheme;
 
     // Initialize OpenAI client if API key is provided
     let openai = null;
@@ -28,41 +37,8 @@ export const addSelectedLanguage = async (req, res) => {
       });
     }
 
-    // Create a client for the Admin GraphQL API using your existing method
+    // Create a client for the Admin GraphQL API
     const client = new shopify.api.clients.Graphql({ session });
-
-    // Get the active theme ID
-    const themeResponse = await client.query({
-      data: `
-        {
-          shop {
-            id
-            primaryDomain {
-              url
-            }
-            themes(first: 10) {
-              edges {
-                node {
-                  id
-                  name
-                  role
-                }
-              }
-            }
-          }
-        }
-      `,
-    });
-
-    // Find the active theme
-    const themes = themeResponse.body.data.shop.themes.edges;
-    const activeTheme = themes.find((edge) => edge.node.role === "MAIN");
-
-    if (!activeTheme) {
-      throw new Error("No active theme found");
-    }
-
-    const themeId = activeTheme.node.id;
 
     // Get translatable content from the theme
     const translatableResourcesResponse = await client.query({
@@ -95,12 +71,6 @@ export const addSelectedLanguage = async (req, res) => {
 
     const translatableResources =
       translatableResourcesResponse.body.data.translatableResources.edges;
-    let pageInfo =
-      translatableResourcesResponse.body.data.translatableResources.pageInfo;
-    let cursor = pageInfo.endCursor;
-
-    // Process translations in batches to avoid timeouts
-    const batchSize = 20;
     let translationCount = 0;
 
     // Start with a small test batch
@@ -189,22 +159,19 @@ export const addSelectedLanguage = async (req, res) => {
       }
     }
 
-    // If the test batch was successful, you can uncomment this code to process the rest
+    // If test batch was successful and you want to process all resources, uncomment this
     /*
-    // Process remaining resources
+    // Process remaining resources in batches
+    const batchSize = 20;
     if (translatableResources.length > initialBatchSize) {
       const remainingResources = translatableResources.slice(initialBatchSize);
       
-      // Process in batches
       for (let i = 0; i < remainingResources.length; i += batchSize) {
         const batch = remainingResources.slice(i, i + batchSize);
         
-        // Process each resource in the batch
-        // ... (similar code as above)
+        // Process each resource in the batch (similar code as above)
+        // ...
       }
-      
-      // Process additional pages if available
-      // ... (pagination code)
     }
     */
 
