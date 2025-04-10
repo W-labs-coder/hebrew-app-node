@@ -60,6 +60,32 @@ const UPDATE_CUSTOMER_ADDRESS_MUTATION = `
   }
 `;
 
+// Update the mutation at the top of your file
+const CART_UPDATE_MUTATION = `
+  mutation cartDeliveryAddressesUpdate($addresses: [CartSelectableAddressUpdateInput!]!, $cartId: ID!) {
+    cartDeliveryAddressesUpdate(addresses: $addresses, cartId: $cartId) {
+      cart {
+        id
+        deliveryGroups {
+          deliveryAddress {
+            address1
+            city
+            zip
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+      warnings {
+        code
+        message
+      }
+    }
+  }
+`;
+
 // Add these lines after imports to define __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -169,29 +195,41 @@ const webhookHandlers = {
                   // Update the checkout with the valid postal code
                   const response = await client.request({
                     data: {
-                      query: UPDATE_CHECKOUT_MUTATION,
+                      query: CART_UPDATE_MUTATION,
                       variables: {
-                        checkoutId: `gid://shopify/Checkout/${checkoutData.token}`,
-                        shippingAddress: {
-                          address1: finalAddress.address1,
-                          address2: finalAddress.address2 || "",
-                          city: finalAddress.city,
-                          province: finalAddress.province || "",
-                          country: "IL",
-                          zip: validPostalCode,
-                          firstName: finalAddress.firstName || "",
-                          lastName: finalAddress.lastName || "",
-                          phone: finalAddress.phone || ""
-                        }
+                        cartId: `gid://shopify/Cart/${cartData.token}`,
+                        addresses: [{
+                          address: {
+                            deliveryAddress: {
+                              address1: finalAddress.address1,
+                              address2: finalAddress.address2 || "",
+                              city: finalAddress.city,
+                              province: finalAddress.province || "",
+                              countryCode: "IL",
+                              zip: validPostalCode,
+                              firstName: finalAddress.firstName || "",
+                              lastName: finalAddress.lastName || "",
+                              phone: finalAddress.phone || ""
+                            },
+                            selected: true,
+                            validationStrategy: "COUNTRY_CODE_ONLY"
+                          }
+                        }]
                       }
                     }
                   });
 
-                  // Add error checking
-                  if (response.body.data?.checkoutShippingAddressUpdate?.userErrors?.length > 0) {
-                    const errors = response.body.data.checkoutShippingAddressUpdate.userErrors;
-                    console.error('Checkout update errors:', errors);
+                  // Update error handling
+                  if (response.body.data?.cartDeliveryAddressesUpdate?.userErrors?.length > 0) {
+                    const errors = response.body.data.cartDeliveryAddressesUpdate.userErrors;
+                    console.error('Cart update errors:', errors);
                     throw new Error(errors[0].message);
+                  }
+
+                  // Check for warnings
+                  if (response.body.data?.cartDeliveryAddressesUpdate?.warnings?.length > 0) {
+                    const warnings = response.body.data.cartDeliveryAddressesUpdate.warnings;
+                    console.warn('Cart update warnings:', warnings);
                   }
 
                   console.log('✅ Checkout updated with valid postal code:', validPostalCode);
