@@ -130,26 +130,28 @@ const webhookHandlers = {
 
               // Only update if automatic correction is enabled and postal code is different
               if (user.autofocusCorrection === 'enabled' && validPostalCode !== finalAddress.zip) {
-                // Load session for the shop
-                const session = await shopify.config.sessionStorage.loadSession(shop);
-                if (!session) {
-                  console.log('❌ No session found for shop:', shop);
-                  return;
-                }
-
-                // Create an offline session
-                const offlineSession = new shopify.api.session.Session({
-                  id: `offline_${shop}`,
-                  shop: shop,
-                  state: 'offline',
-                  isOnline: false,
-                  accessToken: session.accessToken
-                });
-
-                // Create GraphQL client with offline session
-                const client = new shopify.api.clients.Graphql({ session: offlineSession });
-
                 try {
+                  // Get offline session directly using Shopify's session storage
+                  const offlineSessionId = `offline_${shop}`;
+                  const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
+              
+                  if (!shopifySession || !shopifySession.accessToken) {
+                    console.log('❌ No offline session found for shop:', shop);
+                    return;
+                  }
+              
+                  // Create offline session using the stored access token
+                  const offlineSession = new shopify.api.session.Session({
+                    id: offlineSessionId,
+                    shop: shop,
+                    state: 'offline',
+                    isOnline: false,
+                    accessToken: shopifySession.accessToken
+                  });
+              
+                  // Create GraphQL client with offline session
+                  const client = new shopify.api.clients.Graphql({ session: offlineSession });
+              
                   // Update the checkout with the valid postal code
                   const response = await client.request({
                     data: {
