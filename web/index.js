@@ -35,14 +35,21 @@ const UPDATE_CUSTOMER_ADDRESS_MUTATION = `
 
 const UPDATE_CHECKOUT_MUTATION = `
   mutation checkoutShippingAddressUpdateV2($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
-    checkoutShippingAddressUpdateV2(checkoutId: $checkoutId, shippingAddress: $shippingAddress) {
+    checkoutShippingAddressUpdateV2(
+      checkoutId: $checkoutId,
+      shippingAddress: $shippingAddress
+    ) {
       checkout {
         id
         shippingAddress {
+          id
+          address1
+          city
           zip
         }
       }
       checkoutUserErrors {
+        code
         field
         message
       }
@@ -161,14 +168,28 @@ const webhookHandlers = {
                     data: {
                       query: UPDATE_CHECKOUT_MUTATION,
                       variables: {
-                        checkoutId: checkoutData.id,
+                        checkoutId: checkoutData.token, // Note: using token instead of id
                         shippingAddress: {
-                          ...finalAddress,
-                          zip: validPostalCode
+                          address1: finalAddress.address1,
+                          address2: finalAddress.address2,
+                          city: finalAddress.city,
+                          province: finalAddress.province,
+                          country: finalAddress.country,
+                          zip: validPostalCode,
+                          firstName: finalAddress.firstName,
+                          lastName: finalAddress.lastName,
+                          phone: finalAddress.phone
                         }
                       }
                     }
                   });
+
+                  // Add error checking
+                  if (response.body.data?.checkoutShippingAddressUpdateV2?.checkoutUserErrors?.length > 0) {
+                    const errors = response.body.data.checkoutShippingAddressUpdateV2.checkoutUserErrors;
+                    console.error('Checkout update errors:', errors);
+                    throw new Error(errors[0].message);
+                  }
 
                   console.log('✅ Checkout updated with valid postal code:', validPostalCode);
                   
