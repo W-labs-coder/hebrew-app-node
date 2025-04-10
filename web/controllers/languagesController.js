@@ -13,7 +13,6 @@ export const addSelectedLanguage = async (req, res) => {
 
     const shopId = session.shop;
 
-    // Update user's selected language
     const user = await User.findOneAndUpdate(
       { shop: shopId },
       { $set: { selectedLanguage: language } },
@@ -28,7 +27,6 @@ export const addSelectedLanguage = async (req, res) => {
 
     let themeId = user.selectedTheme;
 
-    // Ensure valid theme ID format
     if (!themeId.includes("gid://shopify/Theme/")) {
       if (themeId.includes("OnlineStoreTheme")) {
         themeId = themeId.replace("OnlineStoreTheme", "Theme");
@@ -39,7 +37,6 @@ export const addSelectedLanguage = async (req, res) => {
 
     console.log("Final themeId being used in Admin API:", themeId);
 
-    // Initialize OpenAI client if API key is provided
     let openai = null;
     if (openaiApiKey) {
       openai = new OpenAI({ apiKey: openaiApiKey });
@@ -47,32 +44,27 @@ export const addSelectedLanguage = async (req, res) => {
 
     const client = new shopify.api.clients.Graphql({ session });
 
-    // Fetch themes and verify existence
-    const themesResponse = await client.request({
+    // Get theme info
+    const themeResponse = await client.request({
       query: `
-        query {
-          themes(first: 50) {
-            edges {
-              node {
-                id
-                name
-                role
-              }
-            }
+        query GetTheme($id: ID!) {
+          theme(id: $id) {
+            id
+            name
           }
         }
       `,
+      variables: {
+        id: themeId,
+      },
     });
 
-    const themes = themesResponse.body.data.themes.edges;
-    const theme = themes.find((t) => t.node.id === themeId)?.node;
-
+    const theme = themeResponse?.body?.data?.theme;
     if (!theme) {
       console.error("Theme not found or invalid ID:", themeId);
       return res.status(404).json({ error: "Theme not found" });
     }
 
-    // Fetch translatable resources
     const translatableResourcesResponse = await client.request({
       query: `
         query GetTranslatableResources($themeId: ID!) {
@@ -96,18 +88,19 @@ export const addSelectedLanguage = async (req, res) => {
               }
             }
           }
-        `,
+        }
+      `,
       variables: {
-        themeId,
+        themeId: themeId,
       },
     });
 
     const translatableResources =
-      translatableResourcesResponse.body.data.translatableResources.edges;
+      translatableResourcesResponse?.body?.data?.translatableResources?.edges ||
+      [];
 
     let translationCount = 0;
-    const initialBatchSize = 5;
-    const testBatch = translatableResources.slice(0, initialBatchSize);
+    const testBatch = translatableResources.slice(0, 5);
 
     for (const edge of testBatch) {
       const resource = edge.node;
@@ -141,15 +134,25 @@ export const addSelectedLanguage = async (req, res) => {
           }
         }
 
-        translations.push({
-          key: content.key,
-          locale: language,
-          value: translatedValue,
-        });
+        if (translatedValue && translatedValue.trim()) {
+          translations.push({
+            key: content.key,
+            locale: language,
+            value: translatedValue,
+          });
+        }
       }
 
-      // Register translations
       if (translations.length > 0) {
+        console.log(
+          "Registering translations for resourceId:",
+          resource.resourceId
+        );
+        console.log(
+          "Translations payload:",
+          JSON.stringify(translations, null, 2)
+        );
+
         try {
           const registerResponse = await client.request({
             query: `
@@ -173,8 +176,9 @@ export const addSelectedLanguage = async (req, res) => {
           });
 
           const userErrors =
-            registerResponse.body.data.translationsRegister.userErrors;
-          if (userErrors && userErrors.length > 0) {
+            registerResponse?.body?.data?.translationsRegister?.userErrors ||
+            [];
+          if (userErrors.length > 0) {
             console.warn("Translation registration warnings:", userErrors);
           }
 
