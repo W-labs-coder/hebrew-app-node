@@ -48,7 +48,7 @@ const shopify = shopifyApp({
     callbackPath: "/api/auth/callback",
   },
   webhooks: {
-    path: "/api/webhooks",
+    path: "/webhooks",
   },
   sessionStorage, // Use the session storage with Mongoose
 });
