@@ -17,28 +17,10 @@ import cors from 'cors';
 import { validateIsraeliPostalCode } from './controllers/postalController.js'; // First, import the validateIsraeliPostalCode function at the top of the file
 import { Session } from "@shopify/shopify-api"; // Add this import at the top of your file
 
-// Add these GraphQL mutations at the top of your file
-const UPDATE_CUSTOMER_ADDRESS_MUTATION = `
-  mutation customerAddressUpdate($addressId: ID!, $address: MailingAddressInput!) {
-    customerAddressUpdate(addressId: $addressId, address: $address) {
-      customerAddress {
-        id
-        zip
-      }
-      userErrors {
-        field
-        message
-      }
-    }
-  }
-`;
-
+// Update both mutations at the top of your file
 const UPDATE_CHECKOUT_MUTATION = `
-  mutation checkoutShippingAddressUpdate($checkoutId: String!, $shippingAddress: MailingAddressInput!) {
-    checkoutShippingAddressUpdate(
-      checkoutId: $checkoutId,
-      shippingAddress: $shippingAddress
-    ) {
+  mutation checkoutShippingAddressUpdateV2($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
+    checkoutShippingAddressUpdateV2(checkoutId: $checkoutId, shippingAddress: $shippingAddress) {
       checkout {
         id
         shippingAddress {
@@ -47,6 +29,28 @@ const UPDATE_CHECKOUT_MUTATION = `
           city
           zip
         }
+      }
+      checkoutUserErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+
+const UPDATE_CUSTOMER_ADDRESS_MUTATION = `
+  mutation customerAddressUpdate($address: MailingAddressInput!, $customerAccessToken: String!, $id: ID!) {
+    customerAddressUpdate(address: $address, customerAccessToken: $customerAccessToken, id: $id) {
+      customerAddress {
+        id
+        address1
+        city
+        zip
+      }
+      customerUserErrors {
+        field
+        message
       }
       userErrors {
         field
@@ -167,7 +171,7 @@ const webhookHandlers = {
                     data: {
                       query: UPDATE_CHECKOUT_MUTATION,
                       variables: {
-                        checkoutId: checkoutData.token,
+                        checkoutId: `gid://shopify/Checkout/${checkoutData.token}`,
                         shippingAddress: {
                           address1: finalAddress.address1,
                           address2: finalAddress.address2 || "",
@@ -198,10 +202,12 @@ const webhookHandlers = {
                       data: {
                         query: UPDATE_CUSTOMER_ADDRESS_MUTATION,
                         variables: {
-                          addressId: checkoutData.customer.default_address.id,
+                          id: checkoutData.customer.default_address.id,
+                          customerAccessToken: checkoutData.customer.customerAccessToken,
                           address: {
                             ...finalAddress,
-                            zip: validPostalCode
+                            zip: validPostalCode,
+                            country: "IL"
                           }
                         }
                       }
