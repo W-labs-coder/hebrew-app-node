@@ -22,26 +22,33 @@ if (!process.env.SHOPIFY_API_SECRET) {
 
 // Export the register webhooks function
 export const registerWebhooks = async (session) => {
-  const webhooks = [
-    {
-      path: '/webhooks/checkouts/create',
+  try {
+    // First delete existing webhook
+    const client = new shopify.api.clients.Rest({ session });
+    const { body: existingWebhooks } = await client.get({
+      path: 'webhooks',
+    });
+
+    // Find and delete existing checkout webhook
+    for (const webhook of existingWebhooks.webhooks) {
+      if (webhook.topic === 'checkouts/create') {
+        console.log('🗑️ Deleting existing checkout webhook:', webhook.id);
+        await client.delete({
+          path: `webhooks/${webhook.id}`,
+        });
+      }
+    }
+
+    // Register new webhook
+    await shopify.api.webhooks.register({
+      session,
+      path: '/webhooks/checkouts/create', // Removed /api/
       topic: 'checkouts/create',
       deliveryMethod: DeliveryMethod.Http
-    }
-  ];
-
-  for (const webhookConfig of webhooks) {
-    try {
-      await shopify.api.webhooks.register({
-        session,
-        path: webhookConfig.path,
-        topic: webhookConfig.topic,
-        deliveryMethod: webhookConfig.deliveryMethod
-      });
-      console.log(`✅ Webhook registered: ${webhookConfig.topic}`);
-    } catch (error) {
-      console.error(`❌ Failed to register webhook ${webhookConfig.topic}:`, error);
-    }
+    });
+    console.log('✅ New checkout webhook registered');
+  } catch (error) {
+    console.error('❌ Failed to register webhook:', error);
   }
 };
 
