@@ -100,6 +100,12 @@ const webhookHandlers = {
           return;
         }
 
+        // Log user settings
+        console.log('🔧 User settings:', {
+          autofocusDetection: user.autofocusDetection,
+          autofocusCorrection: user.autofocusCorrection
+        });
+
         // Modify the address extraction logic
         const address = Array.isArray(checkoutData.shipping_address) ? null : checkoutData.shipping_address;
         const customerAddress = checkoutData.customer?.default_address;
@@ -112,66 +118,74 @@ const webhookHandlers = {
             current_zip: finalAddress.zip
           });
 
-          // Only proceed if automatic correction is enabled
-          if (user.autofocusCorrection === 'enabled') {
+          // Check for autofocusDetection first
+          if (user.autofocusDetection === 'enabled') {
             const validPostalCode = await validateIsraeliPostalCode(
               finalAddress.address1,
               finalAddress.city
             );
 
-            if (validPostalCode && validPostalCode !== finalAddress.zip) {
-              // Load session for the shop
-              const session = await shopify.config.sessionStorage.loadSession(shop);
-              if (!session) {
-                console.log('❌ No session found for shop:', shop);
-                return;
-              }
+            if (validPostalCode) {
+              console.log('✅ Valid postal code detected:', validPostalCode);
 
-              // Create GraphQL client
-              const client = new shopify.api.clients.Graphql({ session });
+              // Only update if automatic correction is enabled and postal code is different
+              if (user.autofocusCorrection === 'enabled' && validPostalCode !== finalAddress.zip) {
+                // Load session for the shop
+                const session = await shopify.config.sessionStorage.loadSession(shop);
+                if (!session) {
+                  console.log('❌ No session found for shop:', shop);
+                  return;
+                }
 
-              try {
-                // Update the checkout with the valid postal code
-                const response = await client.request({
-                  data: {
-                    query: UPDATE_CHECKOUT_MUTATION,
-                    variables: {
-                      checkoutId: checkoutData.id,
-                      shippingAddress: {
-                        ...finalAddress,
-                        zip: validPostalCode
-                      }
-                    }
-                  }
-                });
+                // Create GraphQL client
+                const client = new shopify.api.clients.Graphql({ session });
 
-                console.log('✅ Checkout updated with valid postal code:', validPostalCode);
-                
-                // Also update customer's default address if available
-                if (checkoutData.customer?.id && checkoutData.customer?.default_address?.id) {
-                  await client.request({
+                try {
+                  // Update the checkout with the valid postal code
+                  const response = await client.request({
                     data: {
-                      query: UPDATE_CUSTOMER_ADDRESS_MUTATION,
+                      query: UPDATE_CHECKOUT_MUTATION,
                       variables: {
-                        addressId: checkoutData.customer.default_address.id,
-                        address: {
+                        checkoutId: checkoutData.id,
+                        shippingAddress: {
                           ...finalAddress,
                           zip: validPostalCode
                         }
                       }
                     }
                   });
-                  console.log('✅ Customer default address updated');
-                }
 
-              } catch (apiError) {
-                console.error('❌ Failed to update checkout:', apiError);
+                  console.log('✅ Checkout updated with valid postal code:', validPostalCode);
+                  
+                  // Also update customer's default address if available
+                  if (checkoutData.customer?.id && checkoutData.customer?.default_address?.id) {
+                    await client.request({
+                      data: {
+                        query: UPDATE_CUSTOMER_ADDRESS_MUTATION,
+                        variables: {
+                          addressId: checkoutData.customer.default_address.id,
+                          address: {
+                            ...finalAddress,
+                            zip: validPostalCode
+                          }
+                        }
+                      }
+                    });
+                    console.log('✅ Customer default address updated');
+                  }
+                } catch (apiError) {
+                  console.error('❌ Failed to update checkout:', apiError);
+                }
+              } else {
+                console.log(user.autofocusCorrection === 'enabled' 
+                  ? 'ℹ️ No postal code update needed' 
+                  : 'ℹ️ Automatic correction disabled');
               }
             } else {
-              console.log('ℹ️ No postal code update needed');
+              console.log('⚠️ Could not validate postal code for address');
             }
           } else {
-            console.log('ℹ️ Automatic correction disabled for this shop');
+            console.log('ℹ️ Automatic detection disabled for this shop');
           }
         } else {
           console.log('📝 No valid address found or not an Israeli address:', {

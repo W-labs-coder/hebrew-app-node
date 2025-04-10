@@ -44,15 +44,15 @@ export const addSelectedLanguage = async (req, res) => {
     const themeResponse = await client.query({
       data: {
         query: `
-          query GetTheme($id: ID!) {
-            theme(id: $id) {
-              id
-              name
-            }
-          }
-        `,
+  query GetOnlineStoreTheme($id: ID!) {
+    onlineStoreTheme(id: $id) {
+      id
+      name
+    }
+  }
+`,
         variables: {
-          id: `gid://shopify/Theme/${themeId}`,
+          id: themeId,
         },
       },
     });

@@ -389,7 +389,7 @@ export const validateIsraeliPostalCode = async(address, city) => {
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
+        'Accept': 'application/json, text/html',
         'Accept-Language': 'he',
         'Cache-Control': 'no-cache'
       }
@@ -406,26 +406,33 @@ export const validateIsraeliPostalCode = async(address, city) => {
     const text = await response.text();
     console.log('Raw Israel Post response:', text);
 
-    // Check if the response is valid JSON
-    if (text.trim().startsWith('<')) {
-      console.error('Israel Post API returned HTML instead of JSON');
-      return null;
-    }
-
-    // Parse the JSON response
+    // First try parsing as JSON
     try {
       const cleanJson = text.replace(/\\"/g, '"').replace(/^"/, '').replace(/"$/, '');
       const data = JSON.parse(cleanJson);
 
       if (data && data.length > 0) {
-        // Return the first matching postal code
         const match = data[0];
         return match.zip || null;
       }
     } catch (parseError) {
-      console.error('Failed to parse Israel Post response:', parseError);
+      // If JSON parsing fails, try extracting from HTML response
+      if (text.includes('<body')) {
+        // Extract content from body tag
+        const bodyMatch = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        if (bodyMatch && bodyMatch[1]) {
+          // Clean up the extracted text and look for numbers
+          const bodyText = bodyMatch[1].trim();
+          // Look for a 5-7 digit number pattern (Israeli postal codes)
+          const postalMatch = bodyText.match(/\b\d{5,7}\b/);
+          if (postalMatch) {
+            return postalMatch[0];
+          }
+        }
+      }
     }
 
+    console.log('Could not extract postal code from response');
     return null;
   } catch (error) {
     console.error('Error in validateIsraeliPostalCode:', error);
