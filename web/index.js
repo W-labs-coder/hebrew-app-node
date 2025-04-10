@@ -126,21 +126,8 @@ app.post("/webhooks/orders/create", express.raw({type: '*/*'}), async (req, res)
 app.post("/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
     console.log('🔍 Debug: Webhook endpoint hit');
-    console.log('🔍 Request path:', req.path);
-    console.log('🔍 Method:', req.method);
-    console.log('📥 Raw webhook body:', req.body);
-    console.log('📥 Content-Type:', req.get('Content-Type'));
-    console.log('📥 All Headers:', req.headers);
-
-    console.log('📥 Checkout webhook received:', {
-      headers: {
-        hmac: req.get('X-Shopify-Hmac-Sha256'),
-        topic: req.get('X-Shopify-Topic'),
-        shop: req.get('X-Shopify-Shop-Domain')
-      }
-    });
-
-    // Verify webhook HMAC
+    
+    // Get required headers
     const hmac = req.get('X-Shopify-Hmac-Sha256');
     const topic = req.get('X-Shopify-Topic');
     const shop = req.get('X-Shopify-Shop-Domain');
@@ -150,15 +137,17 @@ app.post("/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, r
       return res.status(401).send('Missing required headers');
     }
 
-    // Get raw body before parsing
-    const body = req.body.toString('utf8');
+    // Get raw body
+    const rawBody = req.body.toString('utf8');
     
-    // Verify webhook
-    const verified = shopify.api.webhooks.validate({
-      rawBody: body,
-      hmac,
-      secret: process.env.SHOPIFY_API_SECRET
-    });
+    // Create hash from raw body
+    const hash = crypto
+      .createHmac('sha256', process.env.SHOPIFY_API_SECRET)
+      .update(rawBody, 'utf8')
+      .digest('base64');
+
+    // Verify webhook signature
+    const verified = hash === hmac;
 
     if (!verified) {
       console.error('❌ Invalid webhook signature');
@@ -169,7 +158,7 @@ app.post("/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, r
     await webhookHandlers['checkouts/create'].callback(
       'checkouts/create',
       shop,
-      body
+      rawBody
     );
 
     res.status(200).send('OK');
