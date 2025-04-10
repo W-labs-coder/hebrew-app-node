@@ -26,8 +26,19 @@ export const addSelectedLanguage = async (req, res) => {
       });
     }
 
-    // Convert OnlineStoreTheme GID to Theme GID
-    const themeId = user.selectedTheme.replace("OnlineStoreTheme", "Theme");
+    let themeId = user.selectedTheme;
+
+    // Ensure the themeId is in the correct format (gid://shopify/Theme/{themeId})
+    if (!themeId.includes("gid://shopify/Theme/")) {
+      if (themeId.includes("OnlineStoreTheme")) {
+        themeId = themeId.replace("OnlineStoreTheme", "Theme");
+      } else {
+        themeId = `gid://shopify/Theme/${themeId}`;
+      }
+    }
+
+    // Debug log to check the final themeId
+    console.log("Final themeId being used in Admin API:", themeId);
 
     // Initialize OpenAI client if API key is provided
     let openai = null;
@@ -88,7 +99,7 @@ export const addSelectedLanguage = async (req, res) => {
           }
         `,
         variables: {
-          themeId: user.selectedTheme, // original value works here for translatable resources
+          themeId: themeId, // Use the updated themeId
         },
       },
     });
