@@ -69,8 +69,6 @@ const CART_UPDATE_MUTATION = `
         deliveryGroups {
           deliveryAddress {
             address1
-            city
-            zip
           }
         }
       }
@@ -197,7 +195,7 @@ const webhookHandlers = {
                     data: {
                       query: CART_UPDATE_MUTATION,
                       variables: {
-                        cartId: `gid://shopify/Cart/${cartData.token}`,
+                        cartId: `gid://shopify/Cart/${checkoutData.cart_token || checkoutData.token}`, // Use checkout data instead
                         addresses: [{
                           address: {
                             deliveryAddress: {
@@ -217,6 +215,12 @@ const webhookHandlers = {
                         }]
                       }
                     }
+                  });
+
+                  // Add debug logging
+                  console.log('🛒 Cart update payload:', {
+                    token: checkoutData.cart_token || checkoutData.token,
+                    address: finalAddress
                   });
 
                   // Update error handling
