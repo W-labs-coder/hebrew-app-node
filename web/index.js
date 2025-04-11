@@ -17,6 +17,26 @@ import cors from 'cors';
 import { validateIsraeliPostalCode } from './controllers/postalController.js'; // First, import the validateIsraeliPostalCode function at the top of the file
 import { Session } from "@shopify/shopify-api"; // Add this import at the top of your file
 
+// Add this mutation at the top with other mutations
+const UPDATE_ORDER_MUTATION = `
+  mutation orderUpdate($input: OrderInput!) {
+    orderUpdate(input: $input) {
+      order {
+        id
+        shippingAddress {
+          address1
+          city
+          zip
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 // Update both mutations at the top of your file
 const UPDATE_CHECKOUT_MUTATION = `
   mutation checkoutShippingAddressUpdateV2($checkoutId: ID!, $shippingAddress: MailingAddressInput!) {
@@ -117,14 +137,14 @@ app.options('*', (req, res) => {
   res.status(200).end();
 });
 
-// First define the webhook handlers
+// Change the webhook handler from checkouts/create to orders/create
 const webhookHandlers = {
-  'checkouts/create': {
+  'orders/create': {
     callback: async (topic, shop, body) => {
       try {
-        console.log('🛒 Processing checkout webhook:', { topic, shop });
-        const checkoutData = JSON.parse(body);
-        console.log('📦 Checkout data:', checkoutData);
+        console.log('🛒 Processing order webhook:', { topic, shop });
+        const orderData = JSON.parse(body);
+        console.log('📦 Order data:', orderData);
 
         // Find user settings for this shop
         const user = await User.findOne({ shop });
@@ -139,143 +159,60 @@ const webhookHandlers = {
           autofocusCorrection: user.autofocusCorrection
         });
 
-        // Modify the address extraction logic
-        const address = Array.isArray(checkoutData.shipping_address) ? null : checkoutData.shipping_address;
-        const customerAddress = checkoutData.customer?.default_address;
-        const finalAddress = address || customerAddress;
-
-        if (finalAddress && finalAddress.country_code === 'IL') {
-          console.log('🔍 Processing Israeli address:', {
-            address1: finalAddress.address1,
-            city: finalAddress.city,
-            current_zip: finalAddress.zip
-          });
-
-          // Check for autofocusDetection first
-          if (user.autofocusDetection === 'enabled') {
-            const validPostalCode = await validateIsraeliPostalCode(
-              finalAddress.address1,
-              finalAddress.city
-            );
-
-            if (validPostalCode) {
-              console.log('✅ Valid postal code detected:', validPostalCode);
-
-              // Only update if automatic correction is enabled and postal code is different
-              if (user.autofocusCorrection === 'enabled' && validPostalCode !== finalAddress.zip) {
-                try {
-                  // Get offline session directly using Shopify's session storage
-                  const offlineSessionId = `offline_${shop}`;
-                  const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
-
-                  
-              
-                  if (!shopifySession || !shopifySession.accessToken) {
-                    console.log('❌ No offline session found for shop:', shop);
-                    return;
-                  }
-              
-                  // Create offline session using the stored access token
-                  const offlineSession = new Session({
-                    id: offlineSessionId,
-                    shop: shop,
-                    state: 'offline',
-                    isOnline: false,
-                    accessToken: shopifySession.accessToken
-                  });
-              
-                  // Create GraphQL client with offline session
-                  
-                  const client = new shopify.api.clients.Graphql({ session: offlineSession });
-              
-                  // Update the checkout with the valid postal code
-                  const response = await client.request({
-                    data: {
-                      query: CART_UPDATE_MUTATION,
-                      variables: {
-                        cartId: checkoutData.cart_token 
-                          ? `gid://shopify/Cart/${checkoutData.cart_token}`
-                          : `gid://shopify/Cart/${checkoutData.token}`,
-                        addresses: [{
-                          deliveryAddress: {
-                            address1: finalAddress.address1,
-                            address2: finalAddress.address2 || "",
-                            city: finalAddress.city,
-                            province: finalAddress.province || "",
-                            country: "IL",
-                            zip: validPostalCode,
-                            firstName: finalAddress.firstName || "",
-                            lastName: finalAddress.lastName || "",
-                            phone: finalAddress.phone || ""
-                          }
-                        }]
-                      }
-                    }
-                  });
-
-                  // Add logging to debug the request
-                  console.log('🔍 Cart update request:', JSON.stringify({
-                    cartId: checkoutData.cart_token || checkoutData.token,
-                    address: finalAddress,
-                    validPostalCode
-                  }, null, 2));
-
-                  // Update error handling
-                  if (response.body.data?.cartDeliveryAddressesUpdate?.userErrors?.length > 0) {
-                    const errors = response.body.data.cartDeliveryAddressesUpdate.userErrors;
-                    console.error('Cart update errors:', errors);
-                    throw new Error(errors[0].message);
-                  }
-
-                  // Check for warnings
-                  if (response.body.data?.cartDeliveryAddressesUpdate?.warnings?.length > 0) {
-                    const warnings = response.body.data.cartDeliveryAddressesUpdate.warnings;
-                    console.warn('Cart update warnings:', warnings);
-                  }
-
-                  console.log('✅ Checkout updated with valid postal code:', validPostalCode);
-                  
-                  // Also update customer's default address if available
-                  if (checkoutData.customer?.id && checkoutData.customer?.default_address?.id) {
-                    await client.request({
-                      data: {
-                        query: UPDATE_CUSTOMER_ADDRESS_MUTATION,
-                        variables: {
-                          id: checkoutData.customer.default_address.id,
-                          customerAccessToken: checkoutData.customer.customerAccessToken,
-                          address: {
-                            ...finalAddress,
-                            zip: validPostalCode,
-                            country: "IL"
-                          }
-                        }
-                      }
-                    });
-                    console.log('✅ Customer default address updated');
-                  }
-                } catch (apiError) {
-                  console.error('❌ Failed to update checkout:', apiError);
-                }
-              } else {
-                console.log(user.autofocusCorrection === 'enabled' 
-                  ? 'ℹ️ No postal code update needed' 
-                  : 'ℹ️ Automatic correction disabled');
-              }
-            } else {
-              console.log('⚠️ Could not validate postal code for address');
-            }
-          } else {
-            console.log('ℹ️ Automatic detection disabled for this shop');
-          }
-        } else {
-          console.log('📝 No valid address found or not an Israeli address:', {
-            shipping_address: checkoutData.shipping_address,
-            customer_address: customerAddress
-          });
+        // Get shipping address from order
+        const address = orderData.shipping_address;
+        if (!address) {
+          console.log('❌ No shipping address found in order');
+          return;
         }
 
+        if (address.country_code === 'IL') {
+          // Rest of the logic remains similar, just using order instead of checkout
+          const validPostalCode = await validateIsraeliPostalCode(
+            address.address1,
+            address.city
+          );
+
+          if (validPostalCode && validPostalCode !== address.zip) {
+            // Update the order using the Admin API
+            const offlineSessionId = `offline_${shop}`;
+            const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
+
+            if (!shopifySession?.accessToken) {
+              console.log('❌ No offline session found for shop:', shop);
+              return;
+            }
+
+            const offlineSession = new Session({
+              id: offlineSessionId,
+              shop: shop,
+              state: 'offline',
+              isOnline: false,
+              accessToken: shopifySession.accessToken
+            });
+
+            const client = new shopify.api.clients.Graphql({ session: offlineSession });
+
+            await client.request({
+              data: {
+                query: UPDATE_ORDER_MUTATION,
+                variables: {
+                  input: {
+                    id: orderData.admin_graphql_api_id,
+                    shippingAddress: {
+                      ...address,
+                      zip: validPostalCode
+                    }
+                  }
+                }
+              }
+            });
+
+            console.log('✅ Order updated with valid postal code:', validPostalCode);
+          }
+        }
       } catch (error) {
-        console.error('❌ Error processing checkout webhook:', error);
+        console.error('❌ Error processing order webhook:', error);
       }
     }
   }
@@ -283,10 +220,10 @@ const webhookHandlers = {
 
 // Update the webhook registration
 shopify.api.webhooks.addHandlers({
-  "checkouts/create": {
+  "orders/create": {
     deliveryMethod: "http",
-    callbackUrl: "/webhooks/checkouts/create", // Remove /api/
-    callback: webhookHandlers['checkouts/create'].callback
+    callbackUrl: "/webhooks/orders/create",
+    callback: webhookHandlers['orders/create'].callback
   },
 });
 
@@ -306,36 +243,43 @@ app.post(
 // Move these routes BEFORE the /api/* middleware
 app.post("/webhooks/orders/create", express.raw({type: '*/*'}), async (req, res) => {
   try {
-    console.log('📥 Webhook received:', {
-      headers: {
-        hmac: req.get('X-Shopify-Hmac-Sha256'),
-        topic: req.get('X-Shopify-Topic'),
-        shop: req.get('X-Shopify-Shop-Domain')
-      }
-    });
-
+    console.log('🔍 Debug: Order webhook endpoint hit');
+    
+    // Get required headers
+    const hmac = req.get('X-Shopify-Hmac-Sha256');
+    const topic = req.get('X-Shopify-Topic');
     const shop = req.get('X-Shopify-Shop-Domain');
-    const body = req.body.toString('utf8');
-    console.log('📦 Webhook body:', body);
 
-    const orderData = JSON.parse(body);
-    
-    // Get session for this shop
-    const session = await shopify.config.sessionStorage.loadSession(shop);
-    
-    if (!session) {
-      console.log('❌ No session found for shop:', shop);
-      return res.status(401).send('No session found');
+    if (!hmac || !topic || !shop) {
+      console.error('❌ Missing required headers');
+      return res.status(401).send('Missing required headers');
     }
 
-    await handleOrderCreated(orderData, {
-      locals: {
-        shopify: { session }
-      }
-    });
+    // Get raw body
+    const rawBody = req.body.toString('utf8');
+    
+    // Create hash from raw body
+    const hash = crypto
+      .createHmac('sha256', process.env.SHOPIFY_API_SECRET)
+      .update(rawBody, 'utf8')
+      .digest('base64');
+
+    // Verify webhook signature
+    const verified = hash === hmac;
+
+    if (!verified) {
+      console.error('❌ Invalid webhook signature');
+      return res.status(401).send('Invalid webhook signature');
+    }
+
+    // Process the webhook
+    await webhookHandlers['orders/create'].callback(
+      'orders/create',
+      shop,
+      rawBody
+    );
 
     res.status(200).send('OK');
-
   } catch (error) {
     console.error('❌ Webhook processing error:', error);
     res.status(500).send(error.message);
@@ -374,7 +318,7 @@ app.post("/webhooks/checkouts/create", express.raw({type: '*/*'}), async (req, r
     }
 
     // Process the webhook
-    await webhookHandlers['checkouts/create'].callback(
+    await webhookHandlers['orders/create'].callback(
       'checkouts/create',
       shop,
       rawBody
