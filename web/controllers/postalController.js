@@ -373,47 +373,38 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 const GOOGLE_MAPS_API_KEY = "AIzaSyB13R3UWtrNb4qmYJphR8IfwZ0XsWTrBEI"; // Replace with your real key
 
 export const validateIsraeliPostalCode = async (address, city) => {
-  const query = encodeURIComponent(`${address}, ${city}, Israel`);
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${GOOGLE_MAPS_API_KEY}`;
+  const formattedQuery = encodeURIComponent(`${address}, ${city}, Israel`);
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${formattedQuery}&key=${GOOGLE_MAPS_API_KEY}`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
 
     if (data.status === "OK" && data.results.length > 0) {
-      const firstResult = data.results[0];
+      const result = data.results[0];
+      const components = result.address_components;
 
-      const isInIsrael = firstResult.address_components.some(
-        (c) => c.types.includes("country") && c.long_name === "Israel"
-      );
-
-      const hasCity = firstResult.address_components.some(
-        (c) =>
-          c.types.includes("locality") &&
-          c.long_name.toLowerCase() === city.toLowerCase()
-      );
-
-      const postalCodeComponent = firstResult.address_components.find((c) =>
+      const postalCodeComponent = components.find((c) =>
         c.types.includes("postal_code")
       );
 
-      if (isInIsrael && hasCity && postalCodeComponent) {
-        const postalCode = postalCodeComponent.long_name;
-        console.log("✅ Valid postal code found:", postalCode);
-        return postalCode;
+      if (postalCodeComponent) {
+        console.log("✅ Postal code found:", postalCodeComponent.long_name);
+        return postalCodeComponent.long_name;
       }
+
+      console.log("⚠️ No postal code found in address components:", components);
+      return null;
     }
 
-    console.log("❌ No valid postal code found for address:", {
-      address,
-      city,
-    });
+    console.log("❌ No result for the address:", { address, city });
     return null;
   } catch (err) {
-    console.error("❌ Error validating postal code:", err.message);
+    console.error("❌ Error fetching geocode:", err.message);
     return null;
   }
 };
+
 
 
 
