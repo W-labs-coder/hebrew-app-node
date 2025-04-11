@@ -384,7 +384,14 @@ export const validateIsraeliPostalCode = async (postalCode) => {
         components?.country === "Israel" && components?.postcode === postalCode
     );
 
-    return isValid;
+    console.log("Postal code validation result:", isValid);
+    if (isValid) {
+      console.log("Valid postal code:", postalCode);
+      return postalCode;
+    }
+    console.log("Invalid postal code:", postalCode);
+    // Return false if the postal code is invalid
+    return false;
   } catch (err) {
     console.error("Error validating postal code:", err.message);
     return false;
