@@ -372,29 +372,38 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 
 const OPENCAGE_API_KEY = "0785e3d6dc994a7e947befb680b082c9";
 
-export const validateIsraeliPostalCode = async (postalCode) => {
-  const url = `https://api.opencagedata.com/geocode/v1/json?q=${postalCode}+Israel&key=${OPENCAGE_API_KEY}`;
+export const validateIsraeliPostalCode = async (address, city) => {
+  const query = encodeURIComponent(`${address}, ${city}, Israel`);
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${query}&key=${OPENCAGE_API_KEY}&countrycode=il`;
 
   try {
     const res = await fetch(url);
     const data = await res.json();
 
-    const isValid = data.results.some(
-      ({ components }) =>
-        components?.country === "Israel" && components?.postcode === postalCode
-    );
-
-    console.log("Postal code validation result:", isValid);
-    if (isValid) {
-      console.log("Valid postal code:", postalCode);
-      return postalCode;
+    // Check if we have results
+    if (data.results && data.results.length > 0) {
+      // Get the first result
+      const firstResult = data.results[0];
+      
+      // Validate that this is an Israeli address
+      if (
+        firstResult.components?.country === "Israel" &&
+        firstResult.components?.city === city &&
+        firstResult.components?.country_code === "il" &&
+        firstResult.components?.postcode
+      ) {
+        const postalCode = firstResult.components.postcode;
+        console.log("✅ Valid postal code found:", postalCode);
+        return postalCode;
+      }
     }
-    console.log("Invalid postal code:", postalCode);
-    // Return false if the postal code is invalid
-    return false;
+
+    console.log("❌ No valid postal code found for address:", { address, city });
+    return null;
+
   } catch (err) {
-    console.error("Error validating postal code:", err.message);
-    return false;
+    console.error("❌ Error validating postal code:", err.message);
+    return null;
   }
 };
 
