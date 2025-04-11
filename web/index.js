@@ -20,7 +20,8 @@ import { Session } from "@shopify/shopify-api"; // Add this import at the top of
 // Add this mutation at the top with other mutations
 const UPDATE_ORDER_MUTATION = `
   mutation orderUpdate($input: OrderInput!) {
-    orderUpdate(input: $input) {
+    
+  (input: $input) {
       order {
         id
         shippingAddress {
@@ -167,48 +168,66 @@ const webhookHandlers = {
         }
 
         if (address.country_code === 'IL') {
-          // Rest of the logic remains similar, just using order instead of checkout
-          const validPostalCode = await validateIsraeliPostalCode(
-            address.address1,
-            address.city
-          );
-
-          if (validPostalCode && validPostalCode !== address.zip) {
-            // Update the order using the Admin API
-            const offlineSessionId = `offline_${shop}`;
-            const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
-
-            if (!shopifySession?.accessToken) {
-              console.log('❌ No offline session found for shop:', shop);
-              return;
+          try {
+            const validPostalCode = await validateIsraeliPostalCode(
+              address.address1,
+              address.city
+            );
+        
+            if (!validPostalCode) {
+              console.log('⚠️ No valid postal code found for address:', {
+                address1: address.address1,
+                city: address.city
+              });
+              return; // Exit early without making updates
             }
-
-            const offlineSession = new Session({
-              id: offlineSessionId,
-              shop: shop,
-              state: 'offline',
-              isOnline: false,
-              accessToken: shopifySession.accessToken
-            });
-
-            const client = new shopify.api.clients.Graphql({ session: offlineSession });
-
-            await client.request({
-              data: {
-                query: UPDATE_ORDER_MUTATION,
-                variables: {
-                  input: {
-                    id: orderData.admin_graphql_api_id,
-                    shippingAddress: {
-                      ...address,
-                      zip: validPostalCode
+        
+            if (validPostalCode !== address.zip) {
+              // Update the order using the Admin API
+              const offlineSessionId = `offline_${shop}`;
+              const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
+        
+              if (!shopifySession?.accessToken) {
+                console.log('❌ No offline session found for shop:', shop);
+                return;
+              }
+        
+              const offlineSession = new Session({
+                id: offlineSessionId,
+                shop: shop,
+                state: 'offline',
+                isOnline: false,
+                accessToken: shopifySession.accessToken
+              });
+        
+              const client = new shopify.api.clients.Graphql({ session: offlineSession });
+        
+              await client.request({
+                data: {
+                  query: UPDATE_ORDER_MUTATION,
+                  variables: {
+                    input: {
+                      id: orderData.admin_graphql_api_id,
+                      shippingAddress: {
+                        ...address,
+                        zip: validPostalCode
+                      }
                     }
                   }
                 }
-              }
+              });
+        
+              console.log('✅ Order updated with valid postal code:', validPostalCode);
+            } else {
+              console.log('✅ Address already has correct postal code:', address.zip);
+            }
+          } catch (error) {
+            console.error('❌ Error validating postal code:', error);
+            console.log('📍 Address details:', {
+              address1: address.address1,
+              city: address.city,
+              currentZip: address.zip
             });
-
-            console.log('✅ Order updated with valid postal code:', validPostalCode);
           }
         }
       } catch (error) {

@@ -369,113 +369,29 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 // Helper function to update checkout with new address
 
 
-// Helper function to validate postal code with Israel Post
-export const validateIsraeliPostalCode = async (address, city) => {
-  const apiKey = "pk.1a833b107bda9119c258960d47f4b2b9";
-  const query = encodeURIComponent(`${address}, ${city}, Israel`);
-  const url = `https://us1.locationiq.com/v1/search.php?key=${apiKey}&q=${query}&format=json`;
+
+const OPENCAGE_API_KEY = "0785e3d6dc994a7e947befb680b082c9";
+
+export const validateIsraeliPostalCode = async (postalCode) => {
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${postalCode}+Israel&key=${OPENCAGE_API_KEY}`;
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        Accept: "application/json",
-      },
-    });
+    const res = await fetch(url);
+    const data = await res.json();
 
-    if (!response.ok) {
-      console.error("LocationIQ API error:", {
-        status: response.status,
-        statusText: response.statusText,
-      });
-      return null;
-    }
+    const isValid = data.results.some(
+      ({ components }) =>
+        components?.country === "Israel" && components?.postcode === postalCode
+    );
 
-    const data = await response.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
-      console.warn("No results found for address");
-      return null;
-    }
-
-    // Clean and normalize input address and city
-    const cleanAddress = address.toLowerCase().replace(/[.,]/g, '').trim();
-    const cleanCity = city.toLowerCase().trim();
-
-    // Score and sort the results
-    const scoredResults = data.map(result => {
-      let score = 0;
-      const displayNameLower = result.display_name.toLowerCase();
-      
-      // Check for exact street name match
-      if (displayNameLower.includes(cleanAddress)) {
-        score += 3;
-      }
-      
-      // Check for exact city match
-      if (displayNameLower.includes(cleanCity)) {
-        score += 2;
-      }
-
-      // Bonus points for having a postal code
-      const hasPostalCode = result.address?.postcode || 
-                           displayNameLower.match(/\b\d{7}\b/);
-      if (hasPostalCode) {
-        score += 1;
-      }
-
-      // Prefer 'residential' or 'house' type results
-      if (result.type === 'residential' || result.type === 'house') {
-        score += 2;
-      }
-
-      return {
-        result,
-        score
-      };
-    }).sort((a, b) => b.score - a.score);
-
-    // Log scoring results for debugging
-    console.log('📍 Scored address matches:', scoredResults.map(r => ({
-      address: r.result.display_name,
-      score: r.score,
-      type: r.result.type
-    })));
-
-    // Get the highest scored result
-    const bestMatch = scoredResults[0]?.result;
-    if (!bestMatch) {
-      return null;
-    }
-
-    // Try to get postal code in order of reliability
-    // 1. From address object
-    if (bestMatch.address?.postcode) {
-      return bestMatch.address.postcode;
-    }
-
-    // 2. From display_name
-    const postalCodeMatch = bestMatch.display_name.match(/\b\d{7}\b/);
-    if (postalCodeMatch) {
-      return postalCodeMatch[0];
-    }
-
-    // 3. From any other high-scoring result that has a postal code
-    for (const {result} of scoredResults.slice(1)) {
-      if (result.address?.postcode) {
-        return result.address.postcode;
-      }
-      const match = result.display_name.match(/\b\d{7}\b/);
-      if (match) {
-        return match[0];
-      }
-    }
-
-    console.warn("No postal code found in best matches:", bestMatch);
-    return null;
-  } catch (error) {
-    console.error("Error calling LocationIQ API:", error);
-    return null;
+    return isValid;
+  } catch (err) {
+    console.error("Error validating postal code:", err.message);
+    return false;
   }
 };
+
+
+
 
 
