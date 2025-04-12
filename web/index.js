@@ -208,9 +208,32 @@ const webhookHandlers = {
         
               const client = new shopify.api.clients.Graphql({ session: offlineSession });
         
-              const response = await client.request({
+              const response = await client.query({
                 data: {
-                  query: UPDATE_ORDER_ZIP_MUTATION,
+                  query: `
+      mutation updateOrderShipping($input: OrderInput!) {
+        orderUpdate(input: $input) {
+          order {
+            id
+            shippingAddress {
+              address1
+              address2
+              city
+              province
+              country
+              zip
+              firstName
+              lastName
+              phone
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `,
                   variables: {
                     input: {
                       id: orderData.admin_graphql_api_id, // e.g., "gid://shopify/Order/148977776"
@@ -219,8 +242,8 @@ const webhookHandlers = {
                         address2: address.address2 || "",
                         city: address.city,
                         province: address.province || "",
-                        country: "IL", // or use address.country
-                        zip: validPostalCode, // <-- ZIP CODE GOES HERE
+                        country: "IL", // or use address.country if dynamic
+                        zip: validPostalCode, // updated zip
                         firstName: address.first_name || "",
                         lastName: address.last_name || "",
                         phone: address.phone || "",
@@ -230,7 +253,7 @@ const webhookHandlers = {
                 },
               });
 
-              // Error handling
+              // Optional error handling
               if (response.body.data?.orderUpdate?.userErrors?.length > 0) {
                 const errors = response.body.data.orderUpdate.userErrors;
                 console.error("Order update errors:", errors);
