@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import shopify from "../shopify.js";
+import OpenAI from 'openai';
 
 // Add this function after the existing imports
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -368,39 +369,64 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 
 // Helper function to update checkout with new address
 
+const GOOGLE_MAPS_API_KEY = "AIzaSyB13R3UWtrNb4qmYJphR8IfwZ0XsWTrBEI";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-
-const GOOGLE_MAPS_API_KEY = "AIzaSyB13R3UWtrNb4qmYJphR8IfwZ0XsWTrBEI"; // Replace with your real key
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY
+});
 
 export const validateIsraeliPostalCode = async (address, city) => {
-  const formattedQuery = encodeURIComponent(`${address}, ${city}, Israel`);
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${formattedQuery}&key=${GOOGLE_MAPS_API_KEY}`;
-
+  // First try Google Maps
   try {
+    const formattedQuery = encodeURIComponent(`${address}, ${city}, Israel`);
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${formattedQuery}&key=${GOOGLE_MAPS_API_KEY}`;
+
     const res = await fetch(url);
     const data = await res.json();
 
     if (data.status === "OK" && data.results.length > 0) {
       const result = data.results[0];
       const components = result.address_components;
-
-      const postalCodeComponent = components.find((c) =>
-        c.types.includes("postal_code")
-      );
+      const postalCodeComponent = components.find((c) => c.types.includes("postal_code"));
 
       if (postalCodeComponent) {
-        console.log("✅ Postal code found:", postalCodeComponent.long_name);
+        console.log("✅ Postal code found via Google Maps:", postalCodeComponent.long_name);
         return postalCodeComponent.long_name;
       }
-
-      console.log("⚠️ No postal code found in address components:", components);
-      return null;
+      
+      console.log("⚠️ No postal code found in Google Maps, trying OpenAI...");
     }
 
-    console.log("❌ No result for the address:", { address, city });
+    // If Google Maps fails, try OpenAI
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content: "You are a helper that knows Israeli postal codes. Return only a JSON object with a postal_code field if you know the postal code for the address, or null if you don't."
+        },
+        {
+          role: "user",
+          content: `What is the postal code for this address in Israel: ${address}, ${city}?`
+        }
+      ],
+      temperature: 0,
+      response_format: { type: "json_object" }
+    });
+
+    const aiResponse = JSON.parse(completion.choices[0].message.content);
+    
+    if (aiResponse.postal_code) {
+      console.log("✅ Postal code found via OpenAI:", aiResponse.postal_code);
+      return aiResponse.postal_code;
+    }
+
+    console.log("❌ No postal code found via either service for:", { address, city });
     return null;
+
   } catch (err) {
-    console.error("❌ Error fetching geocode:", err.message);
+    console.error("❌ Error validating postal code:", err.message);
     return null;
   }
 };
