@@ -28,13 +28,13 @@ export const addSelectedLanguage = async (req, res) => {
 
     let themeId = user.selectedTheme;
 
-    // if (!themeId.includes("gid://shopify/Theme/")) {
-    //   if (themeId.includes("OnlineStoreTheme")) {
-    //     themeId = themeId.replace("OnlineStoreTheme", "Theme");
-    //   } else {
-    //     themeId = `gid://shopify/Theme/${themeId}`;
-    //   }
-    // }
+    if (!themeId.includes("gid://shopify/Theme/")) {
+      if (themeId.includes("OnlineStoreTheme")) {
+        themeId = themeId.replace("OnlineStoreTheme", "Theme");
+      } else {
+        themeId = `gid://shopify/Theme/${themeId}`;
+      }
+    }
 
     console.log("Final themeId being used in Admin API:", themeId);
 
