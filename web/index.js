@@ -17,17 +17,21 @@ import cors from 'cors';
 import { validateIsraeliPostalCode } from './controllers/postalController.js'; // First, import the validateIsraeliPostalCode function at the top of the file
 import { Session } from "@shopify/shopify-api"; // Add this import at the top of your file
 
-// Add this mutation at the top with other mutations
+// Update the mutation at the top of the file
 const UPDATE_ORDER_MUTATION = `
   mutation orderUpdate($input: OrderInput!) {
-    
-  (input: $input) {
+    orderUpdate(input: $input) {
       order {
         id
         shippingAddress {
           address1
           city
           zip
+          province
+          country
+          firstName
+          lastName
+          phone
         }
       }
       userErrors {
@@ -202,22 +206,36 @@ const webhookHandlers = {
         
               const client = new shopify.api.clients.Graphql({ session: offlineSession });
         
-              await client.request({
+              const response = await client.request({
                 data: {
                   query: UPDATE_ORDER_MUTATION,
                   variables: {
                     input: {
                       id: orderData.admin_graphql_api_id,
                       shippingAddress: {
-                        ...address,
-                        zip: validPostalCode
+                        address1: address.address1,
+                        address2: address.address2 || "",
+                        city: address.city,
+                        province: address.province || "",
+                        country: "IL",
+                        zip: validPostalCode,
+                        firstName: address.first_name || "",
+                        lastName: address.last_name || "",
+                        phone: address.phone || ""
                       }
                     }
                   }
                 }
               });
         
-              console.log('✅ Order updated with valid postal code:', validPostalCode);
+              // Add error handling
+              if (response.body.data?.orderUpdate?.userErrors?.length > 0) {
+                const errors = response.body.data.orderUpdate.userErrors;
+                console.error('Order update errors:', errors);
+                throw new Error(errors[0].message);
+              }
+        
+              console.log('✅ Order updated successfully with postal code:', validPostalCode);
             } else {
               console.log('✅ Address already has correct postal code:', address.zip);
             }
