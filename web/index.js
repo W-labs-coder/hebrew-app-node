@@ -18,17 +18,18 @@ import { validateIsraeliPostalCode } from './controllers/postalController.js'; /
 import { Session } from "@shopify/shopify-api"; // Add this import at the top of your file
 
 // Update the mutation at the top of the file
-const UPDATE_ORDER_MUTATION = `
-  mutation orderUpdate($input: OrderInput!) {
+const UPDATE_ORDER_ZIP_MUTATION = `
+  mutation updateOrderShipping($input: OrderInput!) {
     orderUpdate(input: $input) {
       order {
         id
         shippingAddress {
           address1
+          address2
           city
-          zip
           province
           country
+          zip
           firstName
           lastName
           phone
@@ -41,6 +42,7 @@ const UPDATE_ORDER_MUTATION = `
     }
   }
 `;
+
 
 // Update both mutations at the top of your file
 const UPDATE_CHECKOUT_MUTATION = `
@@ -208,32 +210,33 @@ const webhookHandlers = {
         
               const response = await client.request({
                 data: {
-                  query: UPDATE_ORDER_MUTATION,
+                  query: UPDATE_ORDER_ZIP_MUTATION,
                   variables: {
                     input: {
-                      id: orderData.admin_graphql_api_id,
+                      id: orderData.admin_graphql_api_id, // e.g., "gid://shopify/Order/148977776"
                       shippingAddress: {
                         address1: address.address1,
                         address2: address.address2 || "",
                         city: address.city,
                         province: address.province || "",
-                        country: "IL",
-                        zip: validPostalCode,
+                        country: "IL", // or use address.country
+                        zip: validPostalCode, // <-- ZIP CODE GOES HERE
                         firstName: address.first_name || "",
                         lastName: address.last_name || "",
-                        phone: address.phone || ""
-                      }
-                    }
-                  }
-                }
+                        phone: address.phone || "",
+                      },
+                    },
+                  },
+                },
               });
-        
-              // Add error handling
+
+              // Error handling
               if (response.body.data?.orderUpdate?.userErrors?.length > 0) {
                 const errors = response.body.data.orderUpdate.userErrors;
-                console.error('Order update errors:', errors);
+                console.error("Order update errors:", errors);
                 throw new Error(errors[0].message);
               }
+
         
               console.log('✅ Order updated successfully with postal code:', validPostalCode);
             } else {
