@@ -377,8 +377,8 @@ const openai = new OpenAI({
 });
 
 export const validateIsraeliPostalCode = async (address, city) => {
-  // First try Google Maps
   try {
+    // First try Google Maps
     const formattedQuery = encodeURIComponent(`${address}, ${city}, Israel`);
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${formattedQuery}&key=${GOOGLE_MAPS_API_KEY}`;
 
@@ -398,28 +398,31 @@ export const validateIsraeliPostalCode = async (address, city) => {
       console.log("⚠️ No postal code found in Google Maps, trying OpenAI...");
     }
 
-    // If Google Maps fails, try OpenAI
+    // If Google Maps fails, try OpenAI with updated prompt
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
           role: "system",
-          content: "You are a helper that knows Israeli postal codes. Return only a JSON object with a postal_code field if you know the postal code for the address, or null if you don't."
+          content: "You are a helper that knows Israeli postal codes. Respond with ONLY a JSON string in the format {\"postal_code\": \"NUMBER\"} or {\"postal_code\": null} if unknown. Do not include any other text."
         },
         {
           role: "user",
           content: `What is the postal code for this address in Israel: ${address}, ${city}?`
         }
       ],
-      temperature: 0,
-      response_format: { type: "json_object" }
+      temperature: 0
     });
 
-    const aiResponse = JSON.parse(completion.choices[0].message.content);
-    
-    if (aiResponse.postal_code) {
-      console.log("✅ Postal code found via OpenAI:", aiResponse.postal_code);
-      return aiResponse.postal_code;
+    try {
+      const aiResponse = JSON.parse(completion.choices[0].message.content);
+      
+      if (aiResponse.postal_code) {
+        console.log("✅ Postal code found via OpenAI:", aiResponse.postal_code);
+        return aiResponse.postal_code;
+      }
+    } catch (parseError) {
+      console.error("❌ Error parsing OpenAI response:", parseError);
     }
 
     console.log("❌ No postal code found via either service for:", { address, city });
