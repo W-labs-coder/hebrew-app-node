@@ -38,64 +38,54 @@ export const addSelectedLanguage = async (req, res) => {
 
     console.log("Final themeId being used in Admin API:", themeId);
 
-    // Initialize OpenAI
     let openai = null;
     if (openaiApiKey) {
       openai = new OpenAI({ apiKey: openaiApiKey });
     }
 
-    // Create GraphQL client
     const client = new shopify.api.clients.Graphql({ session });
 
     // Confirm theme exists
-    const themeResponse = await client.request({
-      query: `
-        query GetTheme($id: ID!) {
-          theme(id: $id) {
-            id
-            name
-          }
+    const themeResponse = await client.query({
+      data: `query GetTheme($id: ID!) {
+        theme(id: $id) {
+          id
+          name
         }
-      `,
+      }`,
       variables: { id: themeId },
     });
 
-    const theme = themeResponse.body?.data?.theme;
+    const theme = themeResponse?.body?.data?.theme;
     if (!theme) {
       return res.status(404).json({ error: "Theme not found" });
     }
 
     // Fetch translatable resources
-    const translatableResourcesResponse = await client.request({
-      query: `
-        query GetTranslatableResources($themeId: ID!) {
-          translatableResources(
-            first: 100,
-            resourceType: ONLINE_STORE_THEME,
-            themeId: $themeId
-          ) {
-            edges {
-              node {
-                resourceId
-                translatableContent {
-                  key
-                  value
-                  digest
-                }
-              }
-              pageInfo {
-                hasNextPage
-                endCursor
+    const translatableResourcesResponse = await client.query({
+      data: `query GetTranslatableResources($themeId: ID!) {
+        translatableResources(
+          first: 100,
+          resourceType: ONLINE_STORE_THEME,
+          themeId: $themeId
+        ) {
+          edges {
+            node {
+              resourceId
+              translatableContent {
+                key
+                value
+                digest
               }
             }
           }
         }
-      `,
+      }`,
       variables: { themeId },
     });
 
     const translatableResources =
-      translatableResourcesResponse.body?.data?.translatableResources?.edges ||
+      translatableResourcesResponse?.body?.data?.translatableResources?.edges ||
       [];
 
     let translationCount = 0;
@@ -149,21 +139,19 @@ export const addSelectedLanguage = async (req, res) => {
         console.log("Translations:", translations);
 
         try {
-          const registerResponse = await client.request({
-            query: `
-              mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
-                translationsRegister(resourceId: $resourceId, translations: $translations) {
-                  translations {
-                    key
-                    locale
-                  }
-                  userErrors {
-                    field
-                    message
-                  }
+          const registerResponse = await client.query({
+            data: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+              translationsRegister(resourceId: $resourceId, translations: $translations) {
+                translations {
+                  key
+                  locale
+                }
+                userErrors {
+                  field
+                  message
                 }
               }
-            `,
+            }`,
             variables: {
               resourceId: resource.resourceId,
               translations,
@@ -171,7 +159,8 @@ export const addSelectedLanguage = async (req, res) => {
           });
 
           const userErrors =
-            registerResponse.body?.data?.translationsRegister?.userErrors || [];
+            registerResponse?.body?.data?.translationsRegister?.userErrors ||
+            [];
           if (userErrors.length > 0) {
             console.warn("Translation registration warnings:", userErrors);
           }
