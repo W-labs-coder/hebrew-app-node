@@ -13,6 +13,7 @@ export const addSelectedLanguage = async (req, res) => {
 
     const shopId = session.shop;
 
+    // Update user's selected language
     const user = await User.findOneAndUpdate(
       { shop: shopId },
       { $set: { selectedLanguage: language } },
@@ -43,21 +44,12 @@ export const addSelectedLanguage = async (req, res) => {
       openai = new OpenAI({ apiKey: openaiApiKey });
     }
 
-    // Create query client
-    const graphqlQuery = async (query, variables = {}) => {
-      const response = await shopify.api.rest.query({
-        session,
-        data: {
-          query,
-          variables,
-        },
-      });
-      return response.body?.data;
-    };
+    // Create GraphQL client
+    const client = new shopify.api.clients.Graphql({ session });
 
-    // Check if theme exists
-    const themeData = await graphqlQuery(
-      `
+    // Confirm theme exists
+    const themeResponse = await client.request({
+      query: `
         query GetTheme($id: ID!) {
           theme(id: $id) {
             id
@@ -65,17 +57,17 @@ export const addSelectedLanguage = async (req, res) => {
           }
         }
       `,
-      { id: themeId }
-    );
+      variables: { id: themeId },
+    });
 
-    const theme = themeData?.theme;
+    const theme = themeResponse.body?.data?.theme;
     if (!theme) {
       return res.status(404).json({ error: "Theme not found" });
     }
 
     // Fetch translatable resources
-    const translatableData = await graphqlQuery(
-      `
+    const translatableResourcesResponse = await client.request({
+      query: `
         query GetTranslatableResources($themeId: ID!) {
           translatableResources(
             first: 100,
@@ -99,11 +91,12 @@ export const addSelectedLanguage = async (req, res) => {
           }
         }
       `,
-      { themeId }
-    );
+      variables: { themeId },
+    });
 
     const translatableResources =
-      translatableData?.translatableResources?.edges || [];
+      translatableResourcesResponse.body?.data?.translatableResources?.edges ||
+      [];
 
     let translationCount = 0;
     const initialBatchSize = 5;
@@ -156,8 +149,8 @@ export const addSelectedLanguage = async (req, res) => {
         console.log("Translations:", translations);
 
         try {
-          const registerData = await graphqlQuery(
-            `
+          const registerResponse = await client.request({
+            query: `
               mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
                 translationsRegister(resourceId: $resourceId, translations: $translations) {
                   translations {
@@ -171,14 +164,14 @@ export const addSelectedLanguage = async (req, res) => {
                 }
               }
             `,
-            {
+            variables: {
               resourceId: resource.resourceId,
               translations,
-            }
-          );
+            },
+          });
 
           const userErrors =
-            registerData?.translationsRegister?.userErrors || [];
+            registerResponse.body?.data?.translationsRegister?.userErrors || [];
           if (userErrors.length > 0) {
             console.warn("Translation registration warnings:", userErrors);
           }
