@@ -77,13 +77,13 @@ export const addSelectedLanguage = async (req, res) => {
     });
 
     const translatableResources =
-      translatableResourcesResponse?.body?.data?.translatableResources?.edges ||
+      translatableResourcesResponse?.body?.data?.translatableResource?.edges ||
       [];
 
 
       console.log(
         "translatableResourcesResponse",
-        translatableResourcesResponse?.body?.data?.translatableResources
+        translatableResourcesResponse?.body?.data?.translatableResource
       );
 
     let translationCount = 0;
