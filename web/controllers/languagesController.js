@@ -68,10 +68,6 @@ export const addSelectedLanguage = async (req, res) => {
       data: `query {
     translatableResource(resourceId: "${themeId}") {
       resourceId
-      translations(locale: "en") {
-        key
-        value
-      }
     }
   }`,
     });
