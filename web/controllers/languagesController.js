@@ -136,6 +136,7 @@ export const addSelectedLanguage = async (req, res) => {
               translationsRegister(resourceId: $resourceId, translations: $translations) {
                 translations {
                   key
+                  value
                   locale
                 }
                 userErrors {
