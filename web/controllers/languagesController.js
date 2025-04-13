@@ -66,11 +66,16 @@ export const addSelectedLanguage = async (req, res) => {
     // Fetch translatable resources
     const translatableResourcesResponse = await client.query({
       data: `query {
-    translatableResource(resourceId: "${themeId}") {
-      resourceId
-      translations(locale: "en") {
-        key
-        value
+    translatableResources(first: 50, resourceType: THEME, themeId: "${themeId}") {
+      edges {
+        node {
+          resourceId
+          translatableContent {
+            key
+            value
+            locale
+          }
+        }
       }
     }
   }`,
@@ -118,8 +123,16 @@ export const addSelectedLanguage = async (req, res) => {
 
         translations.push({
           key: content.key,
-          locale: language.toLower() == 'hebrew' ? 'he' : language.toLower(),
+          locale: language.toLowerCase() === 'hebrew' ? 'he' : language.toLowerCase(),
           value: translatedValue,
+        });
+
+        // Add debug logging
+        console.log('Content being translated:', {
+          original: content.value,
+          translated: translatedValue,
+          key: content.key,
+          locale: language.toLowerCase() === 'hebrew' ? 'he' : language.toLowerCase()
         });
       }
 
