@@ -118,7 +118,7 @@ export const addSelectedLanguage = async (req, res) => {
 
         translations.push({
           key: content.key,
-          locale: language,
+          locale: language.toLower() == 'hebrew' ? 'he' : language.toLower(),
           value: translatedValue,
         });
       }
