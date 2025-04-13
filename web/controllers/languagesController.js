@@ -66,7 +66,7 @@ export const addSelectedLanguage = async (req, res) => {
     // Fetch translatable resources
     const translatableResourcesResponse = await client.query({
       data: `query {
-    translatableResource(resourceId: "${themeId}")) {
+    translatableResource(resourceId: "${themeId}") {
       resourceId
       translations(locale: "en") {
         key
