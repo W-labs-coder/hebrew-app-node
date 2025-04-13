@@ -48,12 +48,11 @@ export const addSelectedLanguage = async (req, res) => {
     // Confirm theme exists
     const themeResponse = await client.query({
       data: `query {
-        theme(id: $id) {
+        theme(id: "${themeId}") {
           id
           name
         }
       }`,
-      variables: { id: themeId },
     });
 
     const theme = themeResponse?.body?.data?.theme;
