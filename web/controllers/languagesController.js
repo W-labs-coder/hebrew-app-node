@@ -81,7 +81,10 @@ export const addSelectedLanguage = async (req, res) => {
       [];
 
 
-      console.log("translatableResourcesResponse", translatableResourcesResponse);
+      console.log(
+        "translatableResourcesResponse",
+        translatableResourcesResponse?.body?.data?.translatableResources
+      );
 
     let translationCount = 0;
     const initialBatchSize = 5;
