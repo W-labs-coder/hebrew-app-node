@@ -118,12 +118,10 @@ export const addSelectedLanguage = async (req, res) => {
 
       try {
        let translatedResourceId = themeId;
-if (themeId.includes("OnlineStoreTheme")) {
-  translatedResourceId = themeId.replace("OnlineStoreTheme", "Theme");
-}
+      console.log('the themeId', themeId)
 
-const registerResponse = await client.query({
-  data: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+       const registerResponse = await client.query({
+         data: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
     translationsRegister(resourceId: $resourceId, translations: $translations) {
       translations {
         key
@@ -136,11 +134,11 @@ const registerResponse = await client.query({
       }
     }
   }`,
-  variables: {
-    resourceId: translatedResourceId,
-    translations,
-  },
-});
+         variables: {
+           resourceId: translatedResourceId,
+           translations,
+         },
+       });
 
         const userErrors =
           registerResponse?.body?.data?.translationsRegister?.userErrors || [];
