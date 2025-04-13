@@ -28,13 +28,13 @@ export const addSelectedLanguage = async (req, res) => {
 
     let themeId = user.selectedTheme;
 
-    if (!themeId.includes("gid://shopify/Theme/")) {
-      if (themeId.includes("OnlineStoreTheme")) {
-        themeId = themeId.replace("OnlineStoreTheme", "Theme");
-      } else {
-        themeId = `gid://shopify/Theme/${themeId}`;
-      }
-    }
+    // if (!themeId.includes("gid://shopify/Theme/")) {
+    //   if (themeId.includes("OnlineStoreTheme")) {
+    //     themeId = themeId.replace("OnlineStoreTheme", "Theme");
+    //   } else {
+    //     themeId = `gid://shopify/Theme/${themeId}`;
+    //   }
+    // }
 
     console.log("Final themeId being used in Admin API:", themeId);
 
@@ -47,7 +47,7 @@ export const addSelectedLanguage = async (req, res) => {
 
     // Confirm theme exists
     const themeResponse = await client.query({
-      data: `query GetTheme($id: ID!) {
+      data: `query {
         theme(id: $id) {
           id
           name
@@ -60,6 +60,9 @@ export const addSelectedLanguage = async (req, res) => {
     if (!theme) {
       return res.status(404).json({ error: "Theme not found" });
     }
+
+
+    console.log(theme)
 
     // Fetch translatable resources
     const translatableResourcesResponse = await client.query({
