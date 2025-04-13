@@ -80,6 +80,9 @@ export const addSelectedLanguage = async (req, res) => {
       translatableResourcesResponse?.body?.data?.translatableResources?.edges ||
       [];
 
+
+      console.log("translatableResources", translatableResources);
+
     let translationCount = 0;
     const initialBatchSize = 5;
     const testBatch = translatableResources.slice(0, initialBatchSize);
