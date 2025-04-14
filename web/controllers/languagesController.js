@@ -185,8 +185,9 @@ export const addSelectedLanguage = async (req, res) => {
 
       try {
         let translatedResourceId = themeId;
-        if (themeId.includes("OnlineStoreTheme")) {
-          translatedResourceId = themeId.replace("OnlineStoreTheme", "Theme");
+        // Ensure the resource ID is in the correct format for translations API
+        if (!translatedResourceId.startsWith('gid://')) {
+          translatedResourceId = `gid://shopify/Theme/${themeId.split('/').pop()}`;
         }
 
         const registerResponse = await client.query({
