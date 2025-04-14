@@ -114,35 +114,41 @@ export const addSelectedLanguage = async (req, res) => {
         },
       ];
 
+
+      console.log('the translations', translations);
+
       console.log("Registering translations:", translations);
 
       try {
        let translatedResourceId = themeId;
-       
+
        if (themeId.includes("OnlineStoreTheme")) {
          translatedResourceId = themeId.replace("OnlineStoreTheme", "Theme");
        }
 
        console.log("the themeId", translatedResourceId);
        const registerResponse = await client.query({
-         data: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
-    translationsRegister(resourceId: $resourceId, translations: $translations) {
-      translations {
-        key
-        value
-        locale
+         data: {
+           query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+      translationsRegister(resourceId: $resourceId, translations: $translations) {
+        translations {
+          key
+          value
+          locale
+        }
+        userErrors {
+          field
+          message
+        }
       }
-      userErrors {
-        field
-        message
-      }
-    }
-  }`,
-         variables: {
-           resourceId: translatedResourceId,
-           translations,
+    }`,
+           variables: {
+             resourceId: themeId, // This must be a string like 'gid://shopify/Theme/134758400089'
+             translations, // This must be an array of objects with `key`, `value`, and `locale`
+           },
          },
        });
+
 
         const userErrors =
           registerResponse?.body?.data?.translationsRegister?.userErrors || [];
