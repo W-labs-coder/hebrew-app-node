@@ -27,7 +27,6 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     let themeId = user.selectedTheme;
-
     console.log("Final themeId being used in Admin API:", themeId);
 
     let openai = null;
@@ -54,7 +53,73 @@ export const addSelectedLanguage = async (req, res) => {
 
     console.log("Theme found:", theme);
 
-    // Fetch translatable content (not translations!)
+    // STEP 1: Normalize and check language code
+    const selectedLocaleCode =
+      language.toLowerCase() === "hebrew" ? "he" : language.toLowerCase();
+
+    // STEP 2: Fetch available locales
+    const localesResponse = await client.query({
+      data: {
+        query: `query {
+          shopLocales {
+            locale
+            name
+            primary
+            published
+          }
+        }`,
+      },
+    });
+
+    const existingLocales = localesResponse?.body?.data?.shopLocales || [];
+    console.log("Published Locales:", existingLocales);
+
+    const isLocaleEnabled = existingLocales.some(
+      (locale) => locale.locale === selectedLocaleCode && locale.published
+    );
+
+    // STEP 3: Enable the locale if not already enabled
+    if (!isLocaleEnabled) {
+      console.log(
+        `Locale '${selectedLocaleCode}' not published. Attempting to publish it...`
+      );
+
+      const enableLocaleResponse = await client.query({
+        data: {
+          query: `mutation publishablePublish($locale: String!) {
+            publishablePublish(locale: $locale) {
+              shop {
+                publishedLocales {
+                  locale
+                }
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }`,
+          variables: {
+            locale: selectedLocaleCode,
+          },
+        },
+      });
+
+      const userErrors =
+        enableLocaleResponse?.body?.data?.publishablePublish?.userErrors || [];
+
+      if (userErrors.length > 0) {
+        console.error("Error publishing locale:", userErrors);
+        return res.status(400).json({
+          error: "Locale not enabled and could not be published",
+          details: userErrors,
+        });
+      }
+
+      console.log(`Locale '${selectedLocaleCode}' published successfully.`);
+    }
+
+    // STEP 4: Fetch translatable content
     const translatableResourcesResponse = await client.query({
       data: `query {
         translatableResource(resourceId: "${themeId}") {
@@ -109,51 +174,45 @@ export const addSelectedLanguage = async (req, res) => {
       const translations = [
         {
           key: content.key,
-          locale:
-            language.toLowerCase() === "hebrew" ? "he" : language.toLowerCase(),
+          locale: selectedLocaleCode,
           value: translatedValue,
           translatableContentDigest: content.digest || undefined,
         },
       ];
 
-
-      console.log('the translations', translations);
-
       console.log("Registering translations:", translations);
 
       try {
-       let translatedResourceId = themeId;
-
-       if (themeId.includes("OnlineStoreTheme")) {
-         translatedResourceId = themeId.replace("OnlineStoreTheme", "Theme");
-       }
-
-       console.log("the themeId", translatedResourceId);
-       const registerResponse = await client.query({
-         data: {
-           query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
-      translationsRegister(resourceId: $resourceId, translations: $translations) {
-        translations {
-          key
-          value
-          locale
+        let translatedResourceId = themeId;
+        if (themeId.includes("OnlineStoreTheme")) {
+          translatedResourceId = themeId.replace("OnlineStoreTheme", "Theme");
         }
-        userErrors {
-          field
-          message
-        }
-      }
-    }`,
-           variables: {
-             resourceId: themeId, // This must be a string like 'gid://shopify/Theme/134758400089'
-             translations, // This must be an array of objects with `key`, `value`, and `locale`
-           },
-         },
-       });
 
+        const registerResponse = await client.query({
+          data: {
+            query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+              translationsRegister(resourceId: $resourceId, translations: $translations) {
+                translations {
+                  key
+                  value
+                  locale
+                }
+                userErrors {
+                  field
+                  message
+                }
+              }
+            }`,
+            variables: {
+              resourceId: translatedResourceId,
+              translations,
+            },
+          },
+        });
 
         const userErrors =
           registerResponse?.body?.data?.translationsRegister?.userErrors || [];
+
         if (userErrors.length > 0) {
           console.warn("Translation registration warnings:", userErrors);
         }
