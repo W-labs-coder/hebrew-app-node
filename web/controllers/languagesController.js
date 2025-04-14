@@ -92,9 +92,11 @@ export const addSelectedLanguage = async (req, res) => {
             published: true,
           },
         },
-        type: shopify.api.rest.DataType.JSON,
+        type: "application/json",
       });
 
+      console.log("Locale publish response:", enableLocaleResponse);
+      
       const userErrors =
         enableLocaleResponse?.body?.data?.publishablePublish?.userErrors || [];
 
