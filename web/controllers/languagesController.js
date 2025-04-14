@@ -83,25 +83,16 @@ export const addSelectedLanguage = async (req, res) => {
         `Locale '${selectedLocaleCode}' not published. Attempting to publish it...`
       );
 
-      const enableLocaleResponse = await client.query({
+      const restClient = new shopify.api.clients.Rest({ session });
+
+      const enableLocaleResponse = await restClient.put({
+        path: `locales/${selectedLocaleCode}`,
         data: {
-          query: `mutation publishablePublish($locale: String!) {
-            publishablePublish(locale: $locale) {
-              shop {
-                publishedLocales {
-                  locale
-                }
-              }
-              userErrors {
-                field
-                message
-              }
-            }
-          }`,
-          variables: {
-            locale: selectedLocaleCode,
+          locale: {
+            published: true,
           },
         },
+        type: shopify.api.rest.DataType.JSON,
       });
 
       const userErrors =
