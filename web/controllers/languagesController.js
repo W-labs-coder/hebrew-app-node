@@ -141,10 +141,9 @@ export const addSelectedLanguage = async (req, res) => {
     console.log("Fetched translatable content:", translatableContent.length);
 
     let translationCount = 0;
-    const initialBatchSize = 5;
-    const testBatch = translatableContent.slice(0, initialBatchSize);
-
-    for (const content of testBatch) {
+    
+    // Process all translatable content
+    for (const content of translatableContent) {
       if (!content.value || content.value.trim() === "") continue;
 
       let translatedValue = content.value;
