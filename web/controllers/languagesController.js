@@ -63,7 +63,6 @@ export const addSelectedLanguage = async (req, res) => {
         query: `query {
           shopLocales {
             locale
-            name
             primary
             published
           }
