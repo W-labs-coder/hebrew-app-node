@@ -4,7 +4,9 @@ import OpenAI from "openai";
 
 export const addSelectedLanguage = async (req, res) => {
   try {
-    const { language, openaiApiKey } = req.body;
+    const { language } = req.body;
+
+    const openaiApiKey = process.env.OPENAI_API_KEY;
     const session = res.locals.shopify.session;
 
     if (!session) {
