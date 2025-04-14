@@ -62,6 +62,7 @@ export const addSelectedLanguage = async (req, res) => {
           translatableContent {
             key
             value
+            digest
           }
         }
       }`,
@@ -111,6 +112,7 @@ export const addSelectedLanguage = async (req, res) => {
           locale:
             language.toLowerCase() === "hebrew" ? "he" : language.toLowerCase(),
           value: translatedValue,
+          translatableContentDigest: content.digest || undefined,
         },
       ];
 
