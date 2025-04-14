@@ -149,6 +149,7 @@ export const addSelectedLanguage = async (req, res) => {
       let translatedValue = content.value;
 
       if (openai) {
+        console.log(`translating ${content.value} to ${language}`)
         try {
           const translationResponse = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
