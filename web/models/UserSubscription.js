@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const UserSubscriptionSchema = new mongoose.Schema({
   shop: String,
-  subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
+  subscription: { type: mongoose.Schema.Types.ObjectId, ref: "Subscription" },
   status: String,
   startDate: Date,
   endDate: Date,

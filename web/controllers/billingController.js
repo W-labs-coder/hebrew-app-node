@@ -144,7 +144,7 @@ export const confirmSubscription = async (req, res) => {
 
     await UserSubscription.create({
       shop,
-      subscriptionId,
+      subscription: subscription._id,
       status: "ACTIVE",
       startDate,
       endDate,
@@ -202,10 +202,10 @@ export const getSubscriptions = async (req, res) => {
 export const checkSubscriptions = async (req, res) => {
   const session = res.locals.shopify.session;
   const shop = session.shop;
-  // console.log('my shop', shop);
+  console.log('my shop', shop);
 
   try {
-    const subscription = await UserSubscription.findOne({ shop }).sort({ createdAt: -1 }).populate(['subscriptionId']);
+    const subscription = await UserSubscription.findOne({ shop }).sort({ createdAt: -1 }).populate("subscription");
     const user = await User.findOne({ shop });
 
     if (!subscription) {
@@ -213,7 +213,6 @@ export const checkSubscriptions = async (req, res) => {
     }
 
     const currentDate = new Date();
-    const trialEndDate = new Date(subscription.startDate.getTime() + 5 * 24 * 60 * 60 * 1000); // 5 days trial
 
     if (currentDate > subscription.endDate) {
       return res.status(403).json({ 
@@ -222,14 +221,6 @@ export const checkSubscriptions = async (req, res) => {
       });
     }
 
-    if (currentDate < trialEndDate) {
-      return res.status(200).json({ 
-        subscription, 
-        user, 
-        trialActive: true, 
-        message: "Trial period is active" 
-      });
-    }
 
     res.status(200).json({ subscription, user, trialActive: false });
   } catch (error) {
