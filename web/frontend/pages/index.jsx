@@ -20,9 +20,6 @@ import Subscription from "../components/Subscription";
 import { getSessionToken } from "@shopify/app-bridge-utils";
 import { useAuthenticatedFetch } from "../hooks/useAuthenticatedFetch";
 import {useNavigate} from 'react-router-dom'
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
-import { login } from "../store/slices/authSlice";
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -32,8 +29,6 @@ export default function HomePage() {
   const authenticatedFetch = useAuthenticatedFetch();
   const [subscriptions, setSubscriptions] = useState([]);
   const appBridge = useAppBridge();
-  const subscription = useSelector((state) => state.subscription);
-  const dispatch = useDispatch();
 
   const shopify = useMemo(() => {
     if (appBridge) {
@@ -51,9 +46,6 @@ export default function HomePage() {
   }, []);
 
   const checkSubscription = async () => {
-    if(subscription) {
-      navigate("dashboard");
-    }
     try {
       const response = await fetch("/api/billing/check-subscription", {
         method: "GET",
@@ -65,7 +57,6 @@ export default function HomePage() {
         const data = await response.json();
 
         if (data.subscription) {
-          dispatch(login({ subscription: data.subscription }));
           console.log(data)
           navigate("dashboard");
         }

@@ -15,7 +15,6 @@ import FontsImage from "../components/svgs/FontsImage";
 
 export default function Language() {
   const [themes, setThemes] = useState([]);
-  const subscription = useSelector((state) => state.subscription);
 
   const fonts = [
     {
@@ -141,24 +140,19 @@ export default function Language() {
       value: "hebrew",
     },
   ];
+  
 
   return (
     <div className="dashboard-container">
       <Sidebar />
       <div className="main-content">
-        <Page>
+        <Page >
           <Layout>
             <Layout.Section>
               <div>
-                {subscription?.permissions?.includes("language") && (
-                  <LanguageSection languages={languages} />
-                )}
-                {subscription?.permissions?.includes("buyNowText") && (
-                  <BuyNow />
-                )}
-                {subscription?.permissions?.includes("fonts") && (
-                  <Fonts fonts={fonts} />
-                )}
+                <LanguageSection languages={languages} />
+                <BuyNow languages={languages} />
+                <Fonts fonts={fonts} />
               </div>
             </Layout.Section>
           </Layout>

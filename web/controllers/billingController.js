@@ -205,7 +205,7 @@ export const checkSubscriptions = async (req, res) => {
   // console.log('my shop', shop);
 
   try {
-    const subscription = await UserSubscription.findOne({ shop }).sort({ createdAt: -1 });
+    const subscription = await UserSubscription.findOne({ shop }).sort({ createdAt: -1 }).populate(['subscriptionId']);
     const user = await User.findOne({ shop });
 
     if (!subscription) {

@@ -5,6 +5,7 @@ const SubscriptionSchema = new mongoose.Schema({
   amount: Number,
   duration: String,
   features: [String],
+  permissions:[String],
 });
 
 export default mongoose.model("Subscription", SubscriptionSchema);

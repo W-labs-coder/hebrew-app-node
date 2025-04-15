@@ -127,18 +127,13 @@ const Sidebar = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleNav = (link) => {
     navigate(link);
   };
-
-  // Filter menu items based on user permissions
-  const filteredMenu = mainMenu.filter((item) =>
-    userPermissions.includes(item.permissions)
-  );
 
   if (isMobile) {
     return null; // Don't render sidebar on mobile
@@ -146,8 +141,8 @@ const Sidebar = () => {
 
   return (
     <div
-      style={{
-        padding: "24px",
+      style={{ 
+        padding: "24px", 
         backgroundColor: "white",
         position: "fixed",
         top: 0,
@@ -155,11 +150,11 @@ const Sidebar = () => {
         width: "260px",
         height: "100vh",
         overflowY: "auto",
-        zIndex: 1000,
+        zIndex: 1000
       }}
       className="sidebar"
     >
-      {filteredMenu.map((item, index) => {
+      {mainMenu.map((item, index) => {
         const isActive = currentPath === item.link;
         const SvgIcon = item.icon;
 
