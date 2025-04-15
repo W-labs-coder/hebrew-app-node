@@ -14,6 +14,7 @@ import CancellationHistoryIcon from "./svgs/CancellationHistoryIcon";
 import TrainingIcon from "./svgs/TrainingIcon";
 import SupportIcon from "./svgs/SupportIcon";
 import AlertIcon from "./svgs/AlertIcon";
+import { useSelector } from "react-redux";
 
 export const mainMenu = [
   {
@@ -135,14 +136,22 @@ const Sidebar = () => {
     navigate(link);
   };
 
+  const userPermissions = useSelector(state => state.auth.subscription?.subscription?.permissions);
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+
+  const filteredMenu = mainMenu.filter((content) =>
+    userPermissions?.includes(content.permissions)
+  );
+
   if (isMobile) {
     return null; // Don't render sidebar on mobile
   }
 
   return (
     <div
-      style={{ 
-        padding: "24px", 
+      style={{
+        padding: "24px",
         backgroundColor: "white",
         position: "fixed",
         top: 0,
@@ -150,11 +159,11 @@ const Sidebar = () => {
         width: "260px",
         height: "100vh",
         overflowY: "auto",
-        zIndex: 1000
+        zIndex: 1000,
       }}
       className="sidebar"
     >
-      {mainMenu.map((item, index) => {
+      {filteredMenu.map((item, index) => {
         const isActive = currentPath === item.link;
         const SvgIcon = item.icon;
 
