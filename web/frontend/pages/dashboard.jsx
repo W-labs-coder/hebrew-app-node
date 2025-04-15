@@ -120,7 +120,8 @@ export default function dashboard() {
         if (response.ok) {
           const data = await response.json();
           const subscription = data.subscription;
-          dispatch(login({ user:data.user }));
+          console.log(subscription)
+          dispatch(login({ user:data.user, subscription }));
           if(!subscription){
              toast.warning("No Subscription Found!");
             navigate('/')
