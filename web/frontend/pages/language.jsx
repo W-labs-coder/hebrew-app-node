@@ -15,6 +15,7 @@ import FontsImage from "../components/svgs/FontsImage";
 
 export default function Language() {
   const [themes, setThemes] = useState([]);
+  const userPermissions = useSelector(state => state.auth.subscription?.subscription?.permissions);
 
   const fonts = [
     {
@@ -150,9 +151,15 @@ export default function Language() {
           <Layout>
             <Layout.Section>
               <div>
-                <LanguageSection languages={languages} />
-                <BuyNow languages={languages} />
-                <Fonts fonts={fonts} />
+                {userPermissions?.includes("language") && (
+                  <LanguageSection languages={languages} />
+                )}
+                {userPermissions?.includes("buyNowText") && (
+                  <BuyNow />
+                )}
+                {userPermissions?.includes("fonts") && (
+                  <Fonts fonts={fonts} />
+                )}
               </div>
             </Layout.Section>
           </Layout>
