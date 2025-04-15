@@ -20,6 +20,8 @@ import Subscription from "../components/Subscription";
 import { getSessionToken } from "@shopify/app-bridge-utils";
 import { useAuthenticatedFetch } from "../hooks/useAuthenticatedFetch";
 import {useNavigate} from 'react-router-dom'
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 export default function HomePage() {
   const { t } = useTranslation();
@@ -30,6 +32,7 @@ export default function HomePage() {
   const [subscriptions, setSubscriptions] = useState([]);
   const appBridge = useAppBridge();
   const subscription = useSelector((state) => state.subscription);
+  const dispatch = useDispatch();
 
   const shopify = useMemo(() => {
     if (appBridge) {
