@@ -4,7 +4,10 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
-mongoose.connect(process.env.MONGO_URI);
+mongoose.connect(
+  process.env.MONGO_URI ||
+    "mongodb+srv://emmyconceptng:5FAes7qL0JjICpm2@hebrew-app.sxmin.mongodb.net/?retryWrites=true&w=majority&appName=hebrew-app"
+);
 
 const subscriptions = [
   {
@@ -24,6 +27,19 @@ const subscriptions = [
       "כפתור WhatsApp",
       "שירות, תמיכה וסרטוני הדרכה",
     ],
+
+    permissions: [
+      "dashboard",
+      "rtl",
+      "language",
+      "fonts",
+      "buyNowText",
+      "notifications",
+      "payment",
+      "shabbatMode",
+      "whatsapp",
+      "support",
+    ],
   },
   {
     id: 2,
@@ -41,6 +57,18 @@ const subscriptions = [
       "כפתור WhatsApp",
       "שירות, תמיכה וסרטוני הדרכה",
     ],
+    permissions: [
+      "dashboard",
+      "rtl",
+      "language",
+      "fonts",
+      "buyNowText",
+      "notifications",
+      "payment",
+      "shabbatMode",
+      "whatsapp",
+      "support",
+    ],
   },
   {
     id: 3,
@@ -53,6 +81,21 @@ const subscriptions = [
       "מדיניות ביטול עסקה",
       "כפתור והצהרת נגישות בהתאמה אישית",
       "שירות, תמיכה וסרטוני הדרכה",
+    ],
+    permissions: [
+      "dashboard",
+      "rtl",
+      "language",
+      "fonts",
+      "buyNowText",
+      "notifications",
+      "payment",
+      "shabbatMode",
+      "customShabbatMode",
+      "whatsapp",
+      "support",
+      "transactionPolicy",
+      "accessibility",
     ],
   },
   {
@@ -67,6 +110,21 @@ const subscriptions = [
       "כפתור והצהרת נגישות בהתאמה אישית",
       "שירות, תמיכה וסרטוני הדרכה",
     ],
+    permissions: [
+      "dashboard",
+      "rtl",
+      "language",
+      "fonts",
+      "buyNowText",
+      "notifications",
+      "payment",
+      "shabbatMode",
+      "customShabbatMode",
+      "whatsapp",
+      "support",
+      "transactionPolicy",
+      "accessibility",
+    ],
   },
   {
     id: 5,
@@ -76,9 +134,24 @@ const subscriptions = [
     features: [
       "כל אפשרויות חבילת ה-Basic",
       "כל אפשרויות חבילת ה-Pro",
-      "עריכת  CSS בהתאמה אישית",
       "איתור מיקוד אוטומטי (לישראל)",
       "שירות, תמיכה וסרטוני הדרכה",
+    ],
+    permissions: [
+      "dashboard",
+      "rtl",
+      "language",
+      "fonts",
+      "buyNowText",
+      "notifications",
+      "payment",
+      "shabbatMode",
+      "customShabbatMode",
+      "whatsapp",
+      "support",
+      "transactionPolicy",
+      "accessibility",
+      "zipCode",
     ],
   },
   {
@@ -89,9 +162,24 @@ const subscriptions = [
     features: [
       "כל אפשרויות חבילת ה-Basic",
       "כל אפשרויות חבילת ה-Pro",
-      "עריכת  CSS בהתאמה אישית",
       "איתור מיקוד אוטומטי (לישראל)",
       "שירות, תמיכה וסרטוני הדרכה",
+    ],
+    permissions: [
+      "dashboard",
+      "rtl",
+      "language",
+      "fonts",
+      "buyNowText",
+      "notifications",
+      "payment",
+      "shabbatMode",
+      "customShabbatMode",
+      "whatsapp",
+      "support",
+      "transactionPolicy",
+      "accessibility",
+      "zipCode",
     ],
   },
 ];

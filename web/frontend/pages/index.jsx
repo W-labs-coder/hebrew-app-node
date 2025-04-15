@@ -29,6 +29,7 @@ export default function HomePage() {
   const authenticatedFetch = useAuthenticatedFetch();
   const [subscriptions, setSubscriptions] = useState([]);
   const appBridge = useAppBridge();
+  const subscription = useSelector((state) => state.subscription);
 
   const shopify = useMemo(() => {
     if (appBridge) {
@@ -46,6 +47,9 @@ export default function HomePage() {
   }, []);
 
   const checkSubscription = async () => {
+    if(subscription) {
+      navigate("dashboard");
+    }
     try {
       const response = await fetch("/api/billing/check-subscription", {
         method: "GET",
@@ -57,6 +61,7 @@ export default function HomePage() {
         const data = await response.json();
 
         if (data.subscription) {
+          dispatch(login({ subscription: data.subscription }));
           console.log(data)
           navigate("dashboard");
         }

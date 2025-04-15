@@ -56,14 +56,14 @@ export const mainMenu = [
     slug: "sabbath",
     link: "/sabbath",
     icon: SabbathIcon,
-    permissions: "sabbath",
+    permissions: "sabbathMode",
   },
   {
     title: "התראות",
     slug: "alerts",
     link: "/alerts",
     icon: AlertIcon,
-    permissions: "alerts",
+    permissions: "notifications",
   },
   {
     title: "נגישות",
@@ -77,7 +77,7 @@ export const mainMenu = [
     slug: "automatic-focus",
     link: "/postal",
     icon: AutomaticFocusIcon,
-    permissions: "automatic-focus",
+    permissions: "zipCode",
   },
   // {
   //   title: "CSS",
@@ -91,21 +91,21 @@ export const mainMenu = [
     slug: "transaction-cancellation",
     link: "/orders/transaction-cancellation",
     icon: TransactionCancellationIcon,
-    permissions: "transaction-cancellation",
+    permissions: "transactionPolicy",
   },
   {
     title: "היסטוריית ביטולים",
     slug: "cancellation-history",
     link: "/orders/cancellation-history",
     icon: CancellationHistoryIcon,
-    permissions: "cancellation-history",
+    permissions: "transactionPolicy",
   },
   {
     title: "הדרכה",
     slug: "training",
     link: "/training",
     icon: TrainingIcon,
-    permissions: "training",
+    permissions: "support",
   },
   {
     title: "תמיכה",
@@ -127,13 +127,18 @@ const Sidebar = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const handleNav = (link) => {
     navigate(link);
   };
+
+  // Filter menu items based on user permissions
+  const filteredMenu = mainMenu.filter((item) =>
+    userPermissions.includes(item.permissions)
+  );
 
   if (isMobile) {
     return null; // Don't render sidebar on mobile
@@ -141,8 +146,8 @@ const Sidebar = () => {
 
   return (
     <div
-      style={{ 
-        padding: "24px", 
+      style={{
+        padding: "24px",
         backgroundColor: "white",
         position: "fixed",
         top: 0,
@@ -150,11 +155,11 @@ const Sidebar = () => {
         width: "260px",
         height: "100vh",
         overflowY: "auto",
-        zIndex: 1000
+        zIndex: 1000,
       }}
       className="sidebar"
     >
-      {mainMenu.map((item, index) => {
+      {filteredMenu.map((item, index) => {
         const isActive = currentPath === item.link;
         const SvgIcon = item.icon;
 

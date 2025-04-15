@@ -200,13 +200,38 @@ export const getSubscriptions = async (req, res) => {
 };
 
 export const checkSubscriptions = async (req, res) => {
-    const session = res.locals.shopify.session;
-    const shop =session.shop
-    console.log('my shop',shop)
+  const session = res.locals.shopify.session;
+  const shop = session.shop;
+  // console.log('my shop', shop);
+
   try {
-    const subscription = await UserSubscription.findOne({ shop }).sort({createdAt : -1});
-    const user = await User.findOne({shop})
-    res.status(200).json({subscription, user});
+    const subscription = await UserSubscription.findOne({ shop }).sort({ createdAt: -1 });
+    const user = await User.findOne({ shop });
+
+    if (!subscription) {
+      return res.status(404).json({ success: false, message: "No subscription found" });
+    }
+
+    const currentDate = new Date();
+    const trialEndDate = new Date(subscription.startDate.getTime() + 5 * 24 * 60 * 60 * 1000); // 5 days trial
+
+    if (currentDate > subscription.endDate) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Subscription has expired" 
+      });
+    }
+
+    if (currentDate < trialEndDate) {
+      return res.status(200).json({ 
+        subscription, 
+        user, 
+        trialActive: true, 
+        message: "Trial period is active" 
+      });
+    }
+
+    res.status(200).json({ subscription, user, trialActive: false });
   } catch (error) {
     console.error("Error fetching subscriptions:", error);
     res.status(500).send({ success: false, message: error.message });
