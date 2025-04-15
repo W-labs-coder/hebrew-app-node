@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { login } from "../store/slices/authSlice";
 import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const categoryContents = [
   {
@@ -26,6 +27,7 @@ const categoryContents = [
     content: "שנה את כיוון התצוגה של האתר שלך מימין לשמאל בלחיצה אחת!",
     button: "הגדרת RTL",
     link: "rtl",
+    permission:'rtl'
   },
   {
     name: "כפתור שפה דינמי",
@@ -34,6 +36,7 @@ const categoryContents = [
       "תרגם את האתר שלך לעברית באופן מיידי, כך שהקהל שלך יוכל לגלוש בשפה המועדפת עליו.",
     button: "שפת הגדרה",
     link: "language",
+    permission: "language",
   },
   {
     name: "מדריך להגדרת WhatsApp",
@@ -42,6 +45,7 @@ const categoryContents = [
       "ברוכים הבאים לחנות שלנו! אנחנו כאן כדי לעזור לכם בכל שאלה. אל תהססו לפנות אלינו. שתהיה לכם חווית קנייה מהנה!",
     button: "הגדר עכשיו",
     link: "whatsapp",
+    permission: "whatsapp",
   },
   {
     name: "שיטות תשלום",
@@ -50,6 +54,7 @@ const categoryContents = [
       "שילוב סמלי שיטות תשלום מקומיות (ויזה, ביט, וכו') לאתר שלך, בהתאמה לאופציות התשלום המתקבלות - הכל בלחיצה אחת!",
     button: "הגדרת אמצעי תשלום",
     link: "payment",
+    permission: "payment",
   },
 
   {
@@ -59,6 +64,7 @@ const categoryContents = [
       "ודאו שהלקוחות שלכם מקבלים התראות בעברית - התאימו את הטקסט לשפה ולמותג שלכם!",
     button: "הגדרות הודעות",
     link: "alert",
+    permission: "notifications",
   },
   {
     name: "מצב שבת",
@@ -67,6 +73,7 @@ const categoryContents = [
       "הגדר את שעות השבת של החנות שלך לסגירה ופתיחה אוטומטית, תוך שמירה על לקוחות מעודכנים לגבי לוח הזמנים שלך.",
     button: "קבע שבת",
     link: "sabbath",
+    permission: "sabbathMode",
   },
 
   {
@@ -76,6 +83,7 @@ const categoryContents = [
       "הכלי שלנו לכתובת אוטומטית מעדכן את כתובות ההזמנה הנכנסות בהתאם לקלט של הלקוח, ומייעל את תהליך עיבוד ההזמנות שלך.",
     button: "הגדרת מיקוד אוטומטי",
     link: "automatic-focus",
+    permission: "zipCode",
   },
   {
     name: "נגישות",
@@ -84,6 +92,7 @@ const categoryContents = [
       "הפעל תוסף נגישות כדי לשפר את השימושיות של האתר שלך עבור משתמשים עם מוגבלויות. אפשרות בלחיצה אחת להצהרת נגישות כלולה!",
     button: "הגדרת נגישות",
     link: "accessibility",
+    permission: "accessibility",
   },
   {
     name: "הגדרות מתקדמות",
@@ -92,20 +101,32 @@ const categoryContents = [
       "התאמת הגדרות עיצוב מתקדמות - מיועדות למשתמשים בעלי ידע טכני בלבד.",
     button: "עבור לדף ההנחיות",
     link: "training",
+    permission: "training",
   },
-  {
-    name: "CSS",
-    icon: Css2,
-    content: "שנה את הגדרות העיצוב המתקדמות - למשתמשים עם מומחיות טכנית בלבד.",
-    button: "הגדרת CSS מותאם",
-    link: "css",
-  },
+  // {
+  //   name: "CSS",
+  //   icon: Css2,
+  //   content: "שנה את הגדרות העיצוב המתקדמות - למשתמשים עם מומחיות טכנית בלבד.",
+  //   button: "הגדרת CSS מותאם",
+  //   link: "css",
+  // },
 ];
 
 export default function dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate()
+  const userPermissions = useSelector(state => state.auth.subscription?.subscription?.permissions);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   useEffect(() => {
+    if (!isAuthenticated) {
+      toast.error("You are not authenticated!");
+      navigate("/");
+    }
+    if (!userPermissions || !userPermissions.includes("dashboard")) {
+      toast.error("You do not have permission to access this page.");
+      navigate("/");
+    }
+    // Check subscription status when the component mounts
       checkSubscription();
     }, []);
   
@@ -120,7 +141,6 @@ export default function dashboard() {
         if (response.ok) {
           const data = await response.json();
           const subscription = data.subscription;
-          console.log(subscription)
           dispatch(login({ user:data.user, subscription }));
           if(!subscription){
              toast.warning("No Subscription Found!");
@@ -144,7 +164,7 @@ export default function dashboard() {
               <div className="rtl-section">
                 <WelcomeSection />
                 <VideoIntroSection />
-                <SettingsCategorySection />
+                <SettingsCategorySection permissions={userPermissions} />
               </div>
             </Layout.Section>
           </Layout>
@@ -203,22 +223,29 @@ const VideoIntroSection = () => (
   </section>
 );
 
-const SettingsCategorySection = () => (
-  <section>
-    <div>
-      <p className="fs18 fw700">קטגוריית הגדרות</p>
-      <p className="fs14" style={{ color: "#777" }}>
-        התאימו את חנות ה-Shopify שלכם לחוויית קנייה ייחודית בישראל בלחיצה אחת על
-        כל קטגוריה.
-      </p>
-    </div>
-    <div className="row aic" style={{ gap: "16px", marginTop: "16px" }}>
-      {categoryContents.map((content, index) => (
-        <CategoryCard key={index} content={content} />
-      ))}
-    </div>
-  </section>
-);
+const SettingsCategorySection = ({ permissions }) => {
+  // Filter categoryContents based on user permissions
+  const filteredCategoryContents = categoryContents.filter((content) =>
+    permissions?.includes(content.permission)
+  );
+
+  return (
+    <section>
+      <div>
+        <p className="fs18 fw700">קטגוריית הגדרות</p>
+        <p className="fs14" style={{ color: "#777" }}>
+          התאימו את חנות ה-Shopify שלכם לחוויית קנייה ייחודית בישראל בלחיצה אחת על
+          כל קטגוריה.
+        </p>
+      </div>
+      <div className="row aic" style={{ gap: "16px", marginTop: "16px" }}>
+        {filteredCategoryContents.map((content, index) => (
+          <CategoryCard key={index} content={content} />
+        ))}
+      </div>
+    </section>
+  );
+};
 
 const CategoryCard = ({ content }) => {
   const SvgIcon = content.icon;
