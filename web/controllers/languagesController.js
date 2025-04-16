@@ -149,39 +149,6 @@ export const addSelectedLanguage = async (req, res) => {
       (content) => content.value && content.value.trim() !== ""
     );
 
-    let translatedValues = contentsToTranslate.map((c) => c.value);
-
-    if (openai && contentsToTranslate.length > 0) {
-      try {
-        console.log(
-          `Batch translating ${contentsToTranslate.length} items to ${language}`
-        );
-        const translationResponse = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
-          messages: [
-            {
-              role: "system",
-              content: `Translate the following texts to ${language}. Maintain all HTML tags and formatting. Return ONLY a JSON array of translated strings in the same order.`,
-            },
-            {
-              role: "user",
-              content: JSON.stringify(translatedValues),
-            },
-          ],
-          temperature: 0.3,
-        });
-
-        // Parse the JSON array from the response
-        translatedValues = JSON.parse(
-          translationResponse.choices[0].message.content
-        );
-      } catch (translationError) {
-        console.error("Batch translation error:", translationError);
-        // fallback: use original values if translation fails
-        translatedValues = contentsToTranslate.map((c) => c.value);
-      }
-    }
-
     // Helper to chunk an array
     function chunkArray(array, size) {
       const result = [];
@@ -189,6 +156,42 @@ export const addSelectedLanguage = async (req, res) => {
         result.push(array.slice(i, i + size));
       }
       return result;
+    }
+
+    let translatedValues = [];
+    const TRANSLATION_BATCH_SIZE = 50; // Adjust as needed for token limits
+
+    if (openai && contentsToTranslate.length > 0) {
+      try {
+        const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
+        for (const chunk of contentChunks) {
+          const values = chunk.map((c) => c.value);
+          const translationResponse = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: `Translate the following texts to ${language}. Maintain all HTML tags and formatting. Return ONLY a JSON array of translated strings in the same order.`,
+              },
+              {
+                role: "user",
+                content: JSON.stringify(values),
+              },
+            ],
+            temperature: 0.3,
+          });
+          const batchTranslations = JSON.parse(
+            translationResponse.choices[0].message.content
+          );
+          translatedValues.push(...batchTranslations);
+        }
+      } catch (translationError) {
+        console.error("Batch translation error:", translationError);
+        // fallback: use original values if translation fails
+        translatedValues = contentsToTranslate.map((c) => c.value);
+      }
+    } else {
+      translatedValues = contentsToTranslate.map((c) => c.value);
     }
 
     const translations = contentsToTranslate.map((content, i) => ({
