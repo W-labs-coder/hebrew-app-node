@@ -180,8 +180,8 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     let translatedValues = [];
-    const TRANSLATION_BATCH_SIZE = 20; // Safe for OpenAI context
-    const SHOPIFY_BATCH_SIZE = 100;    // Shopify limit
+    const TRANSLATION_BATCH_SIZE = 100; // Safe for OpenAI context
+    const SHOPIFY_BATCH_SIZE = 250;    // Shopify limit
     const TRANSLATION_CONCURRENCY = 3; // Parallel translation batches
     const REGISTRATION_CONCURRENCY = 3; // Parallel Shopify batches
 
@@ -231,7 +231,7 @@ export const addSelectedLanguage = async (req, res) => {
     }));
 
     console.log(
-      "Registering all translations in batches of 100:",
+      "Registering all translations in batches of 250:",
       translations.length
     );
 
