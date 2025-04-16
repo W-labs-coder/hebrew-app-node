@@ -159,11 +159,14 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     let translatedValues = [];
-    const TRANSLATION_BATCH_SIZE = 50; // Adjust as needed for token limits
+    const TRANSLATION_BATCH_SIZE = 1000; // Adjust as needed for token limits
 
     if (openai && contentsToTranslate.length > 0) {
       try {
-        const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
+        const contentChunks = chunkArray(
+          contentsToTranslate,
+          TRANSLATION_BATCH_SIZE
+        );
         for (const chunk of contentChunks) {
           const values = chunk.map((c) => c.value);
           const translationResponse = await openai.chat.completions.create({
@@ -201,12 +204,17 @@ export const addSelectedLanguage = async (req, res) => {
       translatableContentDigest: content.digest || undefined,
     }));
 
-    console.log("Registering all translations in batches of 250:", translations.length);
+    console.log(
+      "Registering all translations in batches of 250:",
+      translations.length
+    );
 
     try {
       let translatedResourceId = themeId;
       if (!translatedResourceId.startsWith("gid://")) {
-        translatedResourceId = `gid://shopify/Theme/${themeId.split("/").pop()}`;
+        translatedResourceId = `gid://shopify/Theme/${themeId
+          .split("/")
+          .pop()}`;
       }
 
       const translationChunks = chunkArray(translations, 250);
