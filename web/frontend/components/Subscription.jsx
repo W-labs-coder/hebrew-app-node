@@ -147,11 +147,11 @@ const handleSelectPlan = async (id) => {
           background: "#FBFBFB",
         }}
       >
-        <div className="d-lg-flex flex-wrap ais my-3 jcc ">
+        <div className="d-lg-flex flex-wrap ais my-3 jcc px-2">
           {filteredSubscriptions.map((subscription) => (
             <div
               key={subscription._id}
-              className="col-lg-3 col-md-3 col-sm-12 m-3 p-0"
+              className="col-lg-3 col-md-3 col-sm-12 m-3"
               style={{
                 background:
                   subscription.name.toLowerCase() === "pro"
@@ -159,6 +159,7 @@ const handleSelectPlan = async (id) => {
                     : "#C6C6C6",
                 borderRadius: "12px",
                 cursor: "pointer",
+                flexGrow: 1
               }}
             >
               <p className="fs14 text-center" style={{ padding: "10px 26px" }}>
