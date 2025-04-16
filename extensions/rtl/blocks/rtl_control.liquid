@@ -52,9 +52,9 @@
         {% when "Paypal" %}
          <img src="{% if processor == 'Paypal' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/paypal-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
      alt="Paypal" width="35" height="35">
-     {% when "Mastercard" %}
-         <img src="{% if processor == 'Mastercard' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/mastercard-full-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
-     alt="Mastercard" width="35" height="35">
+     {% when "Master Card" %}
+         <img src="{% if processor == 'Master Card' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/mastercard-full-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
+     alt="Master Card" width="35" height="35">
       {% when "Google Pay" %}
          <img src="{% if processor == 'Google Pay' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/googlepay-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
      alt="Google Pay" width="35" height="35">
@@ -110,7 +110,7 @@
 
 
 
-{%- assign default_avatar_url = 'user-avatar.png' | asset_url | default: 'https://cdn.shopify.com/s/files/default-avatar.png' -%}
+{%- assign default_avatar_url = 'user-avatar.png' | asset_url | default: 'https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png' -%}
 
 {% comment %} First, ensure we're getting the contacts data {% endcomment %}
 {% assign contacts = shop.metafields.custom.contacts.value | default: '' %}
@@ -174,15 +174,11 @@
                 {% endif %}
               </div>
               <div class="whatsapp-contact-info">
-                <span class="contact-name">{{ contact.name }}</span>
+                <span class="contact-name" style="font-size: 14px; font-weight: 600">{{ contact.name }}</span>
                 {% if contact.role %}
-                  <span class="contact-role">{{ contact.role }}</span>
+                  <span class="contact-role" style="font-size: 12px; font-weight: 400">{{ contact.role }}</span>
                 {% endif %}
-                <span class="contact-status">צ'אט איתנו</span>
               </div>
-              {% if contact.available_hours %}
-                <div class="contact-hours">{{ contact.available_hours }}</div>
-              {% endif %}
             </div>
           {% endfor %}
         </div>
@@ -909,78 +905,17 @@ document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const
 </script>
 
 <script>
-// Add to your existing JavaScript
-document.addEventListener('DOMContentLoaded', function() {
+(function waitForWhatsAppWidget() {
   const container = document.querySelector('.whatsapp-widget-container');
   const minimizeButton = document.querySelector('.whatsapp-minimize-button');
   const closeButton = document.querySelector('.whatsapp-close-button');
 
-  if (minimizeButton) {
-    minimizeButton.addEventListener('click', function() {
-      const isMinimized = container.getAttribute('data-state') === 'minimized';
-      container.setAttribute('data-state', isMinimized ? 'expanded' : 'minimized');
-      
-      // Store state in localStorage
-      localStorage.setItem('whatsappWidgetState', isMinimized ? 'expanded' : 'minimized');
-    });
+  if (!container || !minimizeButton || !closeButton) {
+    setTimeout(waitForWhatsAppWidget, 300);
+    return;
   }
 
-  if (closeButton) {
-    closeButton.addEventListener('click', function() {
-      container.style.display = 'none';
-      // Store closed state in localStorage
-      localStorage.setItem('whatsappWidgetClosed', 'true');
-      
-      // Show widget again after 24 hours
-      setTimeout(() => {
-        container.style.display = 'block';
-        localStorage.removeItem('whatsappWidgetClosed');
-      }, 24 * 60 * 60 * 1000);
-    });
-  }
-
-  // Restore previous state on page load
-  const savedState = localStorage.getItem('whatsappWidgetState');
-  const isClosed = localStorage.getItem('whatsappWidgetClosed');
-  
-  if (savedState === 'minimized') {
-    container.setAttribute('data-state', 'minimized');
-  }
-  
-  if (isClosed === 'true') {
-    container.style.display = 'none';
-  }
-});
-</script>
-
-<script>
-function initWhatsAppWidgetControls() {
-  const container = document.querySelector('.whatsapp-widget-container');
-  const minimizeButton = document.querySelector('.whatsapp-minimize-button');
-  const closeButton = document.querySelector('.whatsapp-close-button');
-
-  if (!container) return;
-
-  if (minimizeButton) {
-    minimizeButton.onclick = function() {
-      const isMinimized = container.getAttribute('data-state') === 'minimized';
-      container.setAttribute('data-state', isMinimized ? 'expanded' : 'minimized');
-      localStorage.setItem('whatsappWidgetState', isMinimized ? 'expanded' : 'minimized');
-    };
-  }
-
-  if (closeButton) {
-    closeButton.onclick = function() {
-      container.style.display = 'none';
-      localStorage.setItem('whatsappWidgetClosed', 'true');
-      setTimeout(() => {
-        container.style.display = 'block';
-        localStorage.removeItem('whatsappWidgetClosed');
-      }, 24 * 60 * 60 * 1000);
-    };
-  }
-
-  // Restore previous state on page load
+  // Restore previous state on load
   const savedState = localStorage.getItem('whatsappWidgetState');
   const isClosed = localStorage.getItem('whatsappWidgetClosed');
   if (savedState === 'minimized') {
@@ -989,11 +924,24 @@ function initWhatsAppWidgetControls() {
   if (isClosed === 'true') {
     container.style.display = 'none';
   }
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(initWhatsAppWidgetControls, 500); // Wait for widget to render
-});
+  // Minimize button
+  minimizeButton.onclick = function() {
+    const isMinimized = container.getAttribute('data-state') === 'minimized';
+    container.setAttribute('data-state', isMinimized ? 'expanded' : 'minimized');
+    localStorage.setItem('whatsappWidgetState', isMinimized ? 'expanded' : 'minimized');
+  };
+
+  // Close button
+  closeButton.onclick = function() {
+    container.style.display = 'none';
+    localStorage.setItem('whatsappWidgetClosed', 'true');
+    setTimeout(() => {
+      container.style.display = 'block';
+      localStorage.removeItem('whatsappWidgetClosed');
+    }, 24 * 60 * 60 * 1000); // 24 hours
+  };
+})();
 </script>
 
 {% if is_sabbath_mode %}
