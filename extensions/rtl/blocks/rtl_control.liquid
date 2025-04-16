@@ -168,15 +168,15 @@
                  style="cursor: pointer;">
               <div class="whatsapp-avatar">
                 {% if contact.avatar_url %}
-                  <img src="{{ contact.avatar_url |  asset_url }}" alt="{{ contact.name }}" width="40" height="40">
+                  <img src="{{ contact.avatar_url |  asset_url }}" alt="" width="40" height="40">
                 {% else %}
-                  <img src="{{ default_avatar_url |  asset_url }}" alt="{{ contact.name }}" width="40" height="40">
+                  <img src="{{ default_avatar_url |  asset_url }}" alt="" width="40" height="40">
                 {% endif %}
               </div>
               <div class="whatsapp-contact-info">
-                <span class="contact-name" style="font-size: 14px; font-weight: 600">{{ contact.name }}</span>
+                <span class="contact-name" style="font-size: 16px; font-weight: 600">{{ contact.name }}</span>
                 {% if contact.role %}
-                  <span class="contact-role" style="font-size: 12px; font-weight: 400">{{ contact.role }}</span>
+                  <span class="contact-role" style="font-size: 14px; font-weight: 400">{{ contact.role }}</span>
                 {% endif %}
               </div>
             </div>
