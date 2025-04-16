@@ -111,7 +111,7 @@ export default function HomePage() {
   }
 
   return (
-    <Page fullWidth>
+    <Page>
       <Layout>
         <Layout.Section>
           <LegacyCard sectioned>
