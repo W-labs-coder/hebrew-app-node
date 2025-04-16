@@ -430,7 +430,7 @@ export const updateWhatsappSettings = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "WhatsApp settings updated successfully",
-      user, subscription
+      user, subscription,
       timestamp: Date.now() - startTime
     });
 

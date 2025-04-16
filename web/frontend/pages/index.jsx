@@ -9,6 +9,7 @@ import {
   Link,
   Text,
   LegacyCard,
+  Spinner,
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { useTranslation, Trans } from "react-i18next";
@@ -21,9 +22,6 @@ import { getSessionToken } from "@shopify/app-bridge-utils";
 import { useAuthenticatedFetch } from "../hooks/useAuthenticatedFetch";
 import {useNavigate} from 'react-router-dom'
 
-
-
-
 export default function HomePage() {
   const { t } = useTranslation();
   const app = useAppBridge();
@@ -31,6 +29,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const authenticatedFetch = useAuthenticatedFetch();
   const [subscriptions, setSubscriptions] = useState([]);
+  const [loading, setLoading] = useState(true); // <-- Add loading state
   const appBridge = useAppBridge();
 
   const shopify = useMemo(() => {
@@ -46,6 +45,7 @@ export default function HomePage() {
   useEffect(() => {
     checkSubscription();
     fetchSubscriptions();
+    // eslint-disable-next-line
   }, []);
 
   const checkSubscription = async () => {
@@ -58,15 +58,17 @@ export default function HomePage() {
       });
       if (response.ok) {
         const data = await response.json();
-
         if (data.subscription) {
-          console.log(data)
           navigate("dashboard");
+        } else {
+          setLoading(false); // <-- Only stop loading if no subscription
         }
       } else {
+        setLoading(false);
         console.error("Failed to fetch subscriptions");
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error fetching subscriptions:", error);
     }
   };
@@ -81,13 +83,6 @@ export default function HomePage() {
       });
       if (response.ok) {
         const data = await response.json();
-        //  const order = ["basic", "pro", "premium"];
-
-        //  // Sort the subscriptions based on the defined order
-        //  data = data.sort(
-        //    (a, b) => order.indexOf(a.name) - order.indexOf(b.name)
-        //  );
-
         setSubscriptions(data);
       } else {
         console.error("Failed to fetch subscriptions");
@@ -100,6 +95,20 @@ export default function HomePage() {
   const handleRedirect = (url) => {
     redirect.dispatch(Redirect.Action.APP, url);
   };
+
+  if (loading) {
+    return (
+      <Page fullWidth>
+        <Layout>
+          <Layout.Section>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
+              <Spinner accessibilityLabel="Loading" size="large" />
+            </div>
+          </Layout.Section>
+        </Layout>
+      </Page>
+    );
+  }
 
   return (
     <Page fullWidth>
