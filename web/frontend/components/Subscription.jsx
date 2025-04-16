@@ -147,7 +147,7 @@ const handleSelectPlan = async (id) => {
           background: "#FBFBFB",
         }}
       >
-        <div className="row ais my-3 jcc ">
+        <div className="row ais my-3 jcc mx-0 ">
           {filteredSubscriptions.map((subscription) => (
             <div
               key={subscription._id}
