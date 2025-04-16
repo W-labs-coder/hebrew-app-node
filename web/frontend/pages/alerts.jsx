@@ -169,7 +169,7 @@ const AlertSection = ({ notificationTypes }) => {
       }
 
       const data = await response.json();
-      dispatch(login({ user: data.user }));
+      dispatch(login({ user: data.user, subscription: data.subscription }));
       setIsSubmitSuccessful(true);
       toast.success('Notification template updated successfully');
       

@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
 import OpenAI from 'openai';
 
@@ -136,14 +137,27 @@ The template should follow this structure:
         ]
       }
     });
-
-    res.json({
+ const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+        
+            if (!subscription) {
+              return res.status(404).json({ success: false, message: "No subscription found" });
+            }
+        
+            const currentDate = new Date();
+        
+            if (currentDate > subscription.endDate) {
+              return res.status(403).json({ 
+                success: false, 
+                message: "Subscription has expired" 
+              });
+            }
+    res.status(200).json({
       success: true,
       data: {
         template: generatedTemplate,
         subject: emailSubject,
       },
-      user
+      user, subscription
     });
 
   } catch (error) {

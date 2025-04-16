@@ -176,7 +176,7 @@ const SabbathSection = ({ themes }) => {
         setShop(data.shop || "");
 
         // Update Redux state
-        dispatch(login({ user: data }));
+        dispatch(login({ user: data.user, subscription:data.subscription }));
 
       } catch (error) {
         console.error("Error loading settings:", error);

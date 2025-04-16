@@ -199,7 +199,7 @@ const saveLanguage = async (e) => {
       const language = data.user.selectedLanguage;
       setSelectedLanguage(language);
       setShop(data.user.shop);
-      dispatch(login({ user: data.user }));
+      dispatch(login({ user: data.user, subscription:data.subscription }));
       setIsLanguageSubmitSuccessful(true);
       setIsLanguageLoading(false)
       toast.success("Language Added Successfully")
@@ -385,7 +385,7 @@ const BuyNow = () => {
 
       if (response.ok) {
         const data = await response.json();
-        dispatch(login({ user: data.user }));
+        dispatch(login({ user: data.user, subscription:data.subscription }));
         setIsBuyNowSubmitSuccessful(true);
         
         toast.success('Buy Now Text Added Successfully')
@@ -505,7 +505,7 @@ const Fonts = ({fonts}) => {
 
       if (response.ok) {
         const data = await response.json();
-        dispatch(login({ user: data.user }));
+        dispatch(login({ user: data.user, subscription:data.subscription }));
         setIsFontSubmitSuccessful(true);
 
         toast.success("Font Added Successfully");

@@ -108,7 +108,7 @@ const AccessibilitySettings = () => {
 
       // Update Redux store with new user data
       if (data.user) {
-        dispatch(login({ user: data.user }));
+        dispatch(login({ user: data.user, subscription:data.subscription }));
       }
 
       setIsSubmitSuccessful(true);

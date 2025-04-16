@@ -1,6 +1,7 @@
 import shopify from "../shopify.js";
 import User from "../models/User.js";
 import OpenAI from "openai";
+import UserSubscription from "../models/UserSubscription.js";
 
 export const addSelectedLanguage = async (req, res) => {
   try {
@@ -227,9 +228,25 @@ export const addSelectedLanguage = async (req, res) => {
       }
     }
 
+     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+            
+                if (!subscription) {
+                  return res.status(404).json({ success: false, message: "No subscription found" });
+                }
+            
+                const currentDate = new Date();
+            
+                if (currentDate > subscription.endDate) {
+                  return res.status(403).json({ 
+                    success: false, 
+                    message: "Subscription has expired" 
+                  });
+                }
+
+
     res.status(200).json({
       message: "Language added successfully and sample translations completed",
-      user,
+      user, subscription,
       translationStats: {
         translatedItems: translationCount,
         totalTranslatableItems: translatableContent.length,

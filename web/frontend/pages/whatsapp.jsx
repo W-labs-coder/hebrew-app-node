@@ -154,7 +154,7 @@ const WhatsappSettings = () => {
       
       // Update Redux store with new user data
       if (data.user) {
-        dispatch(login({ user: data.user }));
+        dispatch(login({ user: data.user, subscription:data.subscription }));
       }
   
       setIsSubmitSuccessful(true);
@@ -254,7 +254,7 @@ const WhatsappSettings = () => {
         
         // Update Redux store
         if (data.user) {
-          dispatch(login({ user: data.user }));
+          dispatch(login({ user: data.user, subscription:data.subscription }));
         }
         
         toast.success('Contact deleted successfully');
@@ -340,7 +340,7 @@ const WhatsappSettings = () => {
         setNewContact({ name: "", role: "", phone: "" });
 
         if (data.user) {
-          dispatch(login({ user: data.user }));
+          dispatch(login({ user: data.user, subscription:data.subscription }));
         }
 
         toast.success(

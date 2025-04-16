@@ -85,7 +85,7 @@ const RTLSection = ({ themes }) => {
         const theme = data.user.selectedTheme;
         setSelectedTheme(theme);
         setShop(data.user.shop);
-        dispatch(login({ user: data.user }));
+        dispatch(login({ user: data.user, subscription: data.subscription }));
         setThemeLoading(false);
         setIsSubmitSuccessful(true);
         toast.success('הנושא נבחר בהצלחה')

@@ -74,7 +74,7 @@ const PostalSettings = () => {
       const data = await response.json();
       
       if (data.user) {
-        dispatch(login({ user: data.user }));
+        dispatch(login({ user: data.user, subscription:data.subscription }));
       }
 
       setIsSubmitSuccessful(true);

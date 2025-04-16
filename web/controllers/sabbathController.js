@@ -3,6 +3,7 @@ import shopify from "../shopify.js";
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { r2Client, generatePresignedUrl } from '../config/r2.js';
 import { v4 as uuidv4 } from 'uuid';
+import UserSubscription from "../models/UserSubscription.js";
 
 export const updateSabbathSettings = async (req, res) => {
   try {
@@ -429,9 +430,23 @@ export const toggleSabbathTheme = async (req, res) => {
         }]
       }
     });
+     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+            
+                if (!subscription) {
+                  return res.status(404).json({ success: false, message: "No subscription found" });
+                }
+            
+                const currentDate = new Date();
+            
+                if (currentDate > subscription.endDate) {
+                  return res.status(403).json({ 
+                    success: false, 
+                    message: "Subscription has expired" 
+                  });
+                }
 
-    res.json({ 
-      success: true,
+    res.status(200).json({ 
+      success: true, user, subscription,
       message: isSabbathMode ? 'Sabbath mode activated' : 'Sabbath mode deactivated'
     });
     
@@ -458,6 +473,21 @@ export const getSabbathSettings = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+            
+                if (!subscription) {
+                  return res.status(404).json({ success: false, message: "No subscription found" });
+                }
+            
+                const currentDate = new Date();
+            
+                if (currentDate > subscription.endDate) {
+                  return res.status(403).json({ 
+                    success: false, 
+                    message: "Subscription has expired" 
+                  });
+                }
+
     res.json({
       isSabbathMode: user.isSabbathMode,
       isAutoSabbathMode: user.isAutoSabbathMode,
@@ -471,7 +501,7 @@ export const getSabbathSettings = async (req, res) => {
       bannerBgColor: user.bannerBgColor,
       bannerTextColor: user.bannerTextColor,
       selectedTheme: user.selectedTheme,
-      shop: user.shop
+      shop: user.shop, user, subscription
     });
 
   } catch (error) {

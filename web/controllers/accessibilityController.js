@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
 
 export const updateAccessibilitySettings = async (req, res) => {
@@ -215,12 +216,28 @@ export const updateAccessibilitySettings = async (req, res) => {
       throw new Error(`MetafieldsSet mutation failed: ${error.message}`);
     });
 
+     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+        
+            if (!subscription) {
+              return res.status(404).json({ success: false, message: "No subscription found" });
+            }
+        
+            const currentDate = new Date();
+        
+            if (currentDate > subscription.endDate) {
+              return res.status(403).json({ 
+                success: false, 
+                message: "Subscription has expired" 
+              });
+            }
+
     // Send success response
     return res.status(200).json({
       success: true,
       message: "Accessibility settings updated successfully",
       user,
-      timestamp: Date.now() - startTime
+      timestamp: Date.now() - startTime,
+      subscription,
     });
 
   } catch (error) {

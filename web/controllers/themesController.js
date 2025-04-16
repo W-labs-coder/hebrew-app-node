@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
 
 export const fetchTheme = async (req, res) => {
@@ -75,7 +76,22 @@ export const addSelectedTheme = async (req, res) => {
       { new: true, upsert: true }
     );
 
-    res.status(200).json({ message: "Theme added successfully", user });
+    const subscription = await UserSubscription.findOne({ shop }).sort({ createdAt: -1 }).populate("subscription");
+    
+        if (!subscription) {
+          return res.status(404).json({ success: false, message: "No subscription found" });
+        }
+    
+        const currentDate = new Date();
+    
+        if (currentDate > subscription.endDate) {
+          return res.status(403).json({ 
+            success: false, 
+            message: "Subscription has expired" 
+          });
+        }
+
+    res.status(200).json({ message: "Theme added successfully", user, subscription });
   } catch (error) {
     console.error("Error adding theme:", error);
     res.status(500).json({ message: "Error adding theme" });

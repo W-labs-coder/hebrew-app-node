@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
 import mongoose from "mongoose";
 
@@ -376,11 +377,25 @@ export const updateWhatsappSettings = async (req, res) => {
           });
         }
 
-        // For other errors, continue with local save
+         const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+                
+                    if (!subscription) {
+                      return res.status(404).json({ success: false, message: "No subscription found" });
+                    }
+                
+                    const currentDate = new Date();
+                
+                    if (currentDate > subscription.endDate) {
+                      return res.status(403).json({ 
+                        success: false, 
+                        message: "Subscription has expired" 
+                      });
+                    }
+        // For otwharher errors, continue with local save
         return res.status(200).json({
           success: true,
           message: "Settings saved locally. Shopify sync will retry later.",
-          user,
+          user, subscription,
           shopifyError: shopifyError.message
         });
       }
@@ -395,11 +410,27 @@ export const updateWhatsappSettings = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     
     console.log('done')
+
+     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+            
+                if (!subscription) {
+                  return res.status(404).json({ success: false, message: "No subscription found" });
+                }
+            
+                const currentDate = new Date();
+            
+                if (currentDate > subscription.endDate) {
+                  return res.status(403).json({ 
+                    success: false, 
+                    message: "Subscription has expired" 
+                  });
+                }
+
     // Send success response
     return res.status(200).json({
       success: true,
       message: "WhatsApp settings updated successfully",
-      user,
+      user, subscription
       timestamp: Date.now() - startTime
     });
 
@@ -462,11 +493,25 @@ export const addOrUpdateWhatsappContact = async (req, res) => {
 
     // Save the updated user
     await user.save();
+     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+            
+                if (!subscription) {
+                  return res.status(404).json({ success: false, message: "No subscription found" });
+                }
+            
+                const currentDate = new Date();
+            
+                if (currentDate > subscription.endDate) {
+                  return res.status(403).json({ 
+                    success: false, 
+                    message: "Subscription has expired" 
+                  });
+                }
 
     res.status(200).json({
       success: true,
       message: contact.id ? "Contact updated successfully" : "Contact added successfully",
-      contact: contact
+      contact: contact, user, subscription
     });
 
   } catch (error) {
@@ -507,10 +552,24 @@ export const deleteWhatsappContact = async (req, res) => {
     
     // Save the updated user
     await user.save();
+     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+            
+                if (!subscription) {
+                  return res.status(404).json({ success: false, message: "No subscription found" });
+                }
+            
+                const currentDate = new Date();
+            
+                if (currentDate > subscription.endDate) {
+                  return res.status(403).json({ 
+                    success: false, 
+                    message: "Subscription has expired" 
+                  });
+                }
 
     res.status(200).json({
       success: true,
-      user,
+      user, subscription
       message: "Contact deleted successfully"
     });
 
