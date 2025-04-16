@@ -144,36 +144,45 @@ export const addSelectedLanguage = async (req, res) => {
     console.log("Fetched translatable content:", translatableContent.length);
 
     let translationCount = 0;
-    
-    // Process all translatable content
-    for (const content of translatableContent) {
-      if (!content.value || content.value.trim() === "") continue;
 
-      let translatedValue = content.value;
+    // Collect all non-empty values for batch translation
+    const contentsToTranslate = translatableContent.filter(
+      (content) => content.value && content.value.trim() !== ""
+    );
 
-      if (openai) {
-        console.log(`translating ${content.value} to ${language}`)
-        try {
-          const translationResponse = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-              {
-                role: "system",
-                content: `Translate the following text to ${language}. Maintain all HTML tags and formatting.`,
-              },
-              {
-                role: "user",
-                content: content.value,
-              },
-            ],
-            temperature: 0.3,
-          });
+    let translatedValues = contentsToTranslate.map((c) => c.value);
 
-          translatedValue = translationResponse.choices[0].message.content;
-        } catch (translationError) {
-          console.error("Translation error:", translationError);
-        }
+    if (openai && contentsToTranslate.length > 0) {
+      try {
+        console.log(`Batch translating ${contentsToTranslate.length} items to ${language}`);
+        const translationResponse = await openai.chat.completions.create({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: `Translate the following texts to ${language}. Maintain all HTML tags and formatting. Return ONLY a JSON array of translated strings in the same order.`,
+            },
+            {
+              role: "user",
+              content: JSON.stringify(translatedValues),
+            },
+          ],
+          temperature: 0.3,
+        });
+
+        // Parse the JSON array from the response
+        translatedValues = JSON.parse(translationResponse.choices[0].message.content);
+      } catch (translationError) {
+        console.error("Batch translation error:", translationError);
+        // fallback: use original values if translation fails
+        translatedValues = contentsToTranslate.map((c) => c.value);
       }
+    }
+
+    // Register translations one by one (can also be batched if Shopify API allows)
+    for (let i = 0; i < contentsToTranslate.length; i++) {
+      const content = contentsToTranslate[i];
+      const translatedValue = translatedValues[i];
 
       const translations = [
         {
@@ -188,7 +197,6 @@ export const addSelectedLanguage = async (req, res) => {
 
       try {
         let translatedResourceId = themeId;
-        // Ensure the resource ID is in the correct format for translations API
         if (!translatedResourceId.startsWith('gid://')) {
           translatedResourceId = `gid://shopify/Theme/${themeId.split('/').pop()}`;
         }
