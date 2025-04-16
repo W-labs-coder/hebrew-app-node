@@ -182,8 +182,8 @@ export const addSelectedLanguage = async (req, res) => {
     let translatedValues = [];
     const TRANSLATION_BATCH_SIZE = 30; // Lower for OpenAI reliability
     const SHOPIFY_BATCH_SIZE = 100;    // Shopify limit (not 250!)
-    const TRANSLATION_CONCURRENCY = 6; // Parallel translation batches
-    const REGISTRATION_CONCURRENCY = 6; // Parallel Shopify batches
+    const TRANSLATION_CONCURRENCY = 10; // Parallel translation batches
+    const REGISTRATION_CONCURRENCY = 10; // Parallel Shopify batches
 
     if (openai && contentsToTranslate.length > 0) {
       const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
