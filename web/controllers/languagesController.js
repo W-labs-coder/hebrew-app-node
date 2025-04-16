@@ -182,7 +182,15 @@ export const addSelectedLanguage = async (req, res) => {
       }
     }
 
-    // Register translations in batch
+    // Helper to chunk an array
+    function chunkArray(array, size) {
+      const result = [];
+      for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+      }
+      return result;
+    }
+
     const translations = contentsToTranslate.map((content, i) => ({
       key: content.key,
       locale: selectedLocaleCode,
@@ -190,46 +198,48 @@ export const addSelectedLanguage = async (req, res) => {
       translatableContentDigest: content.digest || undefined,
     }));
 
-    console.log("Registering all translations in batch:", translations.length);
+    console.log("Registering all translations in batches of 250:", translations.length);
 
     try {
       let translatedResourceId = themeId;
       if (!translatedResourceId.startsWith("gid://")) {
-        translatedResourceId = `gid://shopify/Theme/${themeId
-          .split("/")
-          .pop()}`;
+        translatedResourceId = `gid://shopify/Theme/${themeId.split("/").pop()}`;
       }
 
-      const registerResponse = await client.query({
-        data: {
-          query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
-            translationsRegister(resourceId: $resourceId, translations: $translations) {
-              translations {
-                key
-                value
-                locale
+      const translationChunks = chunkArray(translations, 250);
+
+      for (const chunk of translationChunks) {
+        const registerResponse = await client.query({
+          data: {
+            query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+              translationsRegister(resourceId: $resourceId, translations: $translations) {
+                translations {
+                  key
+                  value
+                  locale
+                }
+                userErrors {
+                  field
+                  message
+                }
               }
-              userErrors {
-                field
-                message
-              }
-            }
-          }`,
-          variables: {
-            resourceId: translatedResourceId,
-            translations,
+            }`,
+            variables: {
+              resourceId: translatedResourceId,
+              translations: chunk,
+            },
           },
-        },
-      });
+        });
 
-      const userErrors =
-        registerResponse?.body?.data?.translationsRegister?.userErrors || [];
+        const userErrors =
+          registerResponse?.body?.data?.translationsRegister?.userErrors || [];
 
-      if (userErrors.length > 0) {
-        console.warn("Translation registration warnings:", userErrors);
+        if (userErrors.length > 0) {
+          console.warn("Translation registration warnings:", userErrors);
+        }
+
+        translationCount += chunk.length;
       }
-
-      translationCount += translations.length;
     } catch (registerError) {
       console.error("Error registering translations:", registerError);
     }
