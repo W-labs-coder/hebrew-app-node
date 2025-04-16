@@ -180,7 +180,7 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     let translatedValues = [];
-    const TRANSLATION_BATCH_SIZE = 100; // Safe for OpenAI context
+    const TRANSLATION_BATCH_SIZE = 20; // Lower for OpenAI reliability
     const SHOPIFY_BATCH_SIZE = 250;    // Shopify limit
     const TRANSLATION_CONCURRENCY = 3; // Parallel translation batches
     const REGISTRATION_CONCURRENCY = 3; // Parallel Shopify batches
@@ -200,7 +200,7 @@ export const addSelectedLanguage = async (req, res) => {
               messages: [
                 {
                   role: "system",
-                  content: `Translate the following texts to ${language}. Maintain all HTML tags and formatting. Return ONLY a JSON array of translated strings in the same order.`,
+                  content: `Translate the following texts to ${language}. Maintain all HTML tags and formatting. Return ONLY a valid JSON array of translated strings in the same order. Do not include any explanation or extra text.`,
                 },
                 {
                   role: "user",
@@ -209,9 +209,16 @@ export const addSelectedLanguage = async (req, res) => {
               ],
               temperature: 0.3,
             });
-            return JSON.parse(translationResponse.choices[0].message.content);
+            const content = translationResponse.choices[0].message.content;
+            try {
+              return JSON.parse(content);
+            } catch (jsonErr) {
+              console.error("OpenAI returned invalid JSON:", content);
+              // fallback: return originals for this batch
+              return values;
+            }
           } catch (err) {
-            console.error("OpenAI batch failed or returned invalid JSON:", err);
+            console.error("OpenAI batch failed:", err);
             // fallback: return originals for this batch
             return values;
           }
