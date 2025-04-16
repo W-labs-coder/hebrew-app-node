@@ -86,7 +86,6 @@ export const addSelectedLanguage = async (req, res) => {
         `Locale '${selectedLocaleCode}' not published. Attempting to publish it...`
       );
 
-      
       const enableLocaleResponse = await client.query({
         data: {
           query: `mutation enableLocale($locale: String!) {
@@ -154,7 +153,9 @@ export const addSelectedLanguage = async (req, res) => {
 
     if (openai && contentsToTranslate.length > 0) {
       try {
-        console.log(`Batch translating ${contentsToTranslate.length} items to ${language}`);
+        console.log(
+          `Batch translating ${contentsToTranslate.length} items to ${language}`
+        );
         const translationResponse = await openai.chat.completions.create({
           model: "gpt-3.5-turbo",
           messages: [
@@ -171,7 +172,9 @@ export const addSelectedLanguage = async (req, res) => {
         });
 
         // Parse the JSON array from the response
-        translatedValues = JSON.parse(translationResponse.choices[0].message.content);
+        translatedValues = JSON.parse(
+          translationResponse.choices[0].message.content
+        );
       } catch (translationError) {
         console.error("Batch translation error:", translationError);
         // fallback: use original values if translation fails
@@ -179,82 +182,81 @@ export const addSelectedLanguage = async (req, res) => {
       }
     }
 
-    // Register translations one by one (can also be batched if Shopify API allows)
-    for (let i = 0; i < contentsToTranslate.length; i++) {
-      const content = contentsToTranslate[i];
-      const translatedValue = translatedValues[i];
+    // Register translations in batch
+    const translations = contentsToTranslate.map((content, i) => ({
+      key: content.key,
+      locale: selectedLocaleCode,
+      value: translatedValues[i],
+      translatableContentDigest: content.digest || undefined,
+    }));
 
-      const translations = [
-        {
-          key: content.key,
-          locale: selectedLocaleCode,
-          value: translatedValue,
-          translatableContentDigest: content.digest || undefined,
-        },
-      ];
+    console.log("Registering all translations in batch:", translations.length);
 
-      console.log("Registering translations:", translations);
-
-      try {
-        let translatedResourceId = themeId;
-        if (!translatedResourceId.startsWith('gid://')) {
-          translatedResourceId = `gid://shopify/Theme/${themeId.split('/').pop()}`;
-        }
-
-        const registerResponse = await client.query({
-          data: {
-            query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
-              translationsRegister(resourceId: $resourceId, translations: $translations) {
-                translations {
-                  key
-                  value
-                  locale
-                }
-                userErrors {
-                  field
-                  message
-                }
-              }
-            }`,
-            variables: {
-              resourceId: translatedResourceId,
-              translations,
-            },
-          },
-        });
-
-        const userErrors =
-          registerResponse?.body?.data?.translationsRegister?.userErrors || [];
-
-        if (userErrors.length > 0) {
-          console.warn("Translation registration warnings:", userErrors);
-        }
-
-        translationCount += translations.length;
-      } catch (registerError) {
-        console.error("Error registering translations:", registerError);
+    try {
+      let translatedResourceId = themeId;
+      if (!translatedResourceId.startsWith("gid://")) {
+        translatedResourceId = `gid://shopify/Theme/${themeId
+          .split("/")
+          .pop()}`;
       }
+
+      const registerResponse = await client.query({
+        data: {
+          query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+            translationsRegister(resourceId: $resourceId, translations: $translations) {
+              translations {
+                key
+                value
+                locale
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }`,
+          variables: {
+            resourceId: translatedResourceId,
+            translations,
+          },
+        },
+      });
+
+      const userErrors =
+        registerResponse?.body?.data?.translationsRegister?.userErrors || [];
+
+      if (userErrors.length > 0) {
+        console.warn("Translation registration warnings:", userErrors);
+      }
+
+      translationCount += translations.length;
+    } catch (registerError) {
+      console.error("Error registering translations:", registerError);
     }
 
-     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
-            
-                if (!subscription) {
-                  return res.status(404).json({ success: false, message: "No subscription found" });
-                }
-            
-                const currentDate = new Date();
-            
-                if (currentDate > subscription.endDate) {
-                  return res.status(403).json({ 
-                    success: false, 
-                    message: "Subscription has expired" 
-                  });
-                }
+    const subscription = await UserSubscription.findOne({ shop: user.shop })
+      .sort({ createdAt: -1 })
+      .populate("subscription");
 
+    if (!subscription) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No subscription found" });
+    }
+
+    const currentDate = new Date();
+
+    if (currentDate > subscription.endDate) {
+      return res.status(403).json({
+        success: false,
+        message: "Subscription has expired",
+      });
+    }
 
     res.status(200).json({
       message: "Language added successfully and sample translations completed",
-      user, subscription,
+      user,
+      subscription,
       translationStats: {
         translatedItems: translationCount,
         totalTranslatableItems: translatableContent.length,
