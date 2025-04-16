@@ -21,6 +21,9 @@ import { getSessionToken } from "@shopify/app-bridge-utils";
 import { useAuthenticatedFetch } from "../hooks/useAuthenticatedFetch";
 import {useNavigate} from 'react-router-dom'
 
+
+
+
 export default function HomePage() {
   const { t } = useTranslation();
   const app = useAppBridge();

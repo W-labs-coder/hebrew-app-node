@@ -569,7 +569,7 @@ export const deleteWhatsappContact = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user, subscription
+      user, subscription,
       message: "Contact deleted successfully"
     });
 
