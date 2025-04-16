@@ -122,10 +122,10 @@ export default function dashboard() {
       toast.error("You are not authenticated!");
       navigate("/");
     }
-    if (!userPermissions || !userPermissions.includes("dashboard")) {
-      toast.error("You do not have permission to access this page.");
-      navigate("/");
-    }
+    // if (!userPermissions || !userPermissions.includes("dashboard")) {
+    //   toast.error("You do not have permission to access this page.");
+    //   navigate("/");
+    // }
     // Check subscription status when the component mounts
       checkSubscription();
     }, []);
