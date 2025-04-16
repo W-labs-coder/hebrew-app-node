@@ -168,7 +168,7 @@ export const addSelectedLanguage = async (req, res) => {
       (content) => content.value && content.value.trim() !== ""
     );
 
-    console.log("collected translatable content:", contentsToTranslate);
+    // console.log("collected translatable content:", contentsToTranslate);
 
     // Helper to chunk an array
     function chunkArray(array, size) {
