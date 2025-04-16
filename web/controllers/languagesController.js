@@ -180,10 +180,10 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     let translatedValues = [];
-    const TRANSLATION_BATCH_SIZE = 20; // Lower for OpenAI reliability
-    const SHOPIFY_BATCH_SIZE = 250;    // Shopify limit
-    const TRANSLATION_CONCURRENCY = 3; // Parallel translation batches
-    const REGISTRATION_CONCURRENCY = 3; // Parallel Shopify batches
+    const TRANSLATION_BATCH_SIZE = 30; // Lower for OpenAI reliability
+    const SHOPIFY_BATCH_SIZE = 100;    // Shopify limit (not 250!)
+    const TRANSLATION_CONCURRENCY = 6; // Parallel translation batches
+    const REGISTRATION_CONCURRENCY = 6; // Parallel Shopify batches
 
     if (openai && contentsToTranslate.length > 0) {
       const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
@@ -238,7 +238,7 @@ export const addSelectedLanguage = async (req, res) => {
     }));
 
     console.log(
-      "Registering all translations in batches of 250:",
+      "Registering all translations in batches of 100:",
       translations.length
     );
 
@@ -287,6 +287,7 @@ export const addSelectedLanguage = async (req, res) => {
           translationCount += chunk.length;
         } catch (registerError) {
           console.error("Error registering translations:", registerError);
+          // Do not throw, just continue with next batch
         }
       }
     );
