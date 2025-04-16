@@ -3,6 +3,25 @@ import User from "../models/User.js";
 import OpenAI from "openai";
 import UserSubscription from "../models/UserSubscription.js";
 
+// Simple concurrency limiter
+async function asyncPool(poolLimit, array, iteratorFn) {
+  const ret = [];
+  const executing = [];
+  for (const item of array) {
+    const p = Promise.resolve().then(() => iteratorFn(item));
+    ret.push(p);
+
+    if (poolLimit <= array.length) {
+      const e = p.then(() => executing.splice(executing.indexOf(e), 1));
+      executing.push(e);
+      if (executing.length >= poolLimit) {
+        await Promise.race(executing);
+      }
+    }
+  }
+  return Promise.all(ret);
+}
+
 export const addSelectedLanguage = async (req, res) => {
   try {
     const { language } = req.body;
@@ -149,6 +168,8 @@ export const addSelectedLanguage = async (req, res) => {
       (content) => content.value && content.value.trim() !== ""
     );
 
+    console.log("collected translatable content:", contentsToTranslate);
+
     // Helper to chunk an array
     function chunkArray(array, size) {
       const result = [];
@@ -159,40 +180,45 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     let translatedValues = [];
-    const TRANSLATION_BATCH_SIZE = 1000; // Adjust as needed for token limits
+    const TRANSLATION_BATCH_SIZE = 20; // Safe for OpenAI context
+    const SHOPIFY_BATCH_SIZE = 100;    // Shopify limit
+    const TRANSLATION_CONCURRENCY = 3; // Parallel translation batches
+    const REGISTRATION_CONCURRENCY = 3; // Parallel Shopify batches
 
     if (openai && contentsToTranslate.length > 0) {
-      try {
-        const contentChunks = chunkArray(
-          contentsToTranslate,
-          TRANSLATION_BATCH_SIZE
-        );
-        for (const chunk of contentChunks) {
+      const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
+
+      // Parallelize translation batches
+      const batchResults = await asyncPool(
+        TRANSLATION_CONCURRENCY,
+        contentChunks,
+        async (chunk) => {
           const values = chunk.map((c) => c.value);
-          const translationResponse = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-              {
-                role: "system",
-                content: `Translate the following texts to ${language}. Maintain all HTML tags and formatting. Return ONLY a JSON array of translated strings in the same order.`,
-              },
-              {
-                role: "user",
-                content: JSON.stringify(values),
-              },
-            ],
-            temperature: 0.3,
-          });
-          const batchTranslations = JSON.parse(
-            translationResponse.choices[0].message.content
-          );
-          translatedValues.push(...batchTranslations);
+          try {
+            const translationResponse = await openai.chat.completions.create({
+              model: "gpt-4.1",
+              messages: [
+                {
+                  role: "system",
+                  content: `Translate the following texts to ${language}. Maintain all HTML tags and formatting. Return ONLY a JSON array of translated strings in the same order.`,
+                },
+                {
+                  role: "user",
+                  content: JSON.stringify(values),
+                },
+              ],
+              temperature: 0.3,
+            });
+            return JSON.parse(translationResponse.choices[0].message.content);
+          } catch (err) {
+            console.error("OpenAI batch failed or returned invalid JSON:", err);
+            // fallback: return originals for this batch
+            return values;
+          }
         }
-      } catch (translationError) {
-        console.error("Batch translation error:", translationError);
-        // fallback: use original values if translation fails
-        translatedValues = contentsToTranslate.map((c) => c.value);
-      }
+      );
+      // Flatten results
+      translatedValues = batchResults.flat();
     } else {
       translatedValues = contentsToTranslate.map((c) => c.value);
     }
@@ -205,55 +231,58 @@ export const addSelectedLanguage = async (req, res) => {
     }));
 
     console.log(
-      "Registering all translations in batches of 250:",
+      "Registering all translations in batches of 100:",
       translations.length
     );
 
-    try {
-      let translatedResourceId = themeId;
-      if (!translatedResourceId.startsWith("gid://")) {
-        translatedResourceId = `gid://shopify/Theme/${themeId
-          .split("/")
-          .pop()}`;
-      }
-
-      const translationChunks = chunkArray(translations, 250);
-
-      for (const chunk of translationChunks) {
-        const registerResponse = await client.query({
-          data: {
-            query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
-              translationsRegister(resourceId: $resourceId, translations: $translations) {
-                translations {
-                  key
-                  value
-                  locale
-                }
-                userErrors {
-                  field
-                  message
-                }
-              }
-            }`,
-            variables: {
-              resourceId: translatedResourceId,
-              translations: chunk,
-            },
-          },
-        });
-
-        const userErrors =
-          registerResponse?.body?.data?.translationsRegister?.userErrors || [];
-
-        if (userErrors.length > 0) {
-          console.warn("Translation registration warnings:", userErrors);
-        }
-
-        translationCount += chunk.length;
-      }
-    } catch (registerError) {
-      console.error("Error registering translations:", registerError);
+    let translatedResourceId = themeId;
+    if (!translatedResourceId.startsWith("gid://")) {
+      translatedResourceId = `gid://shopify/Theme/${themeId.split("/").pop()}`;
     }
+
+    const translationChunks = chunkArray(translations, SHOPIFY_BATCH_SIZE);
+
+    // Parallelize Shopify registration batches
+    await asyncPool(
+      REGISTRATION_CONCURRENCY,
+      translationChunks,
+      async (chunk) => {
+        try {
+          const registerResponse = await client.query({
+            data: {
+              query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+                translationsRegister(resourceId: $resourceId, translations: $translations) {
+                  translations {
+                    key
+                    value
+                    locale
+                  }
+                  userErrors {
+                    field
+                    message
+                  }
+                }
+              }`,
+              variables: {
+                resourceId: translatedResourceId,
+                translations: chunk,
+              },
+            },
+          });
+
+          const userErrors =
+            registerResponse?.body?.data?.translationsRegister?.userErrors || [];
+
+          if (userErrors.length > 0) {
+            console.warn("Translation registration warnings:", userErrors);
+          }
+
+          translationCount += chunk.length;
+        } catch (registerError) {
+          console.error("Error registering translations:", registerError);
+        }
+      }
+    );
 
     const subscription = await UserSubscription.findOne({ shop: user.shop })
       .sort({ createdAt: -1 })
