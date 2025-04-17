@@ -2,8 +2,6 @@ import shopify from "../shopify.js";
 import User from "../models/User.js";
 import OpenAI from "openai";
 import UserSubscription from "../models/UserSubscription.js";
-import fs from 'fs/promises';
-import path from 'path';
 
 // Simple concurrency limiter
 async function asyncPool(poolLimit, array, iteratorFn) {
@@ -27,6 +25,8 @@ async function asyncPool(poolLimit, array, iteratorFn) {
 export const addSelectedLanguage = async (req, res) => {
   try {
     const { language } = req.body;
+
+    const openaiApiKey = process.env.OPENAI_API_KEY;
     const session = res.locals.shopify.session;
 
     if (!session) {
@@ -51,6 +51,11 @@ export const addSelectedLanguage = async (req, res) => {
     let themeId = user.selectedTheme;
     console.log("Final themeId being used in Admin API:", themeId);
 
+    let openai = null;
+    if (openaiApiKey) {
+      openai = new OpenAI({ apiKey: openaiApiKey });
+    }
+
     const client = new shopify.api.clients.Graphql({ session });
 
     // Confirm theme exists
@@ -69,11 +74,6 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     console.log("Theme found:", theme);
-
-    // Extract theme name and clean it for file naming
-    const themeName = theme.name.toLowerCase().replace(/\s+/g, '_');
-
-    console.log("Theme name for file:", themeName);
 
     // STEP 1: Normalize and check language code
     const selectedLocaleCode =
@@ -168,6 +168,8 @@ export const addSelectedLanguage = async (req, res) => {
       (content) => content.value && content.value.trim() !== ""
     );
 
+    // console.log("collected translatable content:", contentsToTranslate);
+
     // Helper to chunk an array
     function chunkArray(array, size) {
       const result = [];
@@ -177,49 +179,56 @@ export const addSelectedLanguage = async (req, res) => {
       return result;
     }
 
-    // NEW APPROACH: Use JSON files instead of OpenAI
     let translatedValues = [];
-    try {
-      // Define file path
-      // Define file path
-      const translationFilePath = path.join(
-        process.cwd(),
-        "web", // Add this to fix the path
-        "theme_languages",
-        `${themeName}_${selectedLocaleCode}.json`
-      );
+    const TRANSLATION_BATCH_SIZE = 30; // Lower for OpenAI reliability
+    const SHOPIFY_BATCH_SIZE = 100;    // Shopify limit (not 250!)
+    const TRANSLATION_CONCURRENCY = 10; // Parallel translation batches
+    const REGISTRATION_CONCURRENCY = 10; // Parallel Shopify batches
 
-      console.log(`Looking for translation file: ${translationFilePath}`);
+    if (openai && contentsToTranslate.length > 0) {
+      const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
 
-      // Read and parse the JSON file
-      const fileContent = await fs.readFile(translationFilePath, "utf8");
-      const translationData = JSON.parse(fileContent);
-
-      console.log(
-        `Successfully loaded translation file with ${
-          Object.keys(translationData).length
-        } entries`
-      );
-
-      // Map translations from the JSON file to the content needed
-      translatedValues = contentsToTranslate.map((content) => {
-        // If the key exists in our translation file, use it
-        if (translationData[content.key]) {
-          return translationData[content.key];
+      // Parallelize translation batches
+      const batchResults = await asyncPool(
+        TRANSLATION_CONCURRENCY,
+        contentChunks,
+        async (chunk) => {
+          const values = chunk.map((c) => c.value);
+          try {
+            const translationResponse = await openai.chat.completions.create({
+              model: "gpt-4.1",
+              messages: [
+                {
+                  role: "system",
+                  content: `Translate the following texts to ${language}. Maintain all HTML tags and formatting. Return ONLY a valid JSON array of translated strings in the same order. Do not include any explanation or extra text.`,
+                },
+                {
+                  role: "user",
+                  content: JSON.stringify(values),
+                },
+              ],
+              temperature: 0.3,
+            });
+            const content = translationResponse.choices[0].message.content;
+            try {
+              return JSON.parse(content);
+            } catch (jsonErr) {
+              console.error("OpenAI returned invalid JSON:", content);
+              // fallback: return originals for this batch
+              return values;
+            }
+          } catch (err) {
+            console.error("OpenAI batch failed:", err);
+            // fallback: return originals for this batch
+            return values;
+          }
         }
-        // Otherwise fallback to the original value
-        return content.value;
-      });
-    } catch (fileError) {
-      console.error(`Error loading translation file: ${fileError.message}`);
-      console.log("Falling back to original values for translation");
-      // Fallback: use original values if file not found or invalid
-      translatedValues = contentsToTranslate.map(c => c.value);
+      );
+      // Flatten results
+      translatedValues = batchResults.flat();
+    } else {
+      translatedValues = contentsToTranslate.map((c) => c.value);
     }
-
-    // Continuing with existing code to register translations
-    const SHOPIFY_BATCH_SIZE = 100;
-    const REGISTRATION_CONCURRENCY = 10;
 
     const translations = contentsToTranslate.map((content, i) => ({
       key: content.key,
