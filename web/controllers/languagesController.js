@@ -183,7 +183,6 @@ export const addSelectedLanguage = async (req, res) => {
       // Define file path for translation file
       const translationFilePath = path.join(
         process.cwd(),
-        "web", // Add web directory to path
         "theme_languages",
         `${themeName}_${selectedLocaleCode}.json`
       );
@@ -198,7 +197,7 @@ export const addSelectedLanguage = async (req, res) => {
         return res.status(404).json({
           success: false,
           message: `No translation file found for theme "${theme.name}" and language "${language}"`,
-          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in web/theme_languages directory`
+          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in theme_languages directory`
         });
       }
 
