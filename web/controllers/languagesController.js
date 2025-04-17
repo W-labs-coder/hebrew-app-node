@@ -178,9 +178,9 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     // NEW APPROACH: Use JSON files instead of OpenAI
-    let translatedValues = [];
+    let translationData = {};
     try {
-      // Define file path with web directory included
+      // Define file path for translation file
       const translationFilePath = path.join(
         process.cwd(),
         "theme_languages",
@@ -203,17 +203,27 @@ export const addSelectedLanguage = async (req, res) => {
 
       // Read and parse the JSON file
       const fileContent = await fs.readFile(translationFilePath, "utf8");
-      const translationData = JSON.parse(fileContent);
-
-      console.log(translationData)
-
-      console.log(
-        `Successfully loaded translation file with ${
-          Object.keys(translationData).length
-        } entries`
-      );
-
-      // Map translations from the JSON file to the content needed
+      const nestedTranslationData = JSON.parse(fileContent);
+      
+      // Function to flatten nested JSON
+      function flattenJSON(obj, prefix = "") {
+        return Object.keys(obj).reduce((acc, key) => {
+          const pre = prefix.length ? `${prefix}.${key}` : key;
+          if (typeof obj[key] === "object" && obj[key] !== null) {
+            Object.assign(acc, flattenJSON(obj[key], pre));
+          } else {
+            acc[pre] = obj[key];
+          }
+          return acc;
+        }, {});
+      }
+      
+      // Flatten the nested JSON structure
+      translationData = flattenJSON(nestedTranslationData);
+      
+      console.log(`Successfully flattened translation file with ${Object.keys(translationData).length} entries`);
+      
+      // Map translations from the flattened file to the content needed
       translatedValues = contentsToTranslate.map((content) => {
         // If the key exists in our translation file, use it
         if (translationData[content.key]) {
