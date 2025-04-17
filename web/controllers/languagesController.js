@@ -208,11 +208,17 @@ export const addSelectedLanguage = async (req, res) => {
       // Function to flatten nested JSON
       function flattenJSON(obj, prefix = "") {
         return Object.keys(obj).reduce((acc, key) => {
-          const pre = prefix.length ? `${prefix}.${key}` : key;
+          // Special handling for the "shopify" key - don't add it as a prefix
+          const pre = key === "shopify" ? "" : 
+                     (prefix.length ? `${prefix}.${key}` : key);
+          
           if (typeof obj[key] === "object" && obj[key] !== null) {
             Object.assign(acc, flattenJSON(obj[key], pre));
           } else {
-            acc[pre] = obj[key];
+            // Only add key if prefix is not empty (avoiding empty keys)
+            if (pre.length > 0) {
+              acc[pre] = obj[key];
+            }
           }
           return acc;
         }, {});
