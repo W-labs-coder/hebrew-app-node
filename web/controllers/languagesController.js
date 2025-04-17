@@ -177,13 +177,13 @@ export const addSelectedLanguage = async (req, res) => {
       return result;
     }
 
-    // NEW APPROACH: Use JSON files instead of OpenAI
+    // NEW APPROACH: Use JSON files directly for translations
     let translationData = {};
-    let translatedValues = [];
     try {
       // Define file path for translation file
       const translationFilePath = path.join(
         process.cwd(),
+        "web", // Add web directory to path
         "theme_languages",
         `${themeName}_${selectedLocaleCode}.json`
       );
@@ -198,7 +198,7 @@ export const addSelectedLanguage = async (req, res) => {
         return res.status(404).json({
           success: false,
           message: `No translation file found for theme "${theme.name}" and language "${language}"`,
-          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in theme_languages directory`
+          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in web/theme_languages directory`
         });
       }
 
@@ -222,76 +222,75 @@ export const addSelectedLanguage = async (req, res) => {
       // Flatten the nested JSON structure
       translationData = flattenJSON(nestedTranslationData);
       
-      console.log(translationData);
       console.log(`Successfully flattened translation file with ${Object.keys(translationData).length} entries`);
       
-      // Print more detailed key information for debugging
-      console.log("=== Shopify Translation Format ===");
-      console.log("First 5 Shopify keys:", contentsToTranslate.slice(0, 5).map(c => c.key));
-      console.log("Sample full Shopify content item:", contentsToTranslate[0]);
+      // Simply create translations from the flattened JSON
+      const translations = Object.entries(translationData).map(([key, value]) => ({
+        key: key,
+        locale: selectedLocaleCode,
+        value: value,
+        // No digest since these are our own keys
+      }));
 
-      console.log("=== Our Translation File Format ===");
-      console.log("First 5 translation file keys:", Object.keys(translationData).slice(0, 5));
-
-      // Enhanced matching algorithm
-      let matchCount = 0;
-      let fallbackCount = 0;
-
-      translatedValues = contentsToTranslate.map((content) => {
-        const shopifyKey = content.key;
-        
-        // Method 1: Direct match
-        if (translationData[shopifyKey]) {
-          console.log(`✅ Direct match for: ${shopifyKey}`);
-          matchCount++;
-          return translationData[shopifyKey];
+      console.log(`Created ${translations.length} translations directly from JSON file`);
+      
+      // Continue with registration
+      const SHOPIFY_BATCH_SIZE = 100;
+      const REGISTRATION_CONCURRENCY = 10;
+      
+      console.log("Registering all translations in batches of 100:", translations.length);
+      
+      let translatedResourceId = themeId;
+      if (!translatedResourceId.startsWith("gid://")) {
+        translatedResourceId = `gid://shopify/Theme/${themeId.split("/").pop()}`;
+      }
+      
+      const translationChunks = chunkArray(translations, SHOPIFY_BATCH_SIZE);
+      
+      // Parallelize Shopify registration batches
+      await asyncPool(
+        REGISTRATION_CONCURRENCY,
+        translationChunks,
+        async (chunk) => {
+          try {
+            const registerResponse = await client.query({
+              data: {
+                query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+                  translationsRegister(resourceId: $resourceId, translations: $translations) {
+                    translations {
+                      key
+                      value
+                      locale
+                    }
+                    userErrors {
+                      field
+                      message
+                    }
+                  }
+                }`,
+                variables: {
+                  resourceId: translatedResourceId,
+                  translations: chunk,
+                },
+              },
+            });
+            
+            const userErrors = registerResponse?.body?.data?.translationsRegister?.userErrors || [];
+            
+            if (userErrors.length > 0) {
+              console.warn("Translation registration warnings:", userErrors);
+              console.warn("Sample of keys causing errors:", chunk.slice(0, 3).map(t => t.key));
+            } else {
+              console.log(`✅ Successfully registered batch of ${chunk.length} translations`);
+            }
+            
+            translationCount += chunk.length - userErrors.length;
+          } catch (registerError) {
+            console.error("Error registering translations:", registerError);
+            // Do not throw, just continue with next batch
+          }
         }
-        
-        // Method 2: Check for partial match at end of key
-        // This handles cases where our keys have prefixes that Shopify doesn't
-        const partialMatchKey = Object.keys(translationData).find(ourKey => 
-          ourKey.endsWith(`.${shopifyKey}`) || ourKey.endsWith(`/${shopifyKey}`)
-        );
-        
-        if (partialMatchKey) {
-          console.log(`✅ Partial match: ${shopifyKey} ⟶ ${partialMatchKey}`);
-          matchCount++;
-          return translationData[partialMatchKey];
-        }
-        
-        // Method 3: Check if any segment of our keys matches the Shopify key
-        const segmentMatchKey = Object.keys(translationData).find(ourKey => {
-          const segments = ourKey.split(/[.\/]/); // Split by dots or slashes
-          return segments.includes(shopifyKey);
-        });
-        
-        if (segmentMatchKey) {
-          console.log(`✅ Segment match: ${shopifyKey} ⟶ ${segmentMatchKey}`);
-          matchCount++;
-          return translationData[segmentMatchKey];
-        }
-        
-        // Method 4: Try matching after normalizing (lowercase, no special chars)
-        const normalizedShopifyKey = shopifyKey.toLowerCase().replace(/[^a-z0-9]/g, '');
-        const normalizedMatchKey = Object.keys(translationData).find(ourKey => {
-          const normalizedOurKey = ourKey.toLowerCase().replace(/[^a-z0-9]/g, '');
-          return normalizedOurKey.includes(normalizedShopifyKey) || 
-                 normalizedShopifyKey.includes(normalizedOurKey);
-        });
-        
-        if (normalizedMatchKey) {
-          console.log(`✅ Normalized match: ${shopifyKey} ⟶ ${normalizedMatchKey}`);
-          matchCount++;
-          return translationData[normalizedMatchKey];
-        }
-        
-        // No match found, use original
-        console.log(`❌ No match for: ${shopifyKey}`);
-        fallbackCount++;
-        return content.value;
-      });
-
-      console.log(`Translation matches: ${matchCount}, Fallbacks: ${fallbackCount}`);
+      );
     } catch (fileError) {
       console.error(`Error processing translation file: ${fileError.message}`);
       return res.status(500).json({
@@ -300,72 +299,6 @@ export const addSelectedLanguage = async (req, res) => {
         error: fileError.message
       });
     }
-
-    // Continuing with existing code to register translations
-    const SHOPIFY_BATCH_SIZE = 100;
-    const REGISTRATION_CONCURRENCY = 10;
-
-    const translations = contentsToTranslate.map((content, i) => ({
-      key: content.key,
-      locale: selectedLocaleCode,
-      value: translatedValues[i],
-      translatableContentDigest: content.digest || undefined,
-    }));
-
-    console.log(
-      "Registering all translations in batches of 100:",
-      translations.length
-    );
-
-    let translatedResourceId = themeId;
-    if (!translatedResourceId.startsWith("gid://")) {
-      translatedResourceId = `gid://shopify/Theme/${themeId.split("/").pop()}`;
-    }
-
-    const translationChunks = chunkArray(translations, SHOPIFY_BATCH_SIZE);
-
-    // Parallelize Shopify registration batches
-    await asyncPool(
-      REGISTRATION_CONCURRENCY,
-      translationChunks,
-      async (chunk) => {
-        try {
-          const registerResponse = await client.query({
-            data: {
-              query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
-                translationsRegister(resourceId: $resourceId, translations: $translations) {
-                  translations {
-                    key
-                    value
-                    locale
-                  }
-                  userErrors {
-                    field
-                    message
-                  }
-                }
-              }`,
-              variables: {
-                resourceId: translatedResourceId,
-                translations: chunk,
-              },
-            },
-          });
-
-          const userErrors =
-            registerResponse?.body?.data?.translationsRegister?.userErrors || [];
-
-          if (userErrors.length > 0) {
-            console.warn("Translation registration warnings:", userErrors);
-          }
-
-          translationCount += chunk.length;
-        } catch (registerError) {
-          console.error("Error registering translations:", registerError);
-          // Do not throw, just continue with next batch
-        }
-      }
-    );
 
     const subscription = await UserSubscription.findOne({ shop: user.shop })
       .sort({ createdAt: -1 })
