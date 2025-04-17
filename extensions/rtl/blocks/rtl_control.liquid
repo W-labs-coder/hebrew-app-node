@@ -165,7 +165,7 @@
           {% for contact in contacts %}
             <div class="whatsapp-contact" 
                  onclick="openWhatsApp('{{ contact.phone }}', '{{ contact.default_message }}')" 
-                 style="cursor: pointer;">
+                 style="cursor: pointer; gap:10px">
               <div class="whatsapp-avatar">
                   <img src="https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png" alt="" width="40" height="40">
               </div>
@@ -547,16 +547,7 @@ flex-direction: column;
   display: flex !important;
 }
 
-.whatsapp-widget-container {
-  width: 300px;
-  max-height: 90vh !important;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  overflow: hidden;
-  display: flex !important;
-  flex-direction: column !important;
-}
+
 
 .whatsapp-widget-header {
   position: relative;
@@ -867,7 +858,7 @@ document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const
           position: fixed !important;
           bottom: 20px !important;
           ${position}: 20px !important;
-          z-index: 999999 !important;
+          z-index: 99999 !important;
           display: block !important;
           visibility: visible !important;
           opacity: 1 !important;
@@ -880,9 +871,9 @@ document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const
       if (simpleButton) {
         simpleButton.style.cssText = `
           position: fixed !important;
-          bottom: 20px !important;
+          bottom: 30px !important;
           ${position}: 20px !important;
-          z-index: 999999 !important;
+          z-index: 88888 !important;
           display: flex !important;
           visibility: visible !important;
           opacity: 1 !important;
