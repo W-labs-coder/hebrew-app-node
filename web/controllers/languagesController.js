@@ -246,13 +246,14 @@ export const addSelectedLanguage = async (req, res) => {
       
       const translationChunks = chunkArray(translations, SHOPIFY_BATCH_SIZE);
       
+      console.log("chunk", translationChunks);
       // Parallelize Shopify registration batches
       await asyncPool(
         REGISTRATION_CONCURRENCY,
         translationChunks,
         async (chunk) => {
 
-          console.log('chunk', chunk)
+          
           try {
             const registerResponse = await client.query({
               data: {
