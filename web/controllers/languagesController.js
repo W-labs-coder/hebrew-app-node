@@ -205,6 +205,8 @@ export const addSelectedLanguage = async (req, res) => {
       const fileContent = await fs.readFile(translationFilePath, "utf8");
       const translationData = JSON.parse(fileContent);
 
+      console.log(translationData)
+
       console.log(
         `Successfully loaded translation file with ${
           Object.keys(translationData).length
