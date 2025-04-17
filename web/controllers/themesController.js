@@ -76,7 +76,7 @@ export const addSelectedTheme = async (req, res) => {
       { new: true, upsert: true }
     );
 
-    const subscription = await UserSubscription.findOne({ shop }).sort({ createdAt: -1 }).populate("subscription");
+    const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
     
         if (!subscription) {
           return res.status(404).json({ success: false, message: "No subscription found" });
