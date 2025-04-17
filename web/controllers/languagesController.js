@@ -251,10 +251,12 @@ export const addSelectedLanguage = async (req, res) => {
         REGISTRATION_CONCURRENCY,
         translationChunks,
         async (chunk) => {
+
+          console.log('chunk', chunk)
           try {
             const registerResponse = await client.query({
               data: {
-                query: `mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {
+                query: `mutation translationsRegister($resourceId: ID!, $translations: [TranslationInput!]!) {
                   translationsRegister(resourceId: $resourceId, translations: $translations) {
                     translations {
                       key
