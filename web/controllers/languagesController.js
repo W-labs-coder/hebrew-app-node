@@ -225,15 +225,73 @@ export const addSelectedLanguage = async (req, res) => {
       console.log(translationData);
       console.log(`Successfully flattened translation file with ${Object.keys(translationData).length} entries`);
       
-      // Map translations from the flattened file to the content needed
+      // Print more detailed key information for debugging
+      console.log("=== Shopify Translation Format ===");
+      console.log("First 5 Shopify keys:", contentsToTranslate.slice(0, 5).map(c => c.key));
+      console.log("Sample full Shopify content item:", contentsToTranslate[0]);
+
+      console.log("=== Our Translation File Format ===");
+      console.log("First 5 translation file keys:", Object.keys(translationData).slice(0, 5));
+
+      // Enhanced matching algorithm
+      let matchCount = 0;
+      let fallbackCount = 0;
+
       translatedValues = contentsToTranslate.map((content) => {
-        // If the key exists in our translation file, use it
-        if (translationData[content.key]) {
-          return translationData[content.key];
+        const shopifyKey = content.key;
+        
+        // Method 1: Direct match
+        if (translationData[shopifyKey]) {
+          console.log(`✅ Direct match for: ${shopifyKey}`);
+          matchCount++;
+          return translationData[shopifyKey];
         }
-        // Otherwise fallback to the original value
+        
+        // Method 2: Check for partial match at end of key
+        // This handles cases where our keys have prefixes that Shopify doesn't
+        const partialMatchKey = Object.keys(translationData).find(ourKey => 
+          ourKey.endsWith(`.${shopifyKey}`) || ourKey.endsWith(`/${shopifyKey}`)
+        );
+        
+        if (partialMatchKey) {
+          console.log(`✅ Partial match: ${shopifyKey} ⟶ ${partialMatchKey}`);
+          matchCount++;
+          return translationData[partialMatchKey];
+        }
+        
+        // Method 3: Check if any segment of our keys matches the Shopify key
+        const segmentMatchKey = Object.keys(translationData).find(ourKey => {
+          const segments = ourKey.split(/[.\/]/); // Split by dots or slashes
+          return segments.includes(shopifyKey);
+        });
+        
+        if (segmentMatchKey) {
+          console.log(`✅ Segment match: ${shopifyKey} ⟶ ${segmentMatchKey}`);
+          matchCount++;
+          return translationData[segmentMatchKey];
+        }
+        
+        // Method 4: Try matching after normalizing (lowercase, no special chars)
+        const normalizedShopifyKey = shopifyKey.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const normalizedMatchKey = Object.keys(translationData).find(ourKey => {
+          const normalizedOurKey = ourKey.toLowerCase().replace(/[^a-z0-9]/g, '');
+          return normalizedOurKey.includes(normalizedShopifyKey) || 
+                 normalizedShopifyKey.includes(normalizedOurKey);
+        });
+        
+        if (normalizedMatchKey) {
+          console.log(`✅ Normalized match: ${shopifyKey} ⟶ ${normalizedMatchKey}`);
+          matchCount++;
+          return translationData[normalizedMatchKey];
+        }
+        
+        // No match found, use original
+        console.log(`❌ No match for: ${shopifyKey}`);
+        fallbackCount++;
         return content.value;
       });
+
+      console.log(`Translation matches: ${matchCount}, Fallbacks: ${fallbackCount}`);
     } catch (fileError) {
       console.error(`Error processing translation file: ${fileError.message}`);
       return res.status(500).json({
