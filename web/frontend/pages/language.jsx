@@ -514,7 +514,7 @@ const Fonts = ({fonts}) => {
       }
     } catch (error) {
       console.error("Error updating Font:", error);
-      toast.error("Could not add Font");
+      toast.error("Could not add Font, " + error.response.data.message);
     } finally {
       setIsFontLoading(false);
     }

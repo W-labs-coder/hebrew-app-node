@@ -180,16 +180,26 @@ export const addSelectedLanguage = async (req, res) => {
     // NEW APPROACH: Use JSON files instead of OpenAI
     let translatedValues = [];
     try {
-      // Define file path
-      // Define file path
+      // Define file path with web directory included
       const translationFilePath = path.join(
         process.cwd(),
-        "web", // Add this to fix the path
         "theme_languages",
         `${themeName}_${selectedLocaleCode}.json`
       );
 
       console.log(`Looking for translation file: ${translationFilePath}`);
+
+      // Check if file exists first
+      try {
+        await fs.access(translationFilePath);
+      } catch (fileNotFound) {
+        console.error(`Translation file not found: ${translationFilePath}`);
+        return res.status(404).json({
+          success: false,
+          message: `No translation file found for theme "${theme.name}" and language "${language}"`,
+          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in theme_languages directory`
+        });
+      }
 
       // Read and parse the JSON file
       const fileContent = await fs.readFile(translationFilePath, "utf8");
@@ -211,10 +221,12 @@ export const addSelectedLanguage = async (req, res) => {
         return content.value;
       });
     } catch (fileError) {
-      console.error(`Error loading translation file: ${fileError.message}`);
-      console.log("Falling back to original values for translation");
-      // Fallback: use original values if file not found or invalid
-      translatedValues = contentsToTranslate.map(c => c.value);
+      console.error(`Error processing translation file: ${fileError.message}`);
+      return res.status(500).json({
+        success: false,
+        message: "Error processing translation file",
+        error: fileError.message
+      });
     }
 
     // Continuing with existing code to register translations
