@@ -415,6 +415,20 @@ export const addSelectedLanguage = async (req, res) => {
         console.log(`First 10 missing keys: ${missingKeys.slice(0, 10).join(", ")}`);
       }
 
+      // Add keys that exist only in the JSON file but not in Shopify
+      console.log(`Adding ${onlyInJson.size} keys that only exist in the JSON file`);
+      onlyInJson.forEach(jsonKey => {
+        translations.push({
+          key: jsonKey, // Use the key directly from JSON
+          locale: selectedLocaleCode,
+          value: translationData[jsonKey],
+          // No digest needed for new keys
+        });
+      });
+
+      // Update the statistics to include the newly added keys
+      console.log(`Total translations to register: ${translations.length} (including ${onlyInJson.size} new keys)`);
+
       // Continue with registration
       const SHOPIFY_BATCH_SIZE = 100;
       const REGISTRATION_CONCURRENCY = 10;
