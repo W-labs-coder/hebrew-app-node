@@ -179,6 +179,7 @@ export const addSelectedLanguage = async (req, res) => {
 
     // NEW APPROACH: Use JSON files instead of OpenAI
     let translationData = {};
+    let translatedValues = [];
     try {
       // Define file path for translation file
       const translationFilePath = path.join(
@@ -221,6 +222,7 @@ export const addSelectedLanguage = async (req, res) => {
       // Flatten the nested JSON structure
       translationData = flattenJSON(nestedTranslationData);
       
+      console.log(translationData);
       console.log(`Successfully flattened translation file with ${Object.keys(translationData).length} entries`);
       
       // Map translations from the flattened file to the content needed
