@@ -233,37 +233,111 @@ export const addSelectedLanguage = async (req, res) => {
 
       // Create translations by matching Shopify content with our translations
       const translations = [];
+      const missingKeys = [];
+      const matchedKeys = new Set();
 
       // First try matching exact keys
       contentsToTranslate.forEach(content => {
         const shopifyKey = content.key;
+        let matched = false;
         
+        // Method 1: Direct match
         if (translationData[shopifyKey]) {
-          // Direct match
           translations.push({
             key: shopifyKey,
             locale: selectedLocaleCode,
             value: translationData[shopifyKey],
-            translatableContentDigest: content.digest  // Use Shopify's digest
+            translatableContentDigest: content.digest
           });
-        } else {
-          // Try to find key match
-          for (const [ourKey, ourValue] of Object.entries(translationData)) {
-            if (ourKey.includes(shopifyKey) || shopifyKey.includes(ourKey)) {
-              // Found a potential match
-              translations.push({
-                key: shopifyKey,  // Use Shopify's key
-                locale: selectedLocaleCode,
-                value: ourValue,
-                translatableContentDigest: content.digest  // Use Shopify's digest
-              });
-              break;
+          matchedKeys.add(shopifyKey);
+          matched = true;
+        } 
+        // Method 2: Case insensitive match
+        else if (translationData[shopifyKey.toLowerCase()]) {
+          translations.push({
+            key: shopifyKey,
+            locale: selectedLocaleCode,
+            value: translationData[shopifyKey.toLowerCase()],
+            translatableContentDigest: content.digest
+          });
+          matchedKeys.add(shopifyKey);
+          matched = true;
+        }
+        // Method 3: Match by parts of the key path
+        else {
+          const shopifyKeyParts = shopifyKey.split('.');
+          
+          // Try matching the last part of the key path
+          if (shopifyKeyParts.length > 1) {
+            const lastPart = shopifyKeyParts[shopifyKeyParts.length - 1];
+            
+            // Find keys in our translation data that end with this pattern
+            for (const [ourKey, ourValue] of Object.entries(translationData)) {
+              const ourKeyParts = ourKey.split('.');
+              
+              // Match if the last parts match
+              if (ourKeyParts.length > 0 && 
+                  ourKeyParts[ourKeyParts.length - 1] === lastPart) {
+                translations.push({
+                  key: shopifyKey,
+                  locale: selectedLocaleCode,
+                  value: ourValue,
+                  translatableContentDigest: content.digest
+                });
+                matchedKeys.add(shopifyKey);
+                matched = true;
+                break;
+              }
+              
+              // Also try finding matches somewhere in the key
+              if (!matched && ourKey.includes(lastPart)) {
+                translations.push({
+                  key: shopifyKey,
+                  locale: selectedLocaleCode,
+                  value: ourValue,
+                  translatableContentDigest: content.digest
+                });
+                matchedKeys.add(shopifyKey);
+                matched = true;
+                break;
+              }
+            }
+          }
+          
+          // If still no match, try the original partial matching
+          if (!matched) {
+            for (const [ourKey, ourValue] of Object.entries(translationData)) {
+              if (ourKey.includes(shopifyKey) || shopifyKey.includes(ourKey)) {
+                translations.push({
+                  key: shopifyKey,
+                  locale: selectedLocaleCode,
+                  value: ourValue,
+                  translatableContentDigest: content.digest
+                });
+                matchedKeys.add(shopifyKey);
+                matched = true;
+                break;
+              }
             }
           }
         }
+        
+        // If still no match, add to missing keys list
+        if (!matched) {
+          missingKeys.push(shopifyKey);
+        }
       });
 
+      // Log statistics
       console.log(`Created ${translations.length} translations matched with Shopify content`);
+      console.log(`Missing translations for ${missingKeys.length} keys`);
+      if (missingKeys.length > 0) {
+        console.log(`Sample missing keys: ${missingKeys.slice(0, 10).join(", ")}`);
+      }
+
+      // Log examples of translatable keys for reference
+      console.log(`Sample Shopify translatable keys: ${contentsToTranslate.slice(0, 5).map(c => c.key).join(", ")}`);
+      console.log(`Sample translation file keys: ${Object.keys(translationData).slice(0, 5).join(", ")}`);
       
       // Continue with registration
       const SHOPIFY_BATCH_SIZE = 100;
