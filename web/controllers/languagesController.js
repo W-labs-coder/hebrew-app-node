@@ -222,6 +222,35 @@ export const addSelectedLanguage = async (req, res) => {
       translationData = flattenJSON(nestedTranslationData);
       
       console.log(`Successfully flattened translation file with ${Object.keys(translationData).length} entries`);
+
+      // Create sets for analysis
+      const jsonKeys = new Set(Object.keys(translationData));
+      const shopifyKeys = new Set(contentsToTranslate.map(c => c.key));
+
+      // Find keys that exist in both sets
+      const matchingKeys = new Set([...jsonKeys].filter(k => shopifyKeys.has(k)));
+
+      // Find keys that exist only in JSON but not in Shopify
+      const onlyInJson = new Set([...jsonKeys].filter(k => !shopifyKeys.has(k)));
+
+      // Find keys that exist only in Shopify but not in JSON
+      const onlyInShopify = new Set([...shopifyKeys].filter(k => !jsonKeys.has(k)));
+
+      // Log the analysis
+      console.log(`=== KEY OVERLAP ANALYSIS ===`);
+      console.log(`Total JSON keys: ${jsonKeys.size}`);
+      console.log(`Total Shopify translatable keys: ${shopifyKeys.size}`);
+      console.log(`Keys that match exactly: ${matchingKeys.size} (${Math.round(matchingKeys.size/shopifyKeys.size*100)}%)`);
+      console.log(`Keys only in JSON file: ${onlyInJson.size}`);
+      console.log(`Keys only in Shopify: ${onlyInShopify.size}`);
+
+      console.log(`\n=== SAMPLE KEYS ONLY IN SHOPIFY ===`);
+      console.log([...onlyInShopify].slice(0, 20).join('\n'));
+
+      console.log(`\n=== SAMPLE KEYS ONLY IN JSON ===`);
+      console.log([...onlyInJson].slice(0, 20).join('\n'));
+
+      // Continue with the rest of the code...
       
       // Create a mapping of readable keys to their digests
       const digestMap = {};
