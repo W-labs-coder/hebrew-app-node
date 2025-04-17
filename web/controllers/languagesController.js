@@ -223,15 +223,47 @@ export const addSelectedLanguage = async (req, res) => {
       
       console.log(`Successfully flattened translation file with ${Object.keys(translationData).length} entries`);
       
-      // Simply create translations from the flattened JSON
-      const translations = Object.entries(translationData).map(([key, value]) => ({
-        key: key,
-        locale: selectedLocaleCode,
-        value: value,
-        // No digest since these are our own keys
-      }));
+      // Create a mapping of readable keys to their digests
+      const digestMap = {};
+      contentsToTranslate.forEach(content => {
+        digestMap[content.key] = content.digest;
+      });
 
-      console.log(`Created ${translations.length} translations directly from JSON file`);
+      console.log(`Created digest map with ${Object.keys(digestMap).length} entries`);
+
+      // Create translations by matching Shopify content with our translations
+      const translations = [];
+
+      // First try matching exact keys
+      contentsToTranslate.forEach(content => {
+        const shopifyKey = content.key;
+        
+        if (translationData[shopifyKey]) {
+          // Direct match
+          translations.push({
+            key: shopifyKey,
+            locale: selectedLocaleCode,
+            value: translationData[shopifyKey],
+            translatableContentDigest: content.digest  // Use Shopify's digest
+          });
+        } else {
+          // Try to find key match
+          for (const [ourKey, ourValue] of Object.entries(translationData)) {
+            if (ourKey.includes(shopifyKey) || shopifyKey.includes(ourKey)) {
+              // Found a potential match
+              translations.push({
+                key: shopifyKey,  // Use Shopify's key
+                locale: selectedLocaleCode,
+                value: ourValue,
+                translatableContentDigest: content.digest  // Use Shopify's digest
+              });
+              break;
+            }
+          }
+        }
+      });
+
+      console.log(`Created ${translations.length} translations matched with Shopify content`);
       
       // Continue with registration
       const SHOPIFY_BATCH_SIZE = 100;
