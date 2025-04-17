@@ -34,7 +34,6 @@ export default function Whatsapp() {
 }
 
 const WhatsappSettings = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
@@ -82,6 +81,13 @@ const WhatsappSettings = () => {
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Replace the existing state for isSubmitting with separate states for each section
+  const [submittingSections, setSubmittingSections] = useState({
+    general: false,
+    defaultMessage: false,
+    widget: false
+  });
+
   useEffect(() => {
     if (user?.contacts) {
       setContacts(user.contacts);
@@ -114,14 +120,16 @@ const WhatsappSettings = () => {
     setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleSubmit = async (event) => {
+  // Update the handleSubmit function to accept a section parameter
+  const handleSubmit = async (event, section) => {
     event.preventDefault();
     
     if (!validateForm()) {
       return;
     }
   
-    setIsSubmitting(true);
+    // Set only the specific section as submitting
+    setSubmittingSections(prev => ({ ...prev, [section]: true }));
     setIsSubmitSuccessful(false);
   
     try {
@@ -170,7 +178,8 @@ const WhatsappSettings = () => {
         return;
       }
     } finally {
-      setIsSubmitting(false);
+      // Reset only the specific section's loading state
+      setSubmittingSections(prev => ({ ...prev, [section]: false }));
     }
   };
 
@@ -389,7 +398,7 @@ const WhatsappSettings = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={(e) => handleSubmit(e, 'general')}>
         {/* Section 1 */}
         <div
           className="d-flex flex-column jcs"
@@ -644,7 +653,7 @@ const WhatsappSettings = () => {
                 <div className="mt-4">
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={submittingSections.general}
                     className="primary-button"
                     style={{
                       minWidth: "120px",
@@ -657,7 +666,7 @@ const WhatsappSettings = () => {
                       fontWeight: "500",
                     }}
                   >
-                    {isSubmitting ? (
+                    {submittingSections.general ? (
                       <div className="d-flex align-items-center gap-2">
                         <span
                           className="spinner-border spinner-border-sm"
@@ -864,7 +873,7 @@ const WhatsappSettings = () => {
                 <div className="mt-4">
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={submittingSections.defaultMessage}
                     className="primary-button"
                     style={{
                       minWidth: "120px",
@@ -877,7 +886,7 @@ const WhatsappSettings = () => {
                       fontWeight: "500",
                     }}
                   >
-                    {isSubmitting ? (
+                    {submittingSections.defaultMessage ? (
                       <div className="d-flex align-items-center gap-2">
                         <span
                           className="spinner-border spinner-border-sm"
@@ -1183,7 +1192,7 @@ const WhatsappSettings = () => {
                 <div className="mt-4">
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={submittingSections.widget}
                     className="primary-button"
                     style={{
                       minWidth: "120px",
@@ -1196,7 +1205,7 @@ const WhatsappSettings = () => {
                       fontWeight: "500",
                     }}
                   >
-                    {isSubmitting ? (
+                    {submittingSections.widget ? (
                       <div className="d-flex align-items-center gap-2">
                         <span
                           className="spinner-border spinner-border-sm"
