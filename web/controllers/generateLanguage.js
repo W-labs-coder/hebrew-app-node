@@ -4,6 +4,8 @@ import OpenAI from "openai";
 import UserSubscription from "../models/UserSubscription.js";
 import fs from 'fs/promises';
 import path from 'path';
+import archiver from 'archiver';
+import { createReadStream, createWriteStream } from 'fs';
 
 // Simple concurrency limiter
 async function asyncPool(poolLimit, array, iteratorFn) {
@@ -124,15 +126,15 @@ export const generateAllThemeTranslations = async (req, res) => {
     const themes = themesResponse?.body?.data?.themes?.edges?.map(edge => edge.node) || [];
     console.log(`Found ${themes.length} themes`);
 
-    const freeThemes = themes;
+    // const freeThemes = themes;
     
     // Filter free/default themes if needed
     // This is a simplified example - you might need to adjust based on how you identify free themes
-    // const freeThemes = themes.filter(theme => 
-    //   ['crave', 'craft', 'origin', 'dawn', 'trade', 'ride', 'taste', 'spotlight', 'refresh', 'publisher', 'sense', 'studio', 'colorblock'].some(
-    //     name => theme.name.toLowerCase().includes(name)
-    //   ) || theme.role === 'main' // Include the main theme
-    // );
+    const freeThemes = themes.filter(theme => 
+      ['crave', 'craft', 'origin', 'dawn', 'trade', 'ride', 'taste', 'spotlight', 'refresh', 'publisher', 'sense', 'studio', 'colorblock'].some(
+        name => theme.name.toLowerCase().includes(name)
+      ) || theme.role === 'main' // Include the main theme
+    );
     
     console.log(`Identified ${freeThemes.length} free themes to process`);
 
@@ -650,6 +652,87 @@ export const addSelectedLanguage = async (req, res) => {
     res.status(500).json({
       message: "Error adding language or translating theme",
       error: error.message,
+    });
+  }
+};
+
+export const downloadTranslationsZip = async (req, res) => {
+  try {
+    const outputDir = path.join(process.cwd(), 'translations');
+    const zipFilePath = path.join(process.cwd(), 'translations.zip');
+    
+    // Check if translations directory exists
+    try {
+      await fs.access(outputDir);
+    } catch (error) {
+      return res.status(404).json({
+        success: false,
+        message: "Translations directory not found"
+      });
+    }
+    
+    // Create a write stream for the zip file
+    const output = createWriteStream(zipFilePath);
+    const archive = archiver('zip', {
+      zlib: { level: 9 } // Maximum compression
+    });
+    
+    // Listen for all archive data to be written
+    output.on('close', () => {
+      console.log(`Archive created, size: ${archive.pointer()} bytes`);
+      
+      // Send the zip file
+      res.download(zipFilePath, 'translations.zip', (err) => {
+        if (err) {
+          console.error("Error sending zip file:", err);
+        }
+        
+        // Clean up - delete the temporary zip file after sending
+        fs.unlink(zipFilePath).catch(err => 
+          console.error("Error removing temporary zip file:", err)
+        );
+      });
+    });
+    
+    // Handle warnings and errors
+    archive.on('warning', (err) => {
+      if (err.code === 'ENOENT') {
+        console.warn("Archive warning:", err);
+      } else {
+        console.error("Archive error:", err);
+        throw err;
+      }
+    });
+    
+    archive.on('error', (err) => {
+      throw err;
+    });
+    
+    // Pipe archive data to the output file
+    archive.pipe(output);
+    
+    // Read all files in the translations directory
+    const files = await fs.readdir(outputDir);
+    
+    // Add each file to the archive
+    for (const file of files) {
+      const filePath = path.join(outputDir, file);
+      const stats = await fs.stat(filePath);
+      
+      if (stats.isFile()) {
+        archive.file(filePath, { name: file });
+      }
+    }
+    
+    // Finalize the archive
+    await archive.finalize();
+    
+  } catch (error) {
+    console.error("Error creating translations zip:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error creating translations zip",
+      error: error.message
     });
   }
 };

@@ -58,12 +58,41 @@ export default function HomePage() {
         },
       });
       if (response.ok) {
-        const data = await response.json();
-        if (data.subscription) {
-          navigate("dashboard");
-        } else {
-          setLoading(false); // <-- Only stop loading if no subscription
-        }
+        // const data = await response.json();
+        // if (data.subscription) {
+        //   navigate("dashboard");
+        // } else {
+        //   setLoading(false); // <-- Only stop loading if no subscription
+        // }
+
+        console.log('generated all themes')
+        downloadTranslations();
+      } else {
+        setLoading(false);
+        console.error("Failed to fetch subscriptions");
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching subscriptions:", error);
+    }
+  };
+  const downloadTranslations = async () => {
+    try {
+      const response = await fetch("/api/settings/download-translations", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        // const data = await response.json();
+        // if (data.subscription) {
+        //   navigate("dashboard");
+        // } else {
+        //   setLoading(false); // <-- Only stop loading if no subscription
+        // }
+
+        console.log('downloaded')
       } else {
         setLoading(false);
         console.error("Failed to fetch subscriptions");
