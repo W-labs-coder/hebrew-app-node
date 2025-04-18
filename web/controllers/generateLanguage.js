@@ -78,7 +78,7 @@ function unflattenJSON(obj) {
 export const generateAllThemeTranslations = async (req, res) => {
   try {
     const targetLanguage = 'hebrew';
-    const outputDir = path.join(process.cwd(), 'web', 'theme_languages');
+    const outputDir = path.join(process.cwd(), 'translations');
     const session = res.locals.shopify.session;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
