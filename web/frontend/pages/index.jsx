@@ -48,6 +48,30 @@ export default function HomePage() {
     // eslint-disable-next-line
   }, []);
 
+  const generateLanguage = async () => {
+    try {
+      const response = await fetch("/api/settings/generate-selected-language", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.subscription) {
+          navigate("dashboard");
+        } else {
+          setLoading(false); // <-- Only stop loading if no subscription
+        }
+      } else {
+        setLoading(false);
+        console.error("Failed to fetch subscriptions");
+      }
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching subscriptions:", error);
+    }
+  };
   const checkSubscription = async () => {
     try {
       const response = await fetch("/api/billing/check-subscription", {
