@@ -287,6 +287,7 @@ export const generateAllThemeTranslations = async (req, res) => {
               current = current[keyParts[i]];
             }
             
+            // Fix: Use keyParts.length instead of keys.length
             current[keyParts[keyParts.length - 1]] = translationsMap[content.key];
           }
         }
