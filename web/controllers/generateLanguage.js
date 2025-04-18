@@ -75,39 +75,21 @@ function unflattenJSON(obj) {
   return result;
 }
 
-export const generateAllThemeTranslations = async () => {
+export const generateAllThemeTranslations = async (req, res) => {
   try {
     const targetLanguage = 'hebrew';
     const outputDir = path.join(process.cwd(), 'translations');
-    // const session = res.locals.shopify.session;
+    const session = res.locals.shopify.session;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
-    const shop = 'dev-store-emmy'
-
-
-    // Update the order using the Admin API
-                  const offlineSessionId = `offline_${shop}`;
-                  const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
-            
-                  if (!shopifySession?.accessToken) {
-                    console.log('❌ No offline session found for shop:', shop);
-                    return;
-                  }
-            
-                  const session = new Session({
-                    id: offlineSessionId,
-                    shop: shop,
-                    state: 'offline',
-                    isOnline: false,
-                    accessToken: shopifySession.accessToken
-                  });
+    
 
     if (!session) {
-      console.error("Unauthorized: Session not found" );
+      return res.status(401).json({ error: "Unauthorized: Session not found" });
     }
 
     if (!openaiApiKey) {
-      console.error( "OpenAI API key not configured" );
+      return res.status(400).json({ error: "OpenAI API key not configured" });
     }
 
     // Initialize OpenAI
@@ -213,7 +195,7 @@ export const generateAllThemeTranslations = async () => {
 
         // Step 3: Translate content using OpenAI in batches
         const TRANSLATION_BATCH_SIZE = 30;
-        const TRANSLATION_CONCURRENCY = 15;
+        const TRANSLATION_CONCURRENCY = 5;
         const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
         
         console.log(`Split into ${contentChunks.length} batches for translation`);
@@ -355,17 +337,19 @@ export const generateAllThemeTranslations = async () => {
       }
     }
 
-    console.log( "Theme translations generated successfully",
+    return res.status(200).json({
+      success: true,
+      message: "Theme translations generated successfully",
       results
-    );
+    });
     
   } catch (error) {
     console.error("Error generating theme translations:", error);
-    // return res.status(500).json({
-    //   success: false,
-    //   message: "Error generating theme translations",
-    //   error: error.message
-    // });
+    return res.status(500).json({
+      success: false,
+      message: "Error generating theme translations",
+      error: error.message
+    });
   }
 };
 
