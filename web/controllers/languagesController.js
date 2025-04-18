@@ -5,25 +5,6 @@ import UserSubscription from "../models/UserSubscription.js";
 import fs from 'fs/promises';
 import path from 'path';
 
-// Simple concurrency limiter
-async function asyncPool(poolLimit, array, iteratorFn) {
-  const ret = [];
-  const executing = [];
-  for (const item of array) {
-    const p = Promise.resolve().then(() => iteratorFn(item));
-    ret.push(p);
-
-    if (poolLimit <= array.length) {
-      const e = p.then(() => executing.splice(executing.indexOf(e), 1));
-      executing.push(e);
-      if (executing.length >= poolLimit) {
-        await Promise.race(executing);
-      }
-    }
-  }
-  return Promise.all(ret);
-}
-
 export const addSelectedLanguage = async (req, res) => {
   try {
     const { language } = req.body;
@@ -71,7 +52,7 @@ export const addSelectedLanguage = async (req, res) => {
     console.log("Theme found:", theme);
 
     // Extract theme name and clean it for file naming
-    const themeName = theme.name.toLowerCase().replace(/\s+/g, '_');
+    const themeName = theme.name.toLowerCase().replace(/\s+/g, "_");
 
     console.log("Theme name for file:", themeName);
 
@@ -177,6 +158,190 @@ export const addSelectedLanguage = async (req, res) => {
       return result;
     }
 
+    // Function to flatten nested JSON
+    function flattenJSON(obj, prefix = "") {
+      return Object.keys(obj).reduce((acc, key) => {
+        const pre = prefix.length ? `${prefix}.${key}` : key;
+
+        if (typeof obj[key] === "object" && obj[key] !== null) {
+          Object.assign(acc, flattenJSON(obj[key], pre));
+        } else {
+          acc[pre] = obj[key];
+        }
+        return acc;
+      }, {});
+    }
+
+    // Validate translation before adding it
+    function validateTranslation(key, value) {
+      const MAX_LENGTH = 5000;
+
+      // Check for maximum length
+      if (value && value.length > MAX_LENGTH) {
+        return {
+          isValid: true,
+          value: value.substring(0, MAX_LENGTH - 3) + "...",
+        };
+      }
+
+      // Check for null or undefined values
+      if (value === null || value === undefined) {
+        return {
+          isValid: false,
+          reason: "Translation value is null or undefined",
+        };
+      }
+
+      return { isValid: true, value };
+    }
+
+    // Add better error handling and logging for registration
+    async function registerTranslations(
+      client,
+      resourceId,
+      translations,
+      locale
+    ) {
+      console.log(
+        `Starting registration of ${translations.length} translations`
+      );
+
+      // Group translations by batch size
+      const BATCH_SIZE = 100;
+      const batches = [];
+      for (let i = 0; i < translations.length; i += BATCH_SIZE) {
+        batches.push(translations.slice(i, i + BATCH_SIZE));
+      }
+
+      console.log(
+        `Split into ${batches.length} batches of max ${BATCH_SIZE} translations each`
+      );
+
+      let successCount = 0;
+      let errorCount = 0;
+      let errorSamples = [];
+
+      // Process batches with concurrency control
+      const CONCURRENCY = 5;
+      const batchPromises = [];
+
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+        const batchPromise = (async () => {
+          try {
+            const response = await client.query({
+              data: {
+                query: `mutation translationsRegister($resourceId: ID!, $translations: [TranslationInput!]!) {
+                  translationsRegister(resourceId: $resourceId, translations: $translations) {
+                    translations {
+                      key
+                      locale
+                    }
+                    userErrors {
+                      field
+                      message
+                    }
+                  }
+                }`,
+                variables: {
+                  resourceId,
+                  translations: batch,
+                },
+              },
+            });
+
+            const result = response?.body?.data?.translationsRegister;
+            const userErrors = result?.userErrors || [];
+
+            if (userErrors.length > 0) {
+              console.warn(
+                `Batch ${i + 1}/${batches.length}: ${
+                  userErrors.length
+                } errors out of ${batch.length} translations`
+              );
+
+              // Collect sample errors for debugging
+              if (errorSamples.length < 10) {
+                errorSamples = [...errorSamples, ...userErrors.slice(0, 5)];
+              }
+
+              errorCount += userErrors.length;
+              successCount += batch.length - userErrors.length;
+            } else {
+              console.log(
+                `✅ Batch ${i + 1}/${batches.length}: Successfully registered ${
+                  batch.length
+                } translations`
+              );
+              successCount += batch.length;
+            }
+
+            return {
+              batchIndex: i,
+              success: userErrors.length === 0,
+              successCount: batch.length - userErrors.length,
+              errorCount: userErrors.length,
+            };
+          } catch (error) {
+            console.error(
+              `❌ Batch ${i + 1}/${batches.length} failed with error:`,
+              error.message
+            );
+            errorCount += batch.length;
+            return {
+              batchIndex: i,
+              success: false,
+              successCount: 0,
+              errorCount: batch.length,
+              error: error.message,
+            };
+          }
+        })();
+
+        batchPromises.push(batchPromise);
+
+        // Wait for some batches to complete before starting more
+        if (batchPromises.length >= CONCURRENCY) {
+          await Promise.race(batchPromises.map((p) => p.catch((e) => e)));
+          // Remove completed promises
+          const completedIndex = await Promise.race(
+            batchPromises.map((p, idx) => p.then(() => idx).catch(() => idx))
+          );
+          batchPromises.splice(completedIndex, 1);
+        }
+      }
+
+      // Wait for remaining batches
+      await Promise.all(batchPromises.map((p) => p.catch((e) => e)));
+
+      // Log summary
+      console.log(`\n=== Translation Registration Summary ===`);
+      console.log(`Total translations attempted: ${translations.length}`);
+      console.log(
+        `Successfully registered: ${successCount} (${Math.round(
+          (successCount / translations.length) * 100
+        )}%)`
+      );
+      console.log(`Failed registrations: ${errorCount}`);
+
+      if (errorSamples.length > 0) {
+        console.log(`\n=== Sample Error Messages ===`);
+        errorSamples.forEach((err, i) => {
+          console.log(
+            `${i + 1}. Field: ${err.field || "unknown"}, Message: ${
+              err.message
+            }`
+          );
+        });
+      }
+
+      return {
+        total: translations.length,
+        success: successCount,
+        errors: errorCount,
+      };
+    }
+
     // NEW APPROACH: Use JSON files directly for translations
     let translationData = {};
     try {
@@ -197,308 +362,118 @@ export const addSelectedLanguage = async (req, res) => {
         return res.status(404).json({
           success: false,
           message: `No translation file found for theme "${theme.name}" and language "${language}"`,
-          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in theme_languages directory`
+          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in theme_languages directory`,
         });
       }
 
       // Read and parse the JSON file
       const fileContent = await fs.readFile(translationFilePath, "utf8");
       const nestedTranslationData = JSON.parse(fileContent);
-      
-      // Function to flatten nested JSON
-      function flattenJSON(obj, prefix = "") {
-        return Object.keys(obj).reduce((acc, key) => {
-          // Special handling for the "shopify" key - don't add it as a prefix
-          const pre = key === "shopify" ? "" : 
-                     (prefix.length ? `${prefix}.${key}` : key);
-          
-          if (typeof obj[key] === "object" && obj[key] !== null) {
-            Object.assign(acc, flattenJSON(obj[key], pre));
-          } else {
-            // Only add key if prefix is not empty (avoiding empty keys)
-            if (pre.length > 0) {
-              acc[pre] = obj[key];
-            }
-          }
-          return acc;
-        }, {});
-      }
-      
-      // Flatten the nested JSON structure
-      translationData = flattenJSON(nestedTranslationData);
-      
-      console.log(`Successfully flattened translation file with ${Object.keys(translationData).length} entries`);
 
-      // Create sets for analysis
-      const jsonKeys = new Set(Object.keys(translationData));
-      const shopifyKeys = new Set(contentsToTranslate.map(c => c.key));
+      // Create translations from the flattened JSON data
+      console.log(`Creating translations from flattened JSON data...`);
+      const translations = [];
+
+      // Directly use flattened translations for all available content
+      const flattenedData = flattenJSON(nestedTranslationData);
+      console.log(
+        `Flattened ${Object.keys(flattenedData).length} translation keys`
+      );
+
+      // Create a set of Shopify keys for faster lookup
+      const shopifyKeys = new Set(contentsToTranslate.map((c) => c.key));
+      // Create a digest map for faster access
+      const digestMap = {};
+      contentsToTranslate.forEach((content) => {
+        digestMap[content.key] = content.digest;
+      });
+
+      // Log analysis of keys
+      const jsonKeys = new Set(Object.keys(flattenedData));
 
       // Find keys that exist in both sets
-      const matchingKeys = new Set([...jsonKeys].filter(k => shopifyKeys.has(k)));
+      const matchingKeys = new Set(
+        [...jsonKeys].filter((k) => shopifyKeys.has(k))
+      );
 
       // Find keys that exist only in JSON but not in Shopify
-      const onlyInJson = new Set([...jsonKeys].filter(k => !shopifyKeys.has(k)));
+      const onlyInJson = new Set(
+        [...jsonKeys].filter((k) => !shopifyKeys.has(k))
+      );
 
       // Find keys that exist only in Shopify but not in JSON
-      const onlyInShopify = new Set([...shopifyKeys].filter(k => !jsonKeys.has(k)));
+      const onlyInShopify = new Set(
+        [...shopifyKeys].filter((k) => !jsonKeys.has(k))
+      );
 
       // Log the analysis
       console.log(`=== KEY OVERLAP ANALYSIS ===`);
       console.log(`Total JSON keys: ${jsonKeys.size}`);
       console.log(`Total Shopify translatable keys: ${shopifyKeys.size}`);
-      console.log(`Keys that match exactly: ${matchingKeys.size} (${Math.round(matchingKeys.size/shopifyKeys.size*100)}%)`);
+      console.log(
+        `Keys that match exactly: ${matchingKeys.size} (${Math.round(
+          (matchingKeys.size / shopifyKeys.size) * 100
+        )}%)`
+      );
       console.log(`Keys only in JSON file: ${onlyInJson.size}`);
       console.log(`Keys only in Shopify: ${onlyInShopify.size}`);
 
       console.log(`\n=== SAMPLE KEYS ONLY IN SHOPIFY ===`);
-      console.log([...onlyInShopify].slice(0, 20).join('\n'));
+      console.log([...onlyInShopify].slice(0, 20).join("\n"));
 
       console.log(`\n=== SAMPLE KEYS ONLY IN JSON ===`);
-      console.log([...onlyInJson].slice(0, 20).join('\n'));
+      console.log([...onlyInJson].slice(0, 20).join("\n"));
 
-      // Continue with the rest of the code...
-      
-      // Create a mapping of readable keys to their digests
-      const digestMap = {};
-      contentsToTranslate.forEach(content => {
-        digestMap[content.key] = content.digest;
-      });
-
-      console.log(`Created digest map with ${Object.keys(digestMap).length} entries`);
-
-      // Create translations by matching Shopify content with our translations
-      const translations = [];
-      const missingKeys = [];
-      const matchedKeys = new Set();
-      const keyMatchTypes = {
-        direct: 0,
-        caseInsensitive: 0,
-        lastPart: 0,
-        keywordMatch: 0,
-        partial: 0,
-        notMatched: 0
-      };
-
-      // First try matching keys
-      contentsToTranslate.forEach(content => {
-        const shopifyKey = content.key;
-        let matched = false;
-        
-        // Method 1: Direct match
-        if (translationData[shopifyKey]) {
-          translations.push({
-            key: shopifyKey,
-            locale: selectedLocaleCode,
-            value: translationData[shopifyKey],
-            translatableContentDigest: content.digest
-          });
-          matchedKeys.add(shopifyKey);
-          matched = true;
-          keyMatchTypes.direct++;
-          return; // Early return after match
-        } 
-        
-        // Method 2: Case insensitive match
-        const lowerKey = shopifyKey.toLowerCase();
-        for (const [ourKey, ourValue] of Object.entries(translationData)) {
-          if (ourKey.toLowerCase() === lowerKey) {
+      // Add translations for existing Shopify keys
+      for (const [key, value] of Object.entries(flattenedData)) {
+        const validationResult = validateTranslation(key, value);
+        if (validationResult.isValid) {
+          if (shopifyKeys.has(key)) {
             translations.push({
-              key: shopifyKey,
+              key,
               locale: selectedLocaleCode,
-              value: ourValue,
-              translatableContentDigest: content.digest
+              value: validationResult.value,
+              translatableContentDigest: digestMap[key],
             });
-            matchedKeys.add(shopifyKey);
-            matched = true;
-            keyMatchTypes.caseInsensitive++;
-            return; // Early return after match
-          }
-        }
-        
-        // Method 3: Match by last part of key (most specific part)
-        const shopifyKeyParts = shopifyKey.split('.');
-        if (shopifyKeyParts.length > 1) {
-          const lastPart = shopifyKeyParts[shopifyKeyParts.length - 1];
-          
-          // Find exact match for last part
-          let bestMatch = null;
-          let bestKeyLength = Infinity;
-          
-          for (const [ourKey, ourValue] of Object.entries(translationData)) {
-            const ourKeyParts = ourKey.split('.');
-            if (ourKeyParts.length === 0) continue;
-            
-            if (ourKeyParts[ourKeyParts.length - 1] === lastPart) {
-              // Prefer the shortest key that matches to get most specific match
-              if (ourKey.length < bestKeyLength) {
-                bestMatch = { key: ourKey, value: ourValue };
-                bestKeyLength = ourKey.length;
-              }
-            }
-          }
-          
-          if (bestMatch) {
+          } else {
+            // Add keys that only exist in our JSON but not in Shopify
             translations.push({
-              key: shopifyKey,
+              key,
               locale: selectedLocaleCode,
-              value: bestMatch.value,
-              translatableContentDigest: content.digest
+              value: validationResult.value,
             });
-            matchedKeys.add(shopifyKey);
-            matched = true;
-            keyMatchTypes.lastPart++;
-            return; // Early return after match
           }
+        } else {
+          console.warn(
+            `Skipping invalid translation for key "${key}": ${validationResult.reason}`
+          );
         }
-        
-        // Method 4: Match by keywords in the key
-        const shopifyKeywords = shopifyKey.split(/[_\-\.]/);
-        for (const [ourKey, ourValue] of Object.entries(translationData)) {
-          // Skip already used keys for better diversity
-          if (matchedKeys.has(ourKey)) continue;
-          
-          // Try to find keys that share multiple significant words
-          let matches = 0;
-          for (const word of shopifyKeywords) {
-            if (word.length < 3) continue; // Skip short words
-            if (ourKey.includes(word)) matches++;
-          }
-          
-          if (matches >= 2) { // If at least 2 keywords match
-            translations.push({
-              key: shopifyKey,
-              locale: selectedLocaleCode,
-              value: ourValue,
-              translatableContentDigest: content.digest
-            });
-            matchedKeys.add(shopifyKey);
-            matched = true;
-            keyMatchTypes.keywordMatch++;
-            return; // Early return after match
-          }
-        }
-        
-        // Method 5: Very loose matching as last resort
-        for (const [ourKey, ourValue] of Object.entries(translationData)) {
-          // Skip already used keys
-          if (matchedKeys.has(ourKey)) continue;
-          
-          if ((ourKey.includes(shopifyKey) || shopifyKey.includes(ourKey)) && 
-              !matchedKeys.has(ourKey)) {
-            translations.push({
-              key: shopifyKey,
-              locale: selectedLocaleCode,
-              value: ourValue,
-              translatableContentDigest: content.digest
-            });
-            matchedKeys.add(shopifyKey);
-            matched = true;
-            keyMatchTypes.partial++;
-            return; // Early return after match
-          }
-        }
-        
-        // If still no match, add to missing keys list
-        if (!matched) {
-          missingKeys.push(shopifyKey);
-          keyMatchTypes.notMatched++;
-        }
-      });
-
-      // Print detailed matching statistics
-      console.log("=== Translation Key Matching Statistics ===");
-      console.log(`Total translatable items: ${contentsToTranslate.length}`);
-      console.log(`Total translated: ${translations.length} (${Math.round(translations.length/contentsToTranslate.length*100)}%)`);
-      console.log(`Direct matches: ${keyMatchTypes.direct}`);
-      console.log(`Case insensitive matches: ${keyMatchTypes.caseInsensitive}`);
-      console.log(`Last part matches: ${keyMatchTypes.lastPart}`);
-      console.log(`Keyword matches: ${keyMatchTypes.keywordMatch}`);
-      console.log(`Partial matches: ${keyMatchTypes.partial}`);
-      console.log(`Not matched: ${keyMatchTypes.notMatched}`);
-
-      // Log some examples of missing keys to help understand what's missing
-      if (missingKeys.length > 0) {
-        console.log(`First 10 missing keys: ${missingKeys.slice(0, 10).join(", ")}`);
       }
 
-      // Add keys that exist only in the JSON file but not in Shopify
-      console.log(`Adding ${onlyInJson.size} keys that only exist in the JSON file`);
-      onlyInJson.forEach(jsonKey => {
-        translations.push({
-          key: jsonKey, // Use the key directly from JSON
-          locale: selectedLocaleCode,
-          value: translationData[jsonKey],
-          // No digest needed for new keys
-        });
-      });
+      console.log(`Created ${translations.length} translations to register`);
 
-      // Update the statistics to include the newly added keys
-      console.log(`Total translations to register: ${translations.length} (including ${onlyInJson.size} new keys)`);
-
-      // Continue with registration
-      const SHOPIFY_BATCH_SIZE = 100;
-      const REGISTRATION_CONCURRENCY = 10;
-      
-      console.log("Registering all translations in batches of 100:", translations.length);
-      
+      // Register all translations
       let translatedResourceId = themeId;
       if (!translatedResourceId.startsWith("gid://")) {
-        translatedResourceId = `gid://shopify/Theme/${themeId.split("/").pop()}`;
+        translatedResourceId = `gid://shopify/Theme/${themeId
+          .split("/")
+          .pop()}`;
       }
-      
-      const translationChunks = chunkArray(translations, SHOPIFY_BATCH_SIZE);
-      // Parallelize Shopify registration batches
-      await asyncPool(
-        REGISTRATION_CONCURRENCY,
-        translationChunks,
-        async (chunk) => {
 
-          
-          try {
-            const registerResponse = await client.query({
-              data: {
-                query: `mutation translationsRegister($resourceId: ID!, $translations: [TranslationInput!]!) {
-                  translationsRegister(resourceId: $resourceId, translations: $translations) {
-                    translations {
-                      key
-                      value
-                      locale
-                    }
-                    userErrors {
-                      field
-                      message
-                    }
-                  }
-                }`,
-                variables: {
-                  resourceId: translatedResourceId,
-                  translations: chunk,
-                },
-              },
-            });
-            
-            const userErrors = registerResponse?.body?.data?.translationsRegister?.userErrors || [];
-            
-            if (userErrors.length > 0) {
-              console.warn("Translation registration warnings:", userErrors);
-              console.warn("Sample of keys causing errors:", chunk.slice(0, 3).map(t => t.key));
-            } else {
-              console.log(`✅ Successfully registered batch of ${chunk.length} translations`);
-            }
-            
-            translationCount += chunk.length - userErrors.length;
-          } catch (registerError) {
-            console.error("Error registering translations:", registerError);
-            // Do not throw, just continue with next batch
-          }
-        }
+      const registrationResult = await registerTranslations(
+        client,
+        translatedResourceId,
+        translations,
+        selectedLocaleCode
       );
+
+      translationCount = registrationResult.success;
     } catch (fileError) {
       console.error(`Error processing translation file: ${fileError.message}`);
       return res.status(500).json({
         success: false,
         message: "Error processing translation file",
-        error: fileError.message
+        error: fileError.message,
       });
     }
 
