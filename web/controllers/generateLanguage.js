@@ -130,10 +130,26 @@ export const generateAllThemeTranslations = async (req, res) => {
     
     // Filter free/default themes if needed
     // This is a simplified example - you might need to adjust based on how you identify free themes
-    const freeThemes = themes.filter(theme => 
-      ['crave', 'craft', 'origin', 'dawn', 'trade', 'ride', 'taste', 'spotlight', 'refresh', 'publisher', 'sense', 'studio', 'colorblock'].some(
-        name => theme.name.toLowerCase().includes(name)
-      ) || theme.role === 'main' // Include the main theme
+    const freeThemes = themes.filter(
+      (theme) =>
+        [
+          "crave",
+          "craft",
+          "origin",
+          "dawn",
+          "trade",
+          "ride",
+          "taste",
+          "spotlight",
+          "refresh",
+          "publisher",
+          "sense",
+          "studio",
+          "colorblock",
+          "color-block",
+          "color_block",
+        ].some((name) => theme.name.toLowerCase().includes(name)) ||
+        theme.role === "main" // Include the main theme
     );
     
     console.log(`Identified ${freeThemes.length} free themes to process`);
