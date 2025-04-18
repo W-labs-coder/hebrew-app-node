@@ -4527,7 +4527,7 @@
       "json": {
         "main": {
           "share": {
-            "share_label:3syj88j5f6ixv": "שתף"
+            "share_label": "שתף"
           }
         }
       }
@@ -4536,22 +4536,22 @@
       "json": {
         "image_banner": {
           "heading": {
-            "heading:1j7a9nwb7go7": "עיינו במוצרים החדשים שלנו"
+            "heading:": "עיינו במוצרים החדשים שלנו"
           },
           "button": {
-            "button_label_1:38hqd72gah9io": "צפו בכל המוצרים",
-            "button_link_1:2xgggf1hd943a": "shopify://collections/all"
+            "button_label_1": "צפו בכל המוצרים",
+            "button_link_1": "shopify://collections/all"
           }
         },
         "featured_collection": {
-          "title:vud3cy1kl8qx": "מוצרים מובילים"
+          "title": "מוצרים מובילים"
         }
       }
     },
     "list-collections": {
       "json": {
         "main": {
-          "title:1d0ti1c25d6dr": "קולקציות"
+          "title": "קולקציות"
         }
       }
     },
@@ -4559,10 +4559,10 @@
       "json": {
         "main": {
           "heading": {
-            "heading:3jfchdkhhlz4x": "נפתח בקרוב"
+            "heading": "נפתח בקרוב"
           },
           "paragraph": {
-            "text:3dpbi4yl0bkb6": "<p>היו הראשונים לדעת כאשר נשיק.</p>"
+            "text": "<p>היו הראשונים לדעת כאשר נשיק.</p>"
           }
         }
       }
@@ -4571,21 +4571,21 @@
       "json": {
         "main": {
           "vendor": {
-            "text:2n788erlcind8": "{{ product.vendor }}"
+            "text": "{{ product.vendor }}"
           },
           "share": {
-            "share_label:1ad7auctiy024": "שתף"
+            "share_label": "שתף"
           }
         },
         "related-products": {
-          "heading:33ue0l8criumv": "אולי תאהב גם"
+          "heading": "אולי תאהב גם"
         }
       }
     },
     "sections/footer-group": {
       "json": {
         "footer": {
-          "newsletter_heading:3mws8faawdff7": "הירשמו לניוזלטר שלנו"
+          "newsletter_heading": "הירשמו לניוזלטר שלנו"
         }
       }
     },
@@ -4593,7 +4593,7 @@
       "json": {
         "announcement-bar": {
           "announcement-bar-0": {
-            "text:jct1ak9ccl9t": "ברוכים הבאים לחנות שלנו"
+            "text": "ברוכים הבאים לחנות שלנו"
           }
         }
       }
