@@ -212,7 +212,39 @@ export const generateAllThemeTranslations = async (req, res) => {
               
               const content = translationResponse.choices[0].message.content;
               try {
-                const translatedTexts = JSON.parse(content);
+                // First attempt standard JSON parsing
+                let translatedTexts = [];
+                try {
+                  translatedTexts = JSON.parse(content);
+                } catch (initialParseError) {
+                  console.log(`Initial JSON parse failed for ${theme.name}, batch ${currentBatch}, attempting recovery...`);
+                  
+                  // Recovery attempt 1: Try to fix common formatting issues
+                  const cleanedContent = content
+                    .replace(/\n/g, '')  // Remove line breaks
+                    .replace(/"\s*,\s*"/g, '","')  // Fix spacing in commas
+                    .trim();
+                  
+                  // Check if content looks like array items but missing brackets
+                  if (cleanedContent.startsWith('"') && cleanedContent.endsWith('"')) {
+                    try {
+                      translatedTexts = JSON.parse(`[${cleanedContent}]`);
+                    } catch (fixError) {
+                      // Recovery attempt 2: Parse line by line for multi-line responses
+                      console.log(`Bracket fixing failed, trying line-by-line parsing for ${theme.name}`);
+                      translatedTexts = content
+                        .split('\n')
+                        .filter(line => line.trim())
+                        .map(line => {
+                          // Extract text between quotes if possible
+                          const match = line.match(/^"(.+)"[,]?$/);
+                          return match ? match[1] : line.trim().replace(/^['"]+|['"]+$/g, '');
+                        });
+                    }
+                  } else {
+                    throw initialParseError;
+                  }
+                }
                 
                 // Map keys to translated values
                 keys.forEach((key, index) => {
@@ -223,8 +255,14 @@ export const generateAllThemeTranslations = async (req, res) => {
                 
                 return { success: true, count: keys.length };
               } catch (jsonErr) {
-                console.error(`OpenAI returned invalid JSON for ${theme.name}, batch ${currentBatch}:`, content);
-                return { success: false, error: jsonErr.message };
+                console.error(`Failed to parse OpenAI response for ${theme.name}, batch ${currentBatch}:`, content);
+                // Fall back to using original values for this batch
+                keys.forEach((key, index) => {
+                  if (values[index]) {
+                    translationsMap[key] = values[index]; // Fall back to original text
+                  }
+                });
+                return { success: false, error: jsonErr.message, fallbackUsed: true };
               }
             } catch (err) {
               console.error(`OpenAI translation failed for ${theme.name}, batch ${currentBatch}:`, err);
@@ -249,7 +287,7 @@ export const generateAllThemeTranslations = async (req, res) => {
               current = current[keyParts[i]];
             }
             
-            current[keyParts[keys.length - 1]] = translationsMap[content.key];
+            current[keyParts[keyParts.length - 1]] = translationsMap[content.key];
           }
         }
 
