@@ -126,6 +126,8 @@ export const generateAllThemeTranslations = async (req, res) => {
     const themes = themesResponse?.body?.data?.themes?.edges?.map(edge => edge.node) || [];
     console.log(`Found ${themes.length} themes`);
 
+    console.log('the themes', themes)
+
     // const freeThemes = themes;
     
     // Filter free/default themes if needed
