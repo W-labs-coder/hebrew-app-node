@@ -76,32 +76,45 @@ export default function HomePage() {
       console.error("Error fetching subscriptions:", error);
     }
   };
+
   const downloadTranslations = async () => {
     try {
       const response = await fetch("/api/settings/download-translations", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
+      
       if (response.ok) {
-        // const data = await response.json();
-        // if (data.subscription) {
-        //   navigate("dashboard");
-        // } else {
-        //   setLoading(false); // <-- Only stop loading if no subscription
-        // }
-
-        console.log('downloaded')
+        // Get the blob from the response
+        const blob = await response.blob();
+        
+        // Create a URL for the blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create a temporary anchor element
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'translations.zip';
+        
+        // Append to the document body
+        document.body.appendChild(a);
+        
+        // Trigger click event
+        a.click();
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        console.log('Downloaded translations successfully');
       } else {
-        setLoading(false);
-        console.error("Failed to fetch subscriptions");
+        console.error("Failed to download translations");
       }
     } catch (error) {
-      setLoading(false);
-      console.error("Error fetching subscriptions:", error);
+      console.error("Error downloading translations:", error);
     }
   };
+
   const checkSubscription = async () => {
     try {
       const response = await fetch("/api/billing/check-subscription", {
