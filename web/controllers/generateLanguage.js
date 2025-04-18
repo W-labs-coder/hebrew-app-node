@@ -75,19 +75,39 @@ function unflattenJSON(obj) {
   return result;
 }
 
-export const generateAllThemeTranslations = async (req, res) => {
+export const generateAllThemeTranslations = async () => {
   try {
     const targetLanguage = 'hebrew';
     const outputDir = path.join(process.cwd(), 'translations');
-    const session = res.locals.shopify.session;
+    // const session = res.locals.shopify.session;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
+    const shop = 'dev-store-emmy'
+
+
+    // Update the order using the Admin API
+                  const offlineSessionId = `offline_${shop}`;
+                  const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
+            
+                  if (!shopifySession?.accessToken) {
+                    console.log('❌ No offline session found for shop:', shop);
+                    return;
+                  }
+            
+                  const session = new Session({
+                    id: offlineSessionId,
+                    shop: shop,
+                    state: 'offline',
+                    isOnline: false,
+                    accessToken: shopifySession.accessToken
+                  });
+
     if (!session) {
-      return res.status(401).json({ error: "Unauthorized: Session not found" });
+      console.error("Unauthorized: Session not found" );
     }
 
     if (!openaiApiKey) {
-      return res.status(400).json({ error: "OpenAI API key not configured" });
+      console.error( "OpenAI API key not configured" );
     }
 
     // Initialize OpenAI
@@ -139,7 +159,26 @@ export const generateAllThemeTranslations = async (req, res) => {
     const results = [];
     for (const theme of freeThemes) {
       try {
-        console.log(`Processing theme: ${theme.name} (${theme.id})`);
+        // Check if translation file already exists
+        const themeNameClean = theme.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const fileName = `${themeNameClean}_${selectedLocaleCode}.json`;
+        const filePath = path.join(outputDir, fileName);
+        
+        // Check if file exists
+        try {
+          await fs.access(filePath);
+          console.log(`Translation file for ${theme.name} already exists at ${filePath}, skipping...`);
+          results.push({
+            theme: theme.name,
+            file: fileName,
+            status: 'skipped',
+            reason: 'file already exists'
+          });
+          continue; // Skip to next theme
+        } catch (fileNotFoundError) {
+          // File doesn't exist, proceed with translation
+          console.log(`Processing theme: ${theme.name} (${theme.id})`);
+        }
         
         // Step 2: Fetch translatable content for each theme
         const translatableResourcesResponse = await client.query({
@@ -174,7 +213,7 @@ export const generateAllThemeTranslations = async (req, res) => {
 
         // Step 3: Translate content using OpenAI in batches
         const TRANSLATION_BATCH_SIZE = 30;
-        const TRANSLATION_CONCURRENCY = 5;
+        const TRANSLATION_CONCURRENCY = 15;
         const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
         
         console.log(`Split into ${contentChunks.length} batches for translation`);
@@ -293,10 +332,6 @@ export const generateAllThemeTranslations = async (req, res) => {
         }
 
         // Step 5: Save to file
-        const themeNameClean = theme.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-        const fileName = `${themeNameClean}_${selectedLocaleCode}.json`;
-        const filePath = path.join(outputDir, fileName);
-        
         await fs.writeFile(
           filePath, 
           JSON.stringify(structuredTranslations, null, 2), 
@@ -320,19 +355,17 @@ export const generateAllThemeTranslations = async (req, res) => {
       }
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Theme translations generated successfully",
+    console.log( "Theme translations generated successfully",
       results
-    });
+    );
     
   } catch (error) {
     console.error("Error generating theme translations:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error generating theme translations",
-      error: error.message
-    });
+    // return res.status(500).json({
+    //   success: false,
+    //   message: "Error generating theme translations",
+    //   error: error.message
+    // });
   }
 };
 

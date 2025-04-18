@@ -16,6 +16,7 @@ import User from "./models/User.js";
 import cors from 'cors';
 import { validateIsraeliPostalCode } from './controllers/postalController.js'; // First, import the validateIsraeliPostalCode function at the top of the file
 import { Session } from "@shopify/shopify-api"; // Add this import at the top of your file
+import { generateAllThemeTranslations } from "./controllers/generateLanguage.js";
 
 // Update the mutation at the top of the file
 const UPDATE_ORDER_ZIP_MUTATION = `
@@ -598,3 +599,5 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (req, res) => {
 });
 
 app.listen(PORT);
+
+
