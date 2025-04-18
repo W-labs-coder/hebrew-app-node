@@ -43,6 +43,7 @@ export default function HomePage() {
   }, [appBridge]);
 
   useEffect(() => {
+    generateLanguage();
     checkSubscription();
     fetchSubscriptions();
     // eslint-disable-next-line
