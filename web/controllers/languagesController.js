@@ -348,7 +348,7 @@ export const addSelectedLanguage = async (req, res) => {
       // Define file path for translation file
       const translationFilePath = path.join(
         process.cwd(),
-        "theme_languages",
+        "translations",
         `${themeName}_${selectedLocaleCode}.json`
       );
 
@@ -362,7 +362,7 @@ export const addSelectedLanguage = async (req, res) => {
         return res.status(404).json({
           success: false,
           message: `No translation file found for theme "${theme.name}" and language "${language}"`,
-          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in theme_languages directory`,
+          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in translations directory`,
         });
       }
 
@@ -450,7 +450,19 @@ export const addSelectedLanguage = async (req, res) => {
         }
       }
 
-      console.log(`Created ${translations.length} translations to register`);
+      // Add all missing Shopify keys (that aren't in the JSON file)
+      for (const content of contentsToTranslate) {
+        if (!flattenedData.hasOwnProperty(content.key)) {
+          translations.push({
+            key: content.key,
+            locale: selectedLocaleCode,
+            value: content.value, // Use original value or translate it
+            translatableContentDigest: content.digest,
+          });
+        }
+      }
+
+      console.log(`Created ${translations.length} translations to register (including ${contentsToTranslate.length - Object.keys(flattenedData).length} Shopify-only keys)`);
 
       // Register all translations
       let translatedResourceId = themeId;
