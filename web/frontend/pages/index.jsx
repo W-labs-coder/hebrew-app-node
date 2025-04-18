@@ -65,8 +65,8 @@ export default function HomePage() {
         //   setLoading(false); // <-- Only stop loading if no subscription
         // }
 
-        console.log('generated all themes')
-        downloadTranslations();
+        console.log('generated all themes translations')
+        // downloadTranslations();
       } else {
         setLoading(false);
         console.error("Failed to fetch subscriptions");
