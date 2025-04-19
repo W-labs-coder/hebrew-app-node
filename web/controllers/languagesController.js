@@ -233,6 +233,10 @@ export const addSelectedLanguage = async (req, res) => {
         const batch = batches[i];
         const batchPromise = (async () => {
           try {
+            // Log batch processing start
+            console.log(`Processing batch ${i + 1}/${batches.length} with ${batch.length} translations...`);
+            
+            // Register translations for this batch
             const response = await client.query({
               data: {
                 query: `mutation translationsRegister($resourceId: ID!, $translations: [TranslationInput!]!) {
@@ -259,10 +263,13 @@ export const addSelectedLanguage = async (req, res) => {
 
             if (userErrors.length > 0) {
               console.warn(
-                `Batch ${i + 1}/${batches.length}: ${
-                  userErrors.length
-                } errors out of ${batch.length} translations`
+                `Batch ${i + 1}/${batches.length}: ${userErrors.length} errors out of ${batch.length} translations`
               );
+              
+              // Log some example errors
+              userErrors.slice(0, 3).forEach(err => {
+                console.warn(`Error: ${err.message} for field: ${err.field || 'unknown'}`);
+              });
 
               // Collect sample errors for debugging
               if (errorSamples.length < 10) {
@@ -273,9 +280,7 @@ export const addSelectedLanguage = async (req, res) => {
               successCount += batch.length - userErrors.length;
             } else {
               console.log(
-                `✅ Batch ${i + 1}/${batches.length}: Successfully registered ${
-                  batch.length
-                } translations`
+                `✅ Batch ${i + 1}/${batches.length}: Successfully registered ${batch.length} translations`
               );
               successCount += batch.length;
             }
@@ -300,6 +305,9 @@ export const addSelectedLanguage = async (req, res) => {
               error: error.message,
             };
           }
+          
+          // Add delay between batches for rate limiting
+          await delay(300);
         })();
 
         batchPromises.push(batchPromise);
@@ -309,16 +317,25 @@ export const addSelectedLanguage = async (req, res) => {
           await Promise.race(batchPromises.map((p) => p.catch((e) => e)));
           // Add delay between batch groups
           await delay(500); // 500ms delay
-          // Remove completed promises
-          const completedIndex = await Promise.race(
-            batchPromises.map((p, idx) => p.then(() => idx).catch(() => idx))
-          );
-          batchPromises.splice(completedIndex, 1);
+          
+          // Find completed promises and remove them
+          const completedIndices = [];
+          for (let j = 0; j < batchPromises.length; j++) {
+            const promise = batchPromises[j];
+            if (promise.isFulfilled) {
+              completedIndices.push(j);
+            }
+          }
+          
+          // Remove completed promises from back to front to avoid index issues
+          for (let j = completedIndices.length - 1; j >= 0; j--) {
+            batchPromises.splice(completedIndices[j], 1);
+          }
         }
       }
 
       // Wait for remaining batches
-      await Promise.all(batchPromises.map((p) => p.catch((e) => e)));
+      await Promise.allSettled(batchPromises);
 
       // Log summary
       console.log(`\n=== Translation Registration Summary ===`);
