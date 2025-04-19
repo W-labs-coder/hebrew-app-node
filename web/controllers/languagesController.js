@@ -551,8 +551,8 @@ export const addSelectedLanguage = async (req, res) => {
       try {
         const publishResponse = await client.query({
           data: {
-            query: `mutation publishTheme($id: ID!) {
-              publishTheme(id: $id) {
+            query: `mutation themePublish($id: ID!) {
+              themePublish(id: $id) {
                 userErrors {
                   field
                   message
