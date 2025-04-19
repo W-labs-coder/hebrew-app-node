@@ -554,8 +554,7 @@ export const addSelectedLanguage = async (req, res) => {
         
         // Fetch the actual translations from the theme using the correct query structure
         const localeResponse = await client.query({
-          data: {
-            query: `query 
+          data:  `query 
               translatableResource(resourceId: ${translatedResourceId}) {
                 resourceId
                 translations(locale: ${selectedLocaleCode}) {
@@ -564,7 +563,7 @@ export const addSelectedLanguage = async (req, res) => {
                 }
               }
             `,
-          },
+          
         });
         
         const appliedTranslations = localeResponse?.body?.data?.translatableResource?.translations || [];
