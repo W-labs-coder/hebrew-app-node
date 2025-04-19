@@ -221,117 +221,114 @@ export const addSelectedLanguage = async (req, res) => {
       let errorCount = 0;
       let errorSamples = [];
 
-      // Process batches with concurrency control
-      const CONCURRENCY = 4;
+      // Process batches with improved promise tracking
+      const CONCURRENCY = 3; // Reduced from 4 to prevent rate limiting
 
       // Add a delay function
       const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-      // Track active promises
-      const activeBatches = new Set();
       
-      // Process each batch of translations
-      for (let i = 0; i < batches.length; i++) {
-        // Wait until we have room for more concurrent requests
-        while (activeBatches.size >= CONCURRENCY) {
-          // Wait for any promise to complete
-          await Promise.race([...activeBatches]);
+      // Use a queue approach for better control
+      const queue = [...batches];
+      const activePromises = [];
+      
+      // Process queue until empty
+      while (queue.length > 0 || activePromises.length > 0) {
+        // Fill up to concurrency limit
+        while (queue.length > 0 && activePromises.length < CONCURRENCY) {
+          const batch = queue.shift();
+          const batchIndex = batches.indexOf(batch);
           
-          // Remove completed promises
-          for (const promise of [...activeBatches]) {
-            if (promise.status === 'fulfilled' || promise.status === 'rejected') {
-              activeBatches.delete(promise);
-            }
-          }
-          
-          // Small delay to prevent CPU spinning
-          await delay(100);
-        }
-        
-        const batch = batches[i];
-        
-        // Create and track the promise for this batch
-        const batchPromise = (async () => {
-          try {
-            // Log batch processing start
-            console.log(`Processing batch ${i + 1}/${batches.length} with ${batch.length} translations...`);
-            
-            // Register translations for this batch
-            const response = await client.query({
-              data: {
-                query: `mutation translationsRegister($resourceId: ID!, $translations: [TranslationInput!]!) {
-                  translationsRegister(resourceId: $resourceId, translations: $translations) {
-                    translations {
-                      key
-                      locale
-                    }
-                    userErrors {
-                      field
-                      message
-                    }
-                  }
-                }`,
-                variables: {
-                  resourceId,
-                  translations: batch,
-                },
-              },
-            });
-
-            const result = response?.body?.data?.translationsRegister;
-            const userErrors = result?.userErrors || [];
-
-            if (userErrors.length > 0) {
-              console.warn(
-                `Batch ${i + 1}/${batches.length}: ${userErrors.length} errors out of ${batch.length} translations`
-              );
+          const promise = (async () => {
+            try {
+              // Log batch processing start
+              console.log(`Processing batch ${batchIndex + 1}/${batches.length} with ${batch.length} translations...`);
               
-              // Log some example errors
-              userErrors.slice(0, 3).forEach(err => {
-                console.warn(`Error: ${err.message} for field: ${err.field || 'unknown'}`);
-                // Log specific product keys that failed
-                if (err.field && err.field.includes('product')) {
-                  console.warn(`Failed product key: ${err.field}`);
-                }
+              // Register translations for this batch
+              const response = await client.query({
+                data: {
+                  query: `mutation translationsRegister($resourceId: ID!, $translations: [TranslationInput!]!) {
+                    translationsRegister(resourceId: $resourceId, translations: $translations) {
+                      translations {
+                        key
+                        locale
+                      }
+                      userErrors {
+                        field
+                        message
+                      }
+                    }
+                  }`,
+                  variables: {
+                    resourceId,
+                    translations: batch,
+                  },
+                },
               });
 
-              // Collect sample errors for debugging
-              if (errorSamples.length < 10) {
-                errorSamples = [...errorSamples, ...userErrors.slice(0, 5)];
-              }
+              const result = response?.body?.data?.translationsRegister;
+              const userErrors = result?.userErrors || [];
 
-              errorCount += userErrors.length;
-              successCount += batch.length - userErrors.length;
-            } else {
-              console.log(
-                `✅ Batch ${i + 1}/${batches.length}: Successfully registered ${batch.length} translations`
+              if (userErrors.length > 0) {
+                console.warn(
+                  `Batch ${batchIndex + 1}/${batches.length}: ${userErrors.length} errors out of ${batch.length} translations`
+                );
+                
+                // Log some example errors
+                userErrors.slice(0, 3).forEach(err => {
+                  console.warn(`Error: ${err.message} for field: ${err.field || 'unknown'}`);
+                  // Log specific product keys that failed
+                  if (err.field && err.field.includes('product')) {
+                    console.warn(`Failed product key: ${err.field}`);
+                  }
+                });
+
+                // Collect sample errors for debugging
+                if (errorSamples.length < 10) {
+                  errorSamples = [...errorSamples, ...userErrors.slice(0, 5)];
+                }
+
+                errorCount += userErrors.length;
+                successCount += batch.length - userErrors.length;
+              } else {
+                console.log(
+                  `✅ Batch ${batchIndex + 1}/${batches.length}: Successfully registered ${batch.length} translations`
+                );
+                successCount += batch.length;
+              }
+              
+              // Add delay between batches for rate limiting
+              await delay(300);
+              
+            } catch (error) {
+              console.error(
+                `❌ Batch ${batchIndex + 1}/${batches.length} failed with error:`,
+                error.message
               );
-              successCount += batch.length;
+              errorCount += batch.length;
             }
-            
-            // Add delay between batches for rate limiting
-            await delay(300);
-            
-          } catch (error) {
-            console.error(
-              `❌ Batch ${i + 1}/${batches.length} failed with error:`,
-              error.message
-            );
-            errorCount += batch.length;
-          }
-        })();
+          })();
+          
+          // Add metadata to the promise to track its status
+          promise.then(
+            () => { promise.status = 'fulfilled'; },
+            () => { promise.status = 'rejected'; }
+          );
+          
+          activePromises.push(promise);
+        }
         
-        // Add metadata to the promise to track its status
-        batchPromise.then(
-          () => { batchPromise.status = 'fulfilled'; },
-          () => { batchPromise.status = 'rejected'; }
-        );
+        // Wait for any promise to complete
+        await Promise.race(activePromises);
         
-        activeBatches.add(batchPromise);
+        // Remove completed promises
+        activePromises = activePromises.filter(p => p.status !== 'fulfilled' && p.status !== 'rejected');
+        
+        // Small delay to prevent CPU spinning
+        await delay(100);
       }
 
       // Wait for all remaining batches to complete
-      await Promise.all([...activeBatches]);
+      await Promise.all(activePromises);
 
       // Log summary
       console.log(`\n=== Translation Registration Summary ===`);
@@ -445,37 +442,61 @@ export const addSelectedLanguage = async (req, res) => {
 
       // Add translations for existing Shopify keys
       for (const [key, value] of Object.entries(flattenedData)) {
-        // Debug the flattened keys and whether they're in shopifyKeys
-        if (key.includes('localization')) {
-          console.log(`Found localization key: ${key}, value: ${value}, in shopifyKeys: ${shopifyKeys.has(key)}`);
+        // Transform the key to match Shopify's expected format
+        let shopifyKey = key;
+        
+        // Handle product keys specifically - if the key starts with "product."
+        // add the "products." prefix that Shopify expects
+        if (key.startsWith("product.")) {
+          shopifyKey = "products." + key;
+          console.log(`Transformed product key: ${key} → ${shopifyKey}, value: ${value}`);
+        }
+        
+        // Debug specific key categories
+        if (key.includes('localization') || key.includes('product')) {
+          console.log(`Found key: ${key}, transformed: ${shopifyKey}, in shopifyKeys: ${shopifyKeys.has(shopifyKey)}`);
         }
         
         const validationResult = validateTranslation(key, value);
-        if (!validationResult.isValid && key.includes('localization')) {
-          console.log(`Invalid localization key: ${key}, reason: ${validationResult.reason}`);
+        if (!validationResult.isValid && (key.includes('localization') || key.includes('product'))) {
+          console.log(`Invalid key: ${key}, reason: ${validationResult.reason}`);
         }
         
         if (validationResult.isValid) {
-          // Add translations for keys that exist in both Shopify and JSON
-          if (shopifyKeys.has(key)) {
+          // First check if the transformed key exists in Shopify
+          if (shopifyKeys.has(shopifyKey)) {
+            translations.push({
+              key: shopifyKey, // Use the transformed key for Shopify
+              locale: selectedLocaleCode,
+              value: validationResult.value,
+              translatableContentDigest: digestMap[shopifyKey],
+            });
+            console.log(`Registered existing key: ${shopifyKey}`);
+          } 
+          // Then try the original key
+          else if (shopifyKeys.has(key)) {
             translations.push({
               key,
               locale: selectedLocaleCode,
               value: validationResult.value,
               translatableContentDigest: digestMap[key],
             });
-          } else {
-            // Add keys that only exist in our JSON but not in Shopify
+            console.log(`Registered original key: ${key}`);
+          } 
+          // If neither exists in Shopify, add it as a custom translation
+          else {
+            // For product keys, always use the transformed version
+            const finalKey = key.startsWith("product.") ? shopifyKey : key;
+            
             translations.push({
-              key,
+              key: finalKey,
               locale: selectedLocaleCode,
               value: validationResult.value,
             });
+            console.log(`Registered custom key: ${finalKey}`);
           }
         } else {
-          console.warn(
-            `Skipping invalid translation for key "${key}": ${validationResult.reason}`
-          );
+          console.warn(`Skipping invalid translation for key "${key}": ${validationResult.reason}`);
         }
       }
 
