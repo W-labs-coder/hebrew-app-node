@@ -108,8 +108,9 @@ export const addSelectedLanguage = async (req, res) => {
         },
       });
 
-      const userErrors =
-        enableLocaleResponse?.body?.data?.publishablePublish?.userErrors || [];
+      // Fix error checking to use the correct property path
+      const userErrors = 
+        enableLocaleResponse?.body?.data?.shopLocaleEnable?.userErrors || [];
 
       if (userErrors.length > 0) {
         console.error("Error publishing locale:", userErrors);
@@ -701,6 +702,43 @@ export const addSelectedLanguage = async (req, res) => {
         message: "Error processing translation file",
         error: fileError.message,
       });
+    }
+
+    // Add this after translation verification, before sending the response
+    console.log(`Publishing locale '${selectedLocaleCode}' to make it available in storefront...`);
+    try {
+      const publishLocaleResponse = await client.query({
+        data: {
+          query: `mutation publishLocale($locale: String!) {
+            shopLocalePublish(locale: $locale) {
+              userErrors {
+                message
+                field
+              }
+              shopLocale {
+                locale
+                name
+                published
+              }
+            }
+          }`,
+          variables: {
+            locale: selectedLocaleCode,
+          },
+        },
+      });
+
+      const publishErrors = publishLocaleResponse?.body?.data?.shopLocalePublish?.userErrors || [];
+      
+      if (publishErrors.length > 0) {
+        console.error("Error publishing locale:", publishErrors);
+        console.warn("Translations were added but the language might not be publicly available");
+      } else {
+        console.log(`✅ Locale '${selectedLocaleCode}' published successfully and is now available in the storefront`);
+      }
+    } catch (publishError) {
+      console.error(`Error publishing locale: ${publishError.message}`);
+      console.warn("Translations were added but the language might not be publicly available");
     }
 
     const subscription = await UserSubscription.findOne({ shop: user.shop })
