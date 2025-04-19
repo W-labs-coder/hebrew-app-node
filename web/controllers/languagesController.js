@@ -222,7 +222,7 @@ export const addSelectedLanguage = async (req, res) => {
       let errorSamples = [];
 
       // Process batches with concurrency control
-      const CONCURRENCY = 2; // Reduced from 5 to 2
+      const CONCURRENCY = 4; // Reduced from 5 to 2
 
       // Add a delay function
       const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -432,10 +432,18 @@ export const addSelectedLanguage = async (req, res) => {
 
       // Add translations for existing Shopify keys
       for (const [key, value] of Object.entries(flattenedData)) {
+        // Debug the flattened keys and whether they're in shopifyKeys
+        if (key.includes('localization')) {
+          console.log(`Found localization key: ${key}, value: ${value}, in shopifyKeys: ${shopifyKeys.has(key)}`);
+        }
+        
         const validationResult = validateTranslation(key, value);
+        if (!validationResult.isValid && key.includes('localization')) {
+          console.log(`Invalid localization key: ${key}, reason: ${validationResult.reason}`);
+        }
+        
         if (validationResult.isValid) {
-          // ONLY add translations for keys that exist in Shopify 
-          // (have a digest value available)
+          // Add translations for keys that exist in both Shopify and JSON
           if (shopifyKeys.has(key)) {
             translations.push({
               key,
@@ -444,8 +452,12 @@ export const addSelectedLanguage = async (req, res) => {
               translatableContentDigest: digestMap[key],
             });
           } else {
-            // Skip keys not in Shopify (they can't be registered)
-            console.log(`Skipping JSON-only key without digest: ${key}`);
+            // Add keys that only exist in our JSON but not in Shopify
+            translations.push({
+              key,
+              locale: selectedLocaleCode,
+              value: validationResult.value,
+            });
           }
         } else {
           console.warn(
@@ -453,9 +465,6 @@ export const addSelectedLanguage = async (req, res) => {
           );
         }
       }
-
-      // Log how many translations we're actually registering with Shopify
-      console.log(`Created ${translations.length} translations to register with valid digest values`);
 
       // Add all missing Shopify keys (that aren't in the JSON file)
       for (const content of contentsToTranslate) {
