@@ -428,7 +428,26 @@ export const addSelectedLanguage = async (req, res) => {
       for (const [key, value] of Object.entries(flattenedData)) {
         const validationResult = validateTranslation(key, value);
         if (validationResult.isValid) {
-          // This is where keys are included or excluded
+          // Add translations for keys that exist in both Shopify and JSON
+          if (shopifyKeys.has(key)) {
+            translations.push({
+              key,
+              locale: selectedLocaleCode,
+              value: validationResult.value,
+              translatableContentDigest: digestMap[key],
+            });
+          } else {
+            // Add keys that only exist in our JSON but not in Shopify
+            translations.push({
+              key,
+              locale: selectedLocaleCode,
+              value: validationResult.value,
+            });
+          }
+        } else {
+          console.warn(
+            `Skipping invalid translation for key "${key}": ${validationResult.reason}`
+          );
         }
       }
 
