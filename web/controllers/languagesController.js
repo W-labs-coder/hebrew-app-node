@@ -552,17 +552,22 @@ export const addSelectedLanguage = async (req, res) => {
         // Wait a moment for translations to be processed
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Fetch the actual translations from the theme
+        // Fetch the actual translations from the theme using the correct query structure
         const localeResponse = await client.query({
-          data: `query {
-            translations(locale: "${selectedLocaleCode}", resourceId: "${translatedResourceId}") {
-              key
-              value
-            }
-          }`
+          data: {
+            query: `query 
+              translatableResource(resourceId: ${translatedResourceId}) {
+                resourceId
+                translations(locale: ${selectedLocaleCode}) {
+                  key
+                  value
+                }
+              }
+            `,
+          },
         });
         
-        const appliedTranslations = localeResponse?.body?.data?.translations || [];
+        const appliedTranslations = localeResponse?.body?.data?.translatableResource?.translations || [];
         console.log(`Fetched ${appliedTranslations.length} actual translations from locale file`);
         
         // Check if critical keys actually exist in the applied translations
