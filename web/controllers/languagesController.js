@@ -465,10 +465,13 @@ export const addSelectedLanguage = async (req, res) => {
         // Handle product keys specifically - if the key starts with "product."
         // add the "products." prefix that Shopify expects
         if (key.startsWith("product.")) {
-          shopifyKey = "products." + key;
-          console.log(
-            `Transformed product key: ${key} → ${shopifyKey}, value: ${value}`
-          );
+          // Fix the transformation to avoid duplicating "product" in the path
+          shopifyKey = "products." + key.substring(8); // Remove "product." prefix
+          console.log(`Transformed product key: ${key} → ${shopifyKey}, value: ${value}`);
+        } else if (key.startsWith("newsletter.")) {
+          // Add namespace for newsletter keys
+          shopifyKey = "general." + key;
+          console.log(`Added namespace to newsletter key: ${key} → ${shopifyKey}`);
         }
 
         // Debug specific key categories
@@ -589,7 +592,7 @@ export const addSelectedLanguage = async (req, res) => {
       console.log("Verifying translations were actually applied...");
       try {
         // Wait a moment for translations to be processed
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
         // Fetch the actual translations from the theme using the correct query structure
         const localeResponse = await client.query({
