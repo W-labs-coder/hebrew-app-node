@@ -2,8 +2,8 @@ import shopify from "../shopify.js";
 import User from "../models/User.js";
 import OpenAI from "openai";
 import UserSubscription from "../models/UserSubscription.js";
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "fs/promises";
+import path from "path";
 
 export const addSelectedLanguage = async (req, res) => {
   try {
@@ -225,24 +225,28 @@ export const addSelectedLanguage = async (req, res) => {
       const CONCURRENCY = 3; // Reduced from 4 to prevent rate limiting
 
       // Add a delay function
-      const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-      
+      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
       // Use a queue approach for better control
       const queue = [...batches];
       let activePromises = []; // Changed to let instead of const
-      
+
       // Process queue until empty
       while (queue.length > 0 || activePromises.length > 0) {
         // Fill up to concurrency limit
         while (queue.length > 0 && activePromises.length < CONCURRENCY) {
           const batch = queue.shift();
           const batchIndex = batches.indexOf(batch);
-          
+
           const promise = (async () => {
             try {
               // Log batch processing start
-              console.log(`Processing batch ${batchIndex + 1}/${batches.length} with ${batch.length} translations...`);
-              
+              console.log(
+                `Processing batch ${batchIndex + 1}/${batches.length} with ${
+                  batch.length
+                } translations...`
+              );
+
               // Register translations for this batch
               const response = await client.query({
                 data: {
@@ -270,14 +274,18 @@ export const addSelectedLanguage = async (req, res) => {
 
               if (userErrors.length > 0) {
                 console.warn(
-                  `Batch ${batchIndex + 1}/${batches.length}: ${userErrors.length} errors out of ${batch.length} translations`
+                  `Batch ${batchIndex + 1}/${batches.length}: ${
+                    userErrors.length
+                  } errors out of ${batch.length} translations`
                 );
-                
+
                 // Log some example errors
-                userErrors.slice(0, 3).forEach(err => {
-                  console.warn(`Error: ${err.message} for field: ${err.field || 'unknown'}`);
+                userErrors.slice(0, 3).forEach((err) => {
+                  console.warn(
+                    `Error: ${err.message} for field: ${err.field || "unknown"}`
+                  );
                   // Log specific product keys that failed
-                  if (err.field && err.field.includes('product')) {
+                  if (err.field && err.field.includes("product")) {
                     console.warn(`Failed product key: ${err.field}`);
                   }
                 });
@@ -291,38 +299,47 @@ export const addSelectedLanguage = async (req, res) => {
                 successCount += batch.length - userErrors.length;
               } else {
                 console.log(
-                  `✅ Batch ${batchIndex + 1}/${batches.length}: Successfully registered ${batch.length} translations`
+                  `✅ Batch ${batchIndex + 1}/${
+                    batches.length
+                  }: Successfully registered ${batch.length} translations`
                 );
                 successCount += batch.length;
               }
-              
+
               // Add delay between batches for rate limiting
               await delay(300);
-              
             } catch (error) {
               console.error(
-                `❌ Batch ${batchIndex + 1}/${batches.length} failed with error:`,
+                `❌ Batch ${batchIndex + 1}/${
+                  batches.length
+                } failed with error:`,
                 error.message
               );
               errorCount += batch.length;
             }
           })();
-          
+
           // Add metadata to the promise to track its status
           promise.then(
-            () => { promise.status = 'fulfilled'; },
-            () => { promise.status = 'rejected'; }
+            () => {
+              promise.status = "fulfilled";
+            },
+            () => {
+              promise.status = "rejected";
+            }
           );
-          
+
           activePromises.push(promise);
         }
-        
+
         // Wait for any promise to complete
         await Promise.race(activePromises);
-        
+
         // Remove completed promises - now we can reassign because activePromises is 'let'
-        activePromises = activePromises.filter(p => p.status !== 'fulfilled' && p.status !== 'rejected');
-        
+        activePromises = activePromises.filter(
+          (p) => p.status !== "fulfilled" && p.status !== "rejected"
+        );
+
         // Small delay to prevent CPU spinning
         await delay(100);
       }
@@ -444,39 +461,55 @@ export const addSelectedLanguage = async (req, res) => {
       for (const [key, value] of Object.entries(flattenedData)) {
         // Transform the key to match Shopify's expected format
         let shopifyKey = key;
-        
+
         // Handle product keys specifically - if the key starts with "product."
         // add the "products." prefix that Shopify expects
         if (key.startsWith("product.")) {
           shopifyKey = "products." + key;
-          console.log(`Transformed product key: ${key} → ${shopifyKey}, value: ${value}`);
+          console.log(
+            `Transformed product key: ${key} → ${shopifyKey}, value: ${value}`
+          );
         }
-        
+
         // Debug specific key categories
-        if (key.includes('localization') || key.includes('product')) {
-          console.log(`Found key: ${key}, transformed: ${shopifyKey}, in shopifyKeys: ${shopifyKeys.has(shopifyKey)}`);
+        if (key.includes("localization") || key.includes("product")) {
+          console.log(
+            `Found key: ${key}, transformed: ${shopifyKey}, in shopifyKeys: ${shopifyKeys.has(
+              shopifyKey
+            )}`
+          );
         }
-        
+
         const validationResult = validateTranslation(key, value);
-        if (!validationResult.isValid && (key.includes('localization') || key.includes('product'))) {
-          console.log(`Invalid key: ${key}, reason: ${validationResult.reason}`);
+        if (
+          !validationResult.isValid &&
+          (key.includes("localization") || key.includes("product"))
+        ) {
+          console.log(
+            `Invalid key: ${key}, reason: ${validationResult.reason}`
+          );
         }
-        
+
         // Add right after your transformation checks
-        if (key.includes('product') || key.includes('general')) {
+        if (key.includes("product") || key.includes("general")) {
           let transformedKey = key;
           if (key.startsWith("product.")) {
             transformedKey = "products." + key;
           } else if (key.startsWith("products.")) {
             // Already in correct format
-          } else if (key.includes('product') && !key.includes('products.')) {
+          } else if (key.includes("product") && !key.includes("products.")) {
             // Handle other product-related keys that might need transformation
             console.log(`Potential unhandled product key: ${key}`);
           }
-          
-          console.log(`Product/General key: ${key} → ${transformedKey}, Value: ${value.substring(0, 20)}...`);
+
+          console.log(
+            `Product/General key: ${key} → ${transformedKey}, Value: ${value.substring(
+              0,
+              20
+            )}...`
+          );
         }
-        
+
         if (validationResult.isValid) {
           // First check if the transformed key exists in Shopify
           if (shopifyKeys.has(shopifyKey)) {
@@ -487,7 +520,7 @@ export const addSelectedLanguage = async (req, res) => {
               translatableContentDigest: digestMap[shopifyKey],
             });
             console.log(`Registered existing key: ${shopifyKey}`);
-          } 
+          }
           // Then try the original key
           else if (shopifyKeys.has(key)) {
             translations.push({
@@ -497,12 +530,12 @@ export const addSelectedLanguage = async (req, res) => {
               translatableContentDigest: digestMap[key],
             });
             console.log(`Registered original key: ${key}`);
-          } 
+          }
           // If neither exists in Shopify, add it as a custom translation
           else {
             // For product keys, always use the transformed version
             const finalKey = key.startsWith("product.") ? shopifyKey : key;
-            
+
             translations.push({
               key: finalKey,
               locale: selectedLocaleCode,
@@ -511,7 +544,9 @@ export const addSelectedLanguage = async (req, res) => {
             console.log(`Registered custom key: ${finalKey}`);
           }
         } else {
-          console.warn(`Skipping invalid translation for key "${key}": ${validationResult.reason}`);
+          console.warn(
+            `Skipping invalid translation for key "${key}": ${validationResult.reason}`
+          );
         }
       }
 
@@ -527,7 +562,11 @@ export const addSelectedLanguage = async (req, res) => {
         }
       }
 
-      console.log(`Created ${translations.length} translations to register (including ${contentsToTranslate.length - Object.keys(flattenedData).length} Shopify-only keys)`);
+      console.log(
+        `Created ${translations.length} translations to register (including ${
+          contentsToTranslate.length - Object.keys(flattenedData).length
+        } Shopify-only keys)`
+      );
 
       // Register all translations
       let translatedResourceId = themeId;
@@ -550,11 +589,11 @@ export const addSelectedLanguage = async (req, res) => {
       console.log("Verifying translations were actually applied...");
       try {
         // Wait a moment for translations to be processed
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         // Fetch the actual translations from the theme using the correct query structure
         const localeResponse = await client.query({
-          data:  `query 
+          data: `query 
               translatableResource(resourceId: ${translatedResourceId}) {
                 resourceId
                 translations(locale: ${selectedLocaleCode}) {
@@ -563,52 +602,67 @@ export const addSelectedLanguage = async (req, res) => {
                 }
               }
             `,
-          
         });
-        
-        const appliedTranslations = localeResponse?.body?.data?.translatableResource?.translations || [];
-        console.log(`Fetched ${appliedTranslations.length} actual translations from locale file`);
-        
+
+        const appliedTranslations =
+          localeResponse?.body?.data?.translatableResource?.translations || [];
+        console.log(
+          `Fetched ${appliedTranslations.length} actual translations from locale file`
+        );
+
         // Check if critical keys actually exist in the applied translations
         console.log("Verifying critical translations were actually applied...");
         const criticalKeys = [
           "general.password_page.login_form_heading",
           "general.password_page.login_password_button",
           "general.social.links.facebook",
-          "general.social.links.twitter"
+          "general.social.links.twitter",
         ];
-      
-        criticalKeys.forEach(key => {
-          const foundInLocale = appliedTranslations.some(t => t.key === key);
-          console.log(`Critical key "${key}": ${foundInLocale ? "✅ Applied" : "❌ Missing in locale file"}`);
+
+        criticalKeys.forEach((key) => {
+          const foundInLocale = appliedTranslations.some((t) => t.key === key);
+          console.log(
+            `Critical key "${key}": ${
+              foundInLocale ? "✅ Applied" : "❌ Missing in locale file"
+            }`
+          );
         });
-        
+
         // Calculate overall application rate
-        const totalKeysFound = translations.filter(t => 
-          appliedTranslations.some(at => at.key === t.key)).length;
-        
+        const totalKeysFound = translations.filter((t) =>
+          appliedTranslations.some((at) => at.key === t.key)
+        ).length;
+
         console.log(`=== TRANSLATION APPLICATION SUMMARY ===`);
         console.log(`Total translations attempted: ${translations.length}`);
-        console.log(`Actually found in locale file: ${totalKeysFound} (${Math.round((totalKeysFound/translations.length)*100)}%)`);
-        
+        console.log(
+          `Actually found in locale file: ${totalKeysFound} (${Math.round(
+            (totalKeysFound / translations.length) * 100
+          )}%)`
+        );
       } catch (verifyError) {
         console.error(`Error verifying translations: ${verifyError.message}`);
       }
 
       // Special handling for password page and social translations
-      console.log("Verifying specific translations were registered correctly...");
+      console.log(
+        "Verifying specific translations were registered correctly..."
+      );
       const criticalKeys = [
         "general.password_page.login_form_heading",
         "general.password_page.login_password_button",
         "general.social.links.facebook",
-        "general.social.links.twitter"
+        "general.social.links.twitter",
       ];
 
-      criticalKeys.forEach(key => {
-        const foundInBatch = translations.some(t => t.key === key);
-        console.log(`Critical key "${key}": ${foundInBatch ? "✅ Registered" : "❌ Not found in translations"}`);
+      criticalKeys.forEach((key) => {
+        const foundInBatch = translations.some((t) => t.key === key);
+        console.log(
+          `Critical key "${key}": ${
+            foundInBatch ? "✅ Registered" : "❌ Not found in translations"
+          }`
+        );
       });
-
     } catch (fileError) {
       console.error(`Error processing translation file: ${fileError.message}`);
       return res.status(500).json({
