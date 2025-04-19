@@ -426,7 +426,16 @@ export const addSelectedLanguage = async (req, res) => {
 
       // Add translations for existing Shopify keys
       for (const [key, value] of Object.entries(flattenedData)) {
+        // Debug the flattened keys and whether they're in shopifyKeys
+        if (key.includes('localization')) {
+          console.log(`Found localization key: ${key}, value: ${value}, in shopifyKeys: ${shopifyKeys.has(key)}`);
+        }
+        
         const validationResult = validateTranslation(key, value);
+        if (!validationResult.isValid && key.includes('localization')) {
+          console.log(`Invalid localization key: ${key}, reason: ${validationResult.reason}`);
+        }
+        
         if (validationResult.isValid) {
           // Add translations for keys that exist in both Shopify and JSON
           if (shopifyKeys.has(key)) {
