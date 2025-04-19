@@ -222,15 +222,35 @@ export const addSelectedLanguage = async (req, res) => {
       let errorSamples = [];
 
       // Process batches with concurrency control
-      const CONCURRENCY = 4; // Reduced from 5 to 2
+      const CONCURRENCY = 4;
 
       // Add a delay function
       const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-      const batchPromises = [];
-
+      // Track active promises
+      const activeBatches = new Set();
+      
+      // Process each batch of translations
       for (let i = 0; i < batches.length; i++) {
+        // Wait until we have room for more concurrent requests
+        while (activeBatches.size >= CONCURRENCY) {
+          // Wait for any promise to complete
+          await Promise.race([...activeBatches]);
+          
+          // Remove completed promises
+          for (const promise of [...activeBatches]) {
+            if (promise.status === 'fulfilled' || promise.status === 'rejected') {
+              activeBatches.delete(promise);
+            }
+          }
+          
+          // Small delay to prevent CPU spinning
+          await delay(100);
+        }
+        
         const batch = batches[i];
+        
+        // Create and track the promise for this batch
         const batchPromise = (async () => {
           try {
             // Log batch processing start
@@ -269,6 +289,10 @@ export const addSelectedLanguage = async (req, res) => {
               // Log some example errors
               userErrors.slice(0, 3).forEach(err => {
                 console.warn(`Error: ${err.message} for field: ${err.field || 'unknown'}`);
+                // Log specific product keys that failed
+                if (err.field && err.field.includes('product')) {
+                  console.warn(`Failed product key: ${err.field}`);
+                }
               });
 
               // Collect sample errors for debugging
@@ -284,58 +308,30 @@ export const addSelectedLanguage = async (req, res) => {
               );
               successCount += batch.length;
             }
-
-            return {
-              batchIndex: i,
-              success: userErrors.length === 0,
-              successCount: batch.length - userErrors.length,
-              errorCount: userErrors.length,
-            };
+            
+            // Add delay between batches for rate limiting
+            await delay(300);
+            
           } catch (error) {
             console.error(
               `❌ Batch ${i + 1}/${batches.length} failed with error:`,
               error.message
             );
             errorCount += batch.length;
-            return {
-              batchIndex: i,
-              success: false,
-              successCount: 0,
-              errorCount: batch.length,
-              error: error.message,
-            };
           }
-          
-          // Add delay between batches for rate limiting
-          await delay(300);
         })();
-
-        batchPromises.push(batchPromise);
-
-        // Wait for some batches to complete before starting more
-        if (batchPromises.length >= CONCURRENCY) {
-          await Promise.race(batchPromises.map((p) => p.catch((e) => e)));
-          // Add delay between batch groups
-          await delay(500); // 500ms delay
-          
-          // Find completed promises and remove them
-          const completedIndices = [];
-          for (let j = 0; j < batchPromises.length; j++) {
-            const promise = batchPromises[j];
-            if (promise.isFulfilled) {
-              completedIndices.push(j);
-            }
-          }
-          
-          // Remove completed promises from back to front to avoid index issues
-          for (let j = completedIndices.length - 1; j >= 0; j--) {
-            batchPromises.splice(completedIndices[j], 1);
-          }
-        }
+        
+        // Add metadata to the promise to track its status
+        batchPromise.then(
+          () => { batchPromise.status = 'fulfilled'; },
+          () => { batchPromise.status = 'rejected'; }
+        );
+        
+        activeBatches.add(batchPromise);
       }
 
-      // Wait for remaining batches
-      await Promise.allSettled(batchPromises);
+      // Wait for all remaining batches to complete
+      await Promise.all([...activeBatches]);
 
       // Log summary
       console.log(`\n=== Translation Registration Summary ===`);
