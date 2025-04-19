@@ -77,50 +77,49 @@ export const addSelectedLanguage = async (req, res) => {
     console.log("Published Locales:", existingLocales);
 
     const isLocaleEnabled = existingLocales.some(
-      (locale) => locale.locale === selectedLocaleCode && locale.published
+      (locale) => locale.locale === selectedLocaleCode
     );
 
     // STEP 3: Enable the locale if not already enabled
     if (!isLocaleEnabled) {
       console.log(
-        `Locale '${selectedLocaleCode}' not published. Attempting to publish it...`
+        `Locale '${selectedLocaleCode}' not enabled. Enabling it for translation...`
       );
 
       const enableLocaleResponse = await client.query({
         data: {
           query: `mutation enableLocale($locale: String!) {
-      shopLocaleEnable(locale: $locale) {
-        userErrors {
-          message
-          field
-        }
-        shopLocale {
-          locale
-          name
-          primary
-          published
-        }
-      }
-    }`,
+            shopLocaleEnable(locale: $locale) {
+              userErrors {
+                message
+                field
+              }
+              shopLocale {
+                locale
+                name
+                primary
+                published
+              }
+            }
+          }`,
           variables: {
             locale: selectedLocaleCode,
           },
         },
       });
 
-      // Fix error checking to use the correct property path
       const userErrors = 
         enableLocaleResponse?.body?.data?.shopLocaleEnable?.userErrors || [];
 
       if (userErrors.length > 0) {
-        console.error("Error publishing locale:", userErrors);
+        console.error("Error enabling locale:", userErrors);
         return res.status(400).json({
-          error: "Locale not enabled and could not be published",
+          error: "Locale could not be enabled for translation",
           details: userErrors,
         });
       }
 
-      console.log(`Locale '${selectedLocaleCode}' published successfully.`);
+      console.log(`Locale '${selectedLocaleCode}' enabled successfully.`);
     }
 
     // STEP 4: Fetch translatable content
