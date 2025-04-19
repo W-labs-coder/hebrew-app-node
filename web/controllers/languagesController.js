@@ -229,7 +229,7 @@ export const addSelectedLanguage = async (req, res) => {
       
       // Use a queue approach for better control
       const queue = [...batches];
-      const activePromises = [];
+      let activePromises = []; // Changed to let instead of const
       
       // Process queue until empty
       while (queue.length > 0 || activePromises.length > 0) {
@@ -320,7 +320,7 @@ export const addSelectedLanguage = async (req, res) => {
         // Wait for any promise to complete
         await Promise.race(activePromises);
         
-        // Remove completed promises
+        // Remove completed promises - now we can reassign because activePromises is 'let'
         activePromises = activePromises.filter(p => p.status !== 'fulfilled' && p.status !== 'rejected');
         
         // Small delay to prevent CPU spinning
@@ -460,6 +460,21 @@ export const addSelectedLanguage = async (req, res) => {
         const validationResult = validateTranslation(key, value);
         if (!validationResult.isValid && (key.includes('localization') || key.includes('product'))) {
           console.log(`Invalid key: ${key}, reason: ${validationResult.reason}`);
+        }
+        
+        // Add right after your transformation checks
+        if (key.includes('product') || key.includes('general')) {
+          let transformedKey = key;
+          if (key.startsWith("product.")) {
+            transformedKey = "products." + key;
+          } else if (key.startsWith("products.")) {
+            // Already in correct format
+          } else if (key.includes('product') && !key.includes('products.')) {
+            // Handle other product-related keys that might need transformation
+            console.log(`Potential unhandled product key: ${key}`);
+          }
+          
+          console.log(`Product/General key: ${key} → ${transformedKey}, Value: ${value.substring(0, 20)}...`);
         }
         
         if (validationResult.isValid) {
