@@ -546,35 +546,49 @@ export const addSelectedLanguage = async (req, res) => {
 
       translationCount = registrationResult.success;
 
-      // Add this: Publish the theme to ensure translations are updated in locale files
-      console.log("Publishing theme to apply translations to locale files...");
+      // Verify translations actually appeared in the locale file
+      console.log("Verifying translations were actually applied...");
       try {
-        const publishResponse = await client.query({
-          data: {
-            query: `mutation themePublish($id: ID!) {
-              themePublish(id: $id) {
-                userErrors {
-                  field
-                  message
-                }
-              }
-            }`,
-            variables: {
-              id: translatedResourceId,
-            },
-          },
-        });
-
-        const publishErrors = publishResponse?.body?.data?.publishTheme?.userErrors || [];
+        // Wait a moment for translations to be processed
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        if (publishErrors.length > 0) {
-          console.warn("Theme publication warnings:", publishErrors);
-        } else {
-          console.log("✅ Theme published successfully. Translations should now be visible in locale files.");
-        }
-      } catch (publishError) {
-        console.error("Error publishing theme:", publishError.message);
-        // Don't return error - continue with success response but log the issue
+        // Fetch the actual translations from the theme
+        const localeResponse = await client.query({
+          data: `query {
+            translations(locale: "${selectedLocaleCode}", resourceId: "${translatedResourceId}") {
+              key
+              value
+            }
+          }`
+        });
+        
+        const appliedTranslations = localeResponse?.body?.data?.translations || [];
+        console.log(`Fetched ${appliedTranslations.length} actual translations from locale file`);
+        
+        // Check if critical keys actually exist in the applied translations
+        console.log("Verifying critical translations were actually applied...");
+        const criticalKeys = [
+          "general.password_page.login_form_heading",
+          "general.password_page.login_password_button",
+          "general.social.links.facebook",
+          "general.social.links.twitter"
+        ];
+      
+        criticalKeys.forEach(key => {
+          const foundInLocale = appliedTranslations.some(t => t.key === key);
+          console.log(`Critical key "${key}": ${foundInLocale ? "✅ Applied" : "❌ Missing in locale file"}`);
+        });
+        
+        // Calculate overall application rate
+        const totalKeysFound = translations.filter(t => 
+          appliedTranslations.some(at => at.key === t.key)).length;
+        
+        console.log(`=== TRANSLATION APPLICATION SUMMARY ===`);
+        console.log(`Total translations attempted: ${translations.length}`);
+        console.log(`Actually found in locale file: ${totalKeysFound} (${Math.round((totalKeysFound/translations.length)*100)}%)`);
+        
+      } catch (verifyError) {
+        console.error(`Error verifying translations: ${verifyError.message}`);
       }
 
       // Special handling for password page and social translations
