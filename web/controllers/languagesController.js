@@ -222,7 +222,11 @@ export const addSelectedLanguage = async (req, res) => {
       let errorSamples = [];
 
       // Process batches with concurrency control
-      const CONCURRENCY = 5;
+      const CONCURRENCY = 2; // Reduced from 5 to 2
+
+      // Add a delay function
+      const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
       const batchPromises = [];
 
       for (let i = 0; i < batches.length; i++) {
@@ -303,6 +307,8 @@ export const addSelectedLanguage = async (req, res) => {
         // Wait for some batches to complete before starting more
         if (batchPromises.length >= CONCURRENCY) {
           await Promise.race(batchPromises.map((p) => p.catch((e) => e)));
+          // Add delay between batch groups
+          await delay(500); // 500ms delay
           // Remove completed promises
           const completedIndex = await Promise.race(
             batchPromises.map((p, idx) => p.then(() => idx).catch(() => idx))
