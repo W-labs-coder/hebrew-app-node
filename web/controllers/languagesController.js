@@ -462,16 +462,38 @@ export const addSelectedLanguage = async (req, res) => {
         // Transform the key to match Shopify's expected format
         let shopifyKey = key;
 
-        // Handle product keys specifically - if the key starts with "product."
-        // add the "products." prefix that Shopify expects
+        // Handle namespaces correctly
         if (key.startsWith("product.")) {
-          // Fix the transformation to avoid duplicating "product" in the path
-          shopifyKey = "products." + key.substring(8); // Remove "product." prefix
-          console.log(`Transformed product key: ${key} → ${shopifyKey}, value: ${value}`);
+          // Special case for product keys - need products.product format for price keys
+          if (key.includes("price") || key.includes("on_sale")) {
+            shopifyKey = "products.product." + key.substring(8);
+            console.log(`Special product price key transformation: ${key} → ${shopifyKey}`);
+          } else {
+            // Standard product key transformation
+            shopifyKey = "products." + key.substring(8);
+            console.log(`Standard product key transformation: ${key} → ${shopifyKey}`);
+          }
         } else if (key.startsWith("newsletter.")) {
-          // Add namespace for newsletter keys
-          shopifyKey = "general." + key;
-          console.log(`Added namespace to newsletter key: ${key} → ${shopifyKey}`);
+          // Do NOT add general prefix - leave newsletter keys as-is
+          shopifyKey = key;
+          console.log(`Preserving newsletter key: ${key}`);
+        } else if (key.startsWith("accessibility.")) {
+          // Do NOT add any prefix - leave accessibility keys as-is
+          shopifyKey = key;
+          console.log(`Preserving accessibility key: ${key}`);
+        }
+
+        // Special case mappings for known problematic keys
+        const specialMappings = {
+          // Fix any specific key issues here
+          "products.price.from_price_html": "products.product.price.from_price_html",
+          "products.price.regular_price": "products.product.price.regular_price",
+          "products.on_sale": "products.product.on_sale"
+        };
+
+        if (specialMappings[shopifyKey]) {
+          shopifyKey = specialMappings[shopifyKey];
+          console.log(`Applied special mapping: ${key} → ${shopifyKey}`);
         }
 
         // Debug specific key categories
