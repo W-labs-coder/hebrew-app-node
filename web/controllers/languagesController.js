@@ -467,11 +467,15 @@ export const addSelectedLanguage = async (req, res) => {
           // Special case for product keys - need products.product format for price keys
           if (key.includes("price") || key.includes("on_sale")) {
             shopifyKey = "products.product." + key.substring(8);
-            console.log(`Special product price key transformation: ${key} → ${shopifyKey}`);
+            console.log(
+              `Special product price key transformation: ${key} → ${shopifyKey}`
+            );
           } else {
             // Standard product key transformation
             shopifyKey = "products." + key.substring(8);
-            console.log(`Standard product key transformation: ${key} → ${shopifyKey}`);
+            console.log(
+              `Standard product key transformation: ${key} → ${shopifyKey}`
+            );
           }
         } else if (key.startsWith("newsletter.")) {
           // Do NOT add general prefix - leave newsletter keys as-is
@@ -486,9 +490,11 @@ export const addSelectedLanguage = async (req, res) => {
         // Special case mappings for known problematic keys
         const specialMappings = {
           // Fix any specific key issues here
-          "products.price.from_price_html": "products.product.price.from_price_html",
-          "products.price.regular_price": "products.product.price.regular_price",
-          "products.on_sale": "products.product.on_sale"
+          "products.price.from_price_html":
+            "products.product.price.from_price_html",
+          "products.price.regular_price":
+            "products.product.price.regular_price",
+          "products.on_sale": "products.product.on_sale",
         };
 
         if (specialMappings[shopifyKey]) {
