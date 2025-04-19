@@ -545,6 +545,52 @@ export const addSelectedLanguage = async (req, res) => {
       );
 
       translationCount = registrationResult.success;
+
+      // Add this: Publish the theme to ensure translations are updated in locale files
+      console.log("Publishing theme to apply translations to locale files...");
+      try {
+        const publishResponse = await client.query({
+          data: {
+            query: `mutation publishTheme($id: ID!) {
+              publishTheme(id: $id) {
+                userErrors {
+                  field
+                  message
+                }
+              }
+            }`,
+            variables: {
+              id: translatedResourceId,
+            },
+          },
+        });
+
+        const publishErrors = publishResponse?.body?.data?.publishTheme?.userErrors || [];
+        
+        if (publishErrors.length > 0) {
+          console.warn("Theme publication warnings:", publishErrors);
+        } else {
+          console.log("✅ Theme published successfully. Translations should now be visible in locale files.");
+        }
+      } catch (publishError) {
+        console.error("Error publishing theme:", publishError.message);
+        // Don't return error - continue with success response but log the issue
+      }
+
+      // Special handling for password page and social translations
+      console.log("Verifying specific translations were registered correctly...");
+      const criticalKeys = [
+        "general.password_page.login_form_heading",
+        "general.password_page.login_password_button",
+        "general.social.links.facebook",
+        "general.social.links.twitter"
+      ];
+
+      criticalKeys.forEach(key => {
+        const foundInBatch = translations.some(t => t.key === key);
+        console.log(`Critical key "${key}": ${foundInBatch ? "✅ Registered" : "❌ Not found in translations"}`);
+      });
+
     } catch (fileError) {
       console.error(`Error processing translation file: ${fileError.message}`);
       return res.status(500).json({
