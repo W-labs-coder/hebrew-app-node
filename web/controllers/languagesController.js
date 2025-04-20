@@ -740,6 +740,37 @@ export const addSelectedLanguage = async (req, res) => {
       console.warn("Translations were added but the language might not be publicly available");
     }
 
+    // Check if the locale is already published
+    console.log(`Checking if locale '${selectedLocaleCode}' is published...`);
+    try {
+      const localeStatusResponse = await client.query({
+        data: {
+          query: `query {
+            shopLocales {
+              locale
+              published
+            }
+          }`,
+        },
+      });
+      
+      const currentLocales = localeStatusResponse?.body?.data?.shopLocales || [];
+      const localeStatus = currentLocales.find(locale => locale.locale === selectedLocaleCode);
+      
+      if (localeStatus) {
+        if (localeStatus.published) {
+          console.log(`✅ Locale '${selectedLocaleCode}' is already published and available in the storefront`);
+        } else {
+          console.log(`⚠️ Locale '${selectedLocaleCode}' is enabled but not published. This might be handled differently in newer Shopify API versions.`);
+        }
+      } else {
+        console.log(`⚠️ Could not find status for locale '${selectedLocaleCode}'`);
+      }
+      
+    } catch (statusError) {
+      console.error(`Error checking locale status: ${statusError.message}`);
+    }
+
     const subscription = await UserSubscription.findOne({ shop: user.shop })
       .sort({ createdAt: -1 })
       .populate("subscription");
