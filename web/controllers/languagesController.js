@@ -708,32 +708,37 @@ export const addSelectedLanguage = async (req, res) => {
     try {
       const publishLocaleResponse = await client.query({
         data: {
-          query: `mutation publishLocale($locale: String!) {
-            shopLocalePublish(locale: $locale) {
+          query: `mutation updateLocale($locale: String!, $shopLocale: ShopLocaleInput!) {
+            shopLocaleUpdate(locale: $locale, shopLocale: $shopLocale) {
               userErrors {
                 message
                 field
               }
               shopLocale {
-                locale
                 name
+                locale
+                primary
                 published
               }
             }
           }`,
           variables: {
             locale: selectedLocaleCode,
+            shopLocale: {
+              published: true
+            }
           },
         },
       });
 
-      const publishErrors = publishLocaleResponse?.body?.data?.shopLocalePublish?.userErrors || [];
+      const userErrors = publishLocaleResponse?.body?.data?.shopLocaleUpdate?.userErrors || [];
       
-      if (publishErrors.length > 0) {
-        console.error("Error publishing locale:", publishErrors);
+      if (userErrors.length > 0) {
+        console.error("Error publishing locale:", userErrors);
         console.warn("Translations were added but the language might not be publicly available");
       } else {
-        console.log(`✅ Locale '${selectedLocaleCode}' published successfully and is now available in the storefront`);
+        const publishedLocale = publishLocaleResponse?.body?.data?.shopLocaleUpdate?.shopLocale;
+        console.log(`✅ Locale '${publishedLocale.locale}' published successfully and is now available in the storefront`);
       }
     } catch (publishError) {
       console.error(`Error publishing locale: ${publishError.message}`);
