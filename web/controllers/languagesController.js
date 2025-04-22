@@ -230,6 +230,9 @@ export const addSelectedLanguage = async (req, res) => {
       // Use a queue approach for better control
       const queue = [...batches];
       let activePromises = []; // Changed to let instead of const
+      
+      // Create promiseStatus map outside the loop to make it available in the broader scope
+      const promiseStatus = new WeakMap();
 
       // Process queue until empty
       while (queue.length > 0 || activePromises.length > 0) {
@@ -307,7 +310,7 @@ export const addSelectedLanguage = async (req, res) => {
               }
 
               // Add delay between batches for rate limiting
-              // await delay(300);
+              await delay(300);
             } catch (error) {
               console.error(
                 `❌ Batch ${batchIndex + 1}/${
@@ -334,8 +337,7 @@ export const addSelectedLanguage = async (req, res) => {
             }
           })();
 
-          // Improve promise status tracking with WeakMap instead of modifying the promise
-          const promiseStatus = new WeakMap();
+          // Use the promise status tracking (now uses the outer-scope promiseStatus)
           promise.then(
             () => {
               promiseStatus.set(promise, "fulfilled");
@@ -357,7 +359,7 @@ export const addSelectedLanguage = async (req, res) => {
         );
 
         // Small delay to prevent CPU spinning
-        // await delay(100);
+        await delay(100);
       }
 
       // Wait for all remaining batches to complete
