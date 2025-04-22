@@ -222,24 +222,22 @@ export const generateAllThemeTranslations = async (req, res) => {
         
         console.log(`Split into ${contentChunks.length} batches for translation`);
 
-        // Create a mapping of keys to translated values
-        const translationsMap = {};
-        
-        // Process translation batches with concurrency control
+        // Collect all raw OpenAI responses
+        const rawTranslations = [];
+
         let currentBatch = 0;
-        const batchResults = await asyncPool(
+        await asyncPool(
           TRANSLATION_CONCURRENCY,
           contentChunks,
           async (chunk) => {
             currentBatch++;
             console.log(`Processing batch ${currentBatch}/${contentChunks.length} for ${theme.name}`);
-            
-            const keys = chunk.map(c => c.key);
+
             const values = chunk.map(c => c.value);
-            
+
             try {
               const translationResponse = await openai.chat.completions.create({
-                model: "gpt-4.1", // Using GPT-4o for better translations
+                model: "gpt-4.1",
                 messages: [
                   {
                     role: "system",
@@ -252,101 +250,32 @@ export const generateAllThemeTranslations = async (req, res) => {
                 ],
                 temperature: 0.3
               });
-              
-              const content = translationResponse.choices[0].message.content;
-              try {
-                // First attempt standard JSON parsing
-                let translatedTexts = [];
-                try {
-                  translatedTexts = JSON.parse(content);
-                } catch (initialParseError) {
-                  console.log(`Initial JSON parse failed for ${theme.name}, batch ${currentBatch}, attempting recovery...`);
-                  
-                  // Recovery attempt 1: Try to fix common formatting issues
-                  const cleanedContent = content
-                    .replace(/\n/g, '')  // Remove line breaks
-                    .replace(/"\s*,\s*"/g, '","')  // Fix spacing in commas
-                    .trim();
-                  
-                  // Check if content looks like array items but missing brackets
-                  if (cleanedContent.startsWith('"') && cleanedContent.endsWith('"')) {
-                    try {
-                      translatedTexts = JSON.parse(`[${cleanedContent}]`);
-                    } catch (fixError) {
-                      // Recovery attempt 2: Parse line by line for multi-line responses
-                      console.log(`Bracket fixing failed, trying line-by-line parsing for ${theme.name}`);
-                      translatedTexts = content
-                        .split('\n')
-                        .filter(line => line.trim())
-                        .map(line => {
-                          // Extract text between quotes if possible
-                          const match = line.match(/^"(.+)"[,]?$/);
-                          return match ? match[1] : line.trim().replace(/^['"]+|['"]+$/g, '');
-                        });
-                    }
-                  } else {
-                    throw initialParseError;
-                  }
-                }
-                
-                // Map keys to translated values
-                keys.forEach((key, index) => {
-                  if (translatedTexts[index]) {
-                    translationsMap[key] = translatedTexts[index];
-                  }
-                });
-                
-                return { success: true, count: keys.length };
-              } catch (jsonErr) {
-                console.error(`Failed to parse OpenAI response for ${theme.name}, batch ${currentBatch}:`, content);
-                // Fall back to using original values for this batch
-                keys.forEach((key, index) => {
-                  if (values[index]) {
-                    translationsMap[key] = values[index]; // Fall back to original text
-                  }
-                });
-                return { success: false, error: jsonErr.message, fallbackUsed: true };
-              }
+
+              // Save the raw content (do not parse or clean)
+              rawTranslations.push(translationResponse.choices[0].message.content);
+
+              return { success: true, count: values.length };
             } catch (err) {
               console.error(`OpenAI translation failed for ${theme.name}, batch ${currentBatch}:`, err);
+              // Optionally, push the original values or error message
+              rawTranslations.push(values);
               return { success: false, error: err.message };
             }
           }
         );
 
-        // Step 4: Generate the structured translation object
-        const structuredTranslations = {};
-        
-        for (const content of contentsToTranslate) {
-          if (translationsMap[content.key]) {
-            // Build the nested structure using dot notation keys
-            const keyParts = content.key.split('.');
-            let current = structuredTranslations;
-            
-            for (let i = 0; i < keyParts.length - 1; i++) {
-              if (!current[keyParts[i]]) {
-                current[keyParts[i]] = {};
-              }
-              current = current[keyParts[i]];
-            }
-            
-            // Fix: Use keyParts.length instead of keys.length
-            current[keyParts[keyParts.length - 1]] = translationsMap[content.key];
-          }
-        }
-
-        // Step 5: Save to file
+        // Step 4: Save the raw translations array to file
         await fs.writeFile(
-          filePath, 
-          JSON.stringify(structuredTranslations, null, 2), 
+          filePath,
+          JSON.stringify(rawTranslations, null, 2),
           'utf8'
         );
-        
-        console.log(`Saved translations for ${theme.name} to ${filePath}`);
+
+        console.log(`Saved raw translations for ${theme.name} to ${filePath}`);
         results.push({
           theme: theme.name,
           file: fileName,
-          translatedItems: Object.keys(translationsMap).length,
+          translatedBatches: rawTranslations.length,
           totalItems: contentsToTranslate.length
         });
         
