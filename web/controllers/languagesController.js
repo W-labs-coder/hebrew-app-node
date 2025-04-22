@@ -61,24 +61,24 @@ export const addSelectedLanguage = async (req, res) => {
       language.toLowerCase() === "hebrew" ? "he" : language.toLowerCase();
 
     // STEP 2: Fetch available locales
-    // const localesResponse = await client.query({
-    //   data: {
-    //     query: `query {
-    //       shopLocales {
-    //         locale
-    //         primary
-    //         published
-    //       }
-    //     }`,
-    //   },
-    // });
+    const localesResponse = await client.query({
+      data: {
+        query: `query {
+          shopLocales {
+            locale
+            primary
+            published
+          }
+        }`,
+      },
+    });
 
-    // const existingLocales = localesResponse?.body?.data?.shopLocales || [];
-    // console.log("Published Locales:", existingLocales);
+    const existingLocales = localesResponse?.body?.data?.shopLocales || [];
+    console.log("Published Locales:", existingLocales);
 
-    // const isLocaleEnabled = existingLocales.some(
-    //   (locale) => locale.locale === selectedLocaleCode
-    // );
+    const isLocaleEnabled = existingLocales.some(
+      (locale) => locale.locale === selectedLocaleCode
+    );
 
     // STEP 3: Enable the locale if not already enabled
     // if (!isLocaleEnabled) {
