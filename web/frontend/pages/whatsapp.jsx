@@ -233,7 +233,7 @@ const WhatsappSettings = () => {
 
   const handleDeleteContact = async (contactId) => {
     try {
-      setIsSubmitting(true);
+      setIsLoading(true); // <-- changed from setIsSubmitting(true)
       
       // First update local MongoDB
       const response = await fetch(`/api/settings/whatsapp/contacts/${contactId}`, {
@@ -273,7 +273,7 @@ const WhatsappSettings = () => {
       console.error('Error deleting contact:', error);
       toast.error(error.message || 'Failed to delete contact');
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false); // <-- changed from setIsSubmitting(false)
     }
   };
 
