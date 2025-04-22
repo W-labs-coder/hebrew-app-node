@@ -401,17 +401,11 @@ export const addSelectedLanguage = async (req, res) => {
 
       // Read and parse the JSON file
       const fileContent = await fs.readFile(translationFilePath, "utf8");
-      const nestedTranslationData = JSON.parse(fileContent);
+      const flatTranslationData = JSON.parse(fileContent);
 
-      // Create translations from the flattened JSON data
-      console.log(`Creating translations from flattened JSON data...`);
+      // Create translations from the flat JSON data
+      console.log(`Creating translations from flat JSON data...`);
       const translations = [];
-
-      // Directly use flattened translations for all available content
-      const flattenedData = flattenJSON(nestedTranslationData);
-      console.log(
-        `Flattened ${Object.keys(flattenedData).length} translation keys`
-      );
 
       // Create a set of Shopify keys for faster lookup
       const shopifyKeys = new Set(contentsToTranslate.map((c) => c.key));
@@ -422,7 +416,7 @@ export const addSelectedLanguage = async (req, res) => {
       });
 
       // Log analysis of keys
-      const jsonKeys = new Set(Object.keys(flattenedData));
+      const jsonKeys = new Set(Object.keys(flatTranslationData));
 
       // Find keys that exist in both sets
       const matchingKeys = new Set(
@@ -458,121 +452,26 @@ export const addSelectedLanguage = async (req, res) => {
       console.log([...onlyInJson].slice(0, 20).join("\n"));
 
       // Add translations for existing Shopify keys
-      for (const [key, value] of Object.entries(flattenedData)) {
-        // Transform the key to match Shopify's expected format
-        let shopifyKey = key;
-
-        // Handle namespaces correctly
-        if (key.startsWith("product.")) {
-          // Special case for product keys - need products.product format for price keys
-          if (key.includes("price") || key.includes("on_sale")) {
-            shopifyKey = "products.product." + key.substring(8);
-            console.log(
-              `Special product price key transformation: ${key} → ${shopifyKey}`
-            );
-          } else {
-            // Standard product key transformation
-            shopifyKey = "products." + key.substring(8);
-            console.log(
-              `Standard product key transformation: ${key} → ${shopifyKey}`
-            );
-          }
-        } else if (key.startsWith("newsletter.")) {
-          // Do NOT add general prefix - leave newsletter keys as-is
-          shopifyKey = key;
-          console.log(`Preserving newsletter key: ${key}`);
-        } else if (key.startsWith("accessibility.")) {
-          // Do NOT add any prefix - leave accessibility keys as-is
-          shopifyKey = key;
-          console.log(`Preserving accessibility key: ${key}`);
-        }
-
-        // Special case mappings for known problematic keys
-        const specialMappings = {
-          // Fix any specific key issues here
-          "products.price.from_price_html":
-            "products.product.price.from_price_html",
-          "products.price.regular_price":
-            "products.product.price.regular_price",
-          "products.on_sale": "products.product.on_sale",
-        };
-
-        if (specialMappings[shopifyKey]) {
-          shopifyKey = specialMappings[shopifyKey];
-          console.log(`Applied special mapping: ${key} → ${shopifyKey}`);
-        }
-
-        // Debug specific key categories
-        if (key.includes("localization") || key.includes("product")) {
-          console.log(
-            `Found key: ${key}, transformed: ${shopifyKey}, in shopifyKeys: ${shopifyKeys.has(
-              shopifyKey
-            )}`
-          );
-        }
-
+      for (const [key, value] of Object.entries(flatTranslationData)) {
         const validationResult = validateTranslation(key, value);
-        if (
-          !validationResult.isValid &&
-          (key.includes("localization") || key.includes("product"))
-        ) {
-          console.log(
-            `Invalid key: ${key}, reason: ${validationResult.reason}`
-          );
-        }
-
-        // Add right after your transformation checks
-        if (key.includes("product") || key.includes("general")) {
-          let transformedKey = key;
-          if (key.startsWith("product.")) {
-            transformedKey = "products." + key;
-          } else if (key.startsWith("products.")) {
-            // Already in correct format
-          } else if (key.includes("product") && !key.includes("products.")) {
-            // Handle other product-related keys that might need transformation
-            console.log(`Potential unhandled product key: ${key}`);
-          }
-
-          console.log(
-            `Product/General key: ${key} → ${transformedKey}, Value: ${value.substring(
-              0,
-              20
-            )}...`
-          );
-        }
 
         if (validationResult.isValid) {
-          // First check if the transformed key exists in Shopify
-          if (shopifyKeys.has(shopifyKey)) {
-            translations.push({
-              key: shopifyKey, // Use the transformed key for Shopify
-              locale: selectedLocaleCode,
-              value: validationResult.value,
-              translatableContentDigest: digestMap[shopifyKey],
-            });
-            console.log(`Registered existing key: ${shopifyKey}`);
-          }
-          // Then try the original key
-          else if (shopifyKeys.has(key)) {
+          if (shopifyKeys.has(key)) {
             translations.push({
               key,
               locale: selectedLocaleCode,
               value: validationResult.value,
               translatableContentDigest: digestMap[key],
             });
-            console.log(`Registered original key: ${key}`);
-          }
-          // If neither exists in Shopify, add it as a custom translation
-          else {
-            // For product keys, always use the transformed version
-            const finalKey = key.startsWith("product.") ? shopifyKey : key;
-
+            console.log(`Registered existing key: ${key}`);
+          } else {
+            // If not in Shopify, still add as custom translation (optional)
             translations.push({
-              key: finalKey,
+              key,
               locale: selectedLocaleCode,
               value: validationResult.value,
             });
-            console.log(`Registered custom key: ${finalKey}`);
+            console.log(`Registered custom key: ${key}`);
           }
         } else {
           console.warn(
@@ -583,7 +482,7 @@ export const addSelectedLanguage = async (req, res) => {
 
       // Add all missing Shopify keys (that aren't in the JSON file)
       for (const content of contentsToTranslate) {
-        if (!flattenedData.hasOwnProperty(content.key)) {
+        if (!flatTranslationData.hasOwnProperty(content.key)) {
           translations.push({
             key: content.key,
             locale: selectedLocaleCode,
@@ -595,7 +494,7 @@ export const addSelectedLanguage = async (req, res) => {
 
       console.log(
         `Created ${translations.length} translations to register (including ${
-          contentsToTranslate.length - Object.keys(flattenedData).length
+          contentsToTranslate.length - Object.keys(flatTranslationData).length
         } Shopify-only keys)`
       );
 
