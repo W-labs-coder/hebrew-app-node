@@ -222,8 +222,9 @@ export const generateAllThemeTranslations = async (req, res) => {
         
         console.log(`Split into ${contentChunks.length} batches for translation`);
 
-        // Collect all raw OpenAI responses
+        // Collect all raw OpenAI responses and keys
         const rawTranslations = [];
+        const keyBatches = [];
 
         let currentBatch = 0;
         await asyncPool(
@@ -234,6 +235,7 @@ export const generateAllThemeTranslations = async (req, res) => {
             console.log(`Processing batch ${currentBatch}/${contentChunks.length} for ${theme.name}`);
 
             const values = chunk.map(c => c.value);
+            const keys = chunk.map(c => c.key);
 
             try {
               const translationResponse = await openai.chat.completions.create({
@@ -251,27 +253,46 @@ export const generateAllThemeTranslations = async (req, res) => {
                 temperature: 0.3
               });
 
-              // Save the raw content (do not parse or clean)
+              // Save the raw content and keys for this batch
               rawTranslations.push(translationResponse.choices[0].message.content);
+              keyBatches.push(keys);
 
               return { success: true, count: values.length };
             } catch (err) {
               console.error(`OpenAI translation failed for ${theme.name}, batch ${currentBatch}:`, err);
               // Optionally, push the original values or error message
               rawTranslations.push(values);
+              keyBatches.push(keys);
               return { success: false, error: err.message };
             }
           }
         );
 
-        // Step 4: Save the raw translations array to file
+        // Step 4: Save the cleaned translations as a JSON object with Shopify keys
+        const translationsObject = {};
+        for (let i = 0; i < keyBatches.length; i++) {
+          const keys = keyBatches[i];
+          const raw = rawTranslations[i];
+          let translationsArray;
+          try {
+            translationsArray = JSON.parse(raw);
+          } catch (e) {
+            console.error("Failed to parse OpenAI response for batch", i, raw);
+            translationsArray = keys.map(() => ""); // fallback: empty strings
+          }
+          keys.forEach((key, idx) => {
+            translationsObject[key] = translationsArray[idx] || "";
+          });
+        }
+
+        // Save the object to file (cleaned, parsed)
         await fs.writeFile(
           filePath,
-          JSON.stringify(rawTranslations, null, 2),
+          JSON.stringify(translationsObject, null, 2),
           'utf8'
         );
 
-        console.log(`Saved raw translations for ${theme.name} to ${filePath}`);
+        console.log(`Saved cleaned translations for ${theme.name} to ${filePath}`);
         results.push({
           theme: theme.name,
           file: fileName,
