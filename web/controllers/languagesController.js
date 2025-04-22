@@ -315,17 +315,33 @@ export const addSelectedLanguage = async (req, res) => {
                 } failed with error:`,
                 error.message
               );
-              errorCount += batch.length;
+              
+              // Add retry logic for failed batches
+              if (!batch.retryCount || batch.retryCount < 3) {
+                // Mark batch for retry with exponential backoff
+                batch.retryCount = (batch.retryCount || 0) + 1;
+                const backoffTime = Math.pow(2, batch.retryCount) * 1000; // Exponential backoff: 2s, 4s, 8s
+                console.log(`📅 Scheduling retry #${batch.retryCount} for batch ${batchIndex + 1} in ${backoffTime/1000}s`);
+                
+                // Put the batch back in the queue with a delay
+                setTimeout(() => {
+                  queue.push(batch);
+                }, backoffTime);
+              } else {
+                console.error(`❌ Batch ${batchIndex + 1} failed after ${batch.retryCount} retries, giving up`);
+                errorCount += batch.length;
+              }
             }
           })();
 
-          // Add metadata to the promise to track its status
+          // Improve promise status tracking with WeakMap instead of modifying the promise
+          const promiseStatus = new WeakMap();
           promise.then(
             () => {
-              promise.status = "fulfilled";
+              promiseStatus.set(promise, "fulfilled");
             },
             () => {
-              promise.status = "rejected";
+              promiseStatus.set(promise, "rejected");
             }
           );
 
@@ -335,9 +351,9 @@ export const addSelectedLanguage = async (req, res) => {
         // Wait for any promise to complete
         await Promise.race(activePromises);
 
-        // Remove completed promises - now we can reassign because activePromises is 'let'
+        // More reliable way to filter out completed promises
         activePromises = activePromises.filter(
-          (p) => p.status !== "fulfilled" && p.status !== "rejected"
+          (p) => !promiseStatus.has(p) || (promiseStatus.get(p) !== "fulfilled" && promiseStatus.get(p) !== "rejected")
         );
 
         // Small delay to prevent CPU spinning
