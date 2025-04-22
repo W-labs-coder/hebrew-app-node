@@ -398,7 +398,7 @@ const WhatsappSettings = () => {
         </p>
       </div>
 
-      <form onSubmit={(e) => handleSubmit(e, 'general')}>
+      <form onSubmit={(e) => handleSubmit(e, "general")}>
         {/* Section 1 */}
         <div
           className="d-flex flex-column jcs"
@@ -799,7 +799,7 @@ const WhatsappSettings = () => {
         {/* End Section 1 */}
 
         {/* Section 2 */}
-       
+
         {/* End Section 2 */}
 
         {/* Section 3 - Default Messages */}
@@ -1170,15 +1170,17 @@ const WhatsappSettings = () => {
                                   ביטול
                                 </button>
                                 <button
-                                  type="button" 
+                                  type="button"
                                   className="btn btn-primary"
                                   onClick={handleAddOrUpdateContact}
                                   disabled={isLoading}
                                 >
                                   {isLoading ? (
                                     <span className="spinner-border spinner-border-sm" />
+                                  ) : editingContact ? (
+                                    "לְעַדְכֵּן"
                                   ) : (
-                                    editingContact ? "Update" : "Add"
+                                    "לְהוֹסִיף"
                                   )}
                                 </button>
                               </div>
