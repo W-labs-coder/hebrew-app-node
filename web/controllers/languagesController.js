@@ -60,7 +60,67 @@ export const addSelectedLanguage = async (req, res) => {
     const selectedLocaleCode =
       language.toLowerCase() === "hebrew" ? "he" : language.toLowerCase();
 
-   
+    // STEP 2: Fetch available locales
+    // const localesResponse = await client.query({
+    //   data: {
+    //     query: `query {
+    //       shopLocales {
+    //         locale
+    //         primary
+    //         published
+    //       }
+    //     }`,
+    //   },
+    // });
+
+    // const existingLocales = localesResponse?.body?.data?.shopLocales || [];
+    // console.log("Published Locales:", existingLocales);
+
+    // const isLocaleEnabled = existingLocales.some(
+    //   (locale) => locale.locale === selectedLocaleCode
+    // );
+
+    // STEP 3: Enable the locale if not already enabled
+    // if (!isLocaleEnabled) {
+    //   console.log(
+    //     `Locale '${selectedLocaleCode}' not enabled. Enabling it for translation...`
+    //   );
+
+    //   const enableLocaleResponse = await client.query({
+    //     data: {
+    //       query: `mutation enableLocale($locale: String!) {
+    //         shopLocaleEnable(locale: $locale) {
+    //           userErrors {
+    //             message
+    //             field
+    //           }
+    //           shopLocale {
+    //             locale
+    //             name
+    //             primary
+    //             published
+    //           }
+    //         }
+    //       }`,
+    //       variables: {
+    //         locale: selectedLocaleCode,
+    //       },
+    //     },
+    //   });
+
+    //   const userErrors = 
+    //     enableLocaleResponse?.body?.data?.shopLocaleEnable?.userErrors || [];
+
+    //   if (userErrors.length > 0) {
+    //     console.error("Error enabling locale:", userErrors);
+    //     return res.status(400).json({
+    //       error: "Locale could not be enabled for translation",
+    //       details: userErrors,
+    //     });
+    //   }
+
+    //   console.log(`Locale '${selectedLocaleCode}' enabled successfully.`);
+    // }
 
     // STEP 4: Fetch translatable content
     const translatableResourcesResponse = await client.query({
@@ -114,7 +174,7 @@ export const addSelectedLanguage = async (req, res) => {
 
     // Validate translation before adding it
     function validateTranslation(key, value) {
-      const MAX_LENGTH = 5000;
+      const MAX_LENGTH = 7000;
 
       // Check for maximum length
       if (value && value.length > MAX_LENGTH) {
