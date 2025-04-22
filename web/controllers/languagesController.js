@@ -258,10 +258,12 @@ export const addSelectedLanguage = async (req, res) => {
                       translations {
                         key
                         locale
+                        value   // Add this to see what values were actually registered
                       }
                       userErrors {
                         field
                         message
+                        translationKey  // Request the specific key that failed
                       }
                     }
                   }`,
@@ -323,13 +325,22 @@ export const addSelectedLanguage = async (req, res) => {
               if (!batch.retryCount || batch.retryCount < 3) {
                 // Mark batch for retry with exponential backoff
                 batch.retryCount = (batch.retryCount || 0) + 1;
-                const backoffTime = Math.pow(2, batch.retryCount) * 1000; // Exponential backoff: 2s, 4s, 8s
-                console.log(`📅 Scheduling retry #${batch.retryCount} for batch ${batchIndex + 1} in ${backoffTime/1000}s`);
+                const backoffTime = Math.pow(2, batch.retryCount) * 1000;
                 
-                // Put the batch back in the queue with a delay
-                setTimeout(() => {
-                  queue.push(batch);
-                }, backoffTime);
+                // Extract failed keys from userErrors
+                const failedKeys = userErrors.map(err => err.field?.replace('translations.', '') || '').filter(Boolean);
+                
+                // Create a new batch with only failed items
+                const failedItems = batch.filter((item, index) => failedKeys.includes(index.toString()) || failedKeys.includes(item.key));
+                
+                console.log(`📅 Scheduling retry #${batch.retryCount} for ${failedItems.length} failed items in ${backoffTime/1000}s`);
+                
+                // Put only failed items back in the queue
+                if (failedItems.length > 0) {
+                  setTimeout(() => {
+                    queue.push({...batch, items: failedItems, retryCount: batch.retryCount});
+                  }, backoffTime);
+                }
               } else {
                 console.error(`❌ Batch ${batchIndex + 1} failed after ${batch.retryCount} retries, giving up`);
                 errorCount += batch.length;
@@ -793,6 +804,44 @@ export const addSelectedLanguage = async (req, res) => {
     } catch (statusError) {
       console.error(`Error checking locale status: ${statusError.message}`);
     }
+
+    // Add after all batches have been processed:
+    console.log("Running verification of all translations...");
+    const missingTranslations = [];
+    const batchSize = 500;
+
+    // Check translations in batches to avoid query size limits
+    for (let i = 0; i < translations.length; i += batchSize) {
+      const keysToCheck = translations.slice(i, i + batchSize).map(t => t.key);
+      
+      const verifyResponse = await client.query({
+        data: `query {
+          translatableResource(resourceId: "${resourceId}") {
+            translations(locale: "${locale}", keys: [${keysToCheck.map(k => `"${k}"`).join(',')}]) {
+              key
+              value
+            }
+          }
+        }`
+      });
+      
+      const appliedKeys = new Set(verifyResponse?.body?.data?.translatableResource?.translations.map(t => t.key) || []);
+      
+      // Find missing keys in this batch
+      keysToCheck.forEach(key => {
+        if (!appliedKeys.has(key)) {
+          missingTranslations.push(key);
+        }
+      });
+      
+      console.log(`Verified batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(translations.length/batchSize)}: ${appliedKeys.size}/${keysToCheck.length} found`);
+    }
+
+    // Log detailed results
+    console.log(`=== MISSING TRANSLATIONS ===`);
+    console.log(`Total missing: ${missingTranslations.length} (${Math.round(missingTranslations.length/translations.length*100)}%)`);
+    console.log("Sample of missing keys:");
+    console.log(missingTranslations.slice(0, 20).join("\n"));
 
     const subscription = await UserSubscription.findOne({ shop: user.shop })
       .sort({ createdAt: -1 })
