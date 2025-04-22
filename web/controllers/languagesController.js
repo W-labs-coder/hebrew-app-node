@@ -222,7 +222,7 @@ export const addSelectedLanguage = async (req, res) => {
       let errorSamples = [];
 
       // Process batches with improved promise tracking
-      const CONCURRENCY = 5; // Reduced from 4 to prevent rate limiting
+      const CONCURRENCY = 8; // Reduced from 4 to prevent rate limiting
 
       // Add a delay function
       const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -230,9 +230,6 @@ export const addSelectedLanguage = async (req, res) => {
       // Use a queue approach for better control
       const queue = [...batches];
       let activePromises = []; // Changed to let instead of const
-      
-      // Create promiseStatus map outside the loop to make it available in the broader scope
-      const promiseStatus = new WeakMap();
 
       // Process queue until empty
       while (queue.length > 0 || activePromises.length > 0) {
@@ -258,12 +255,10 @@ export const addSelectedLanguage = async (req, res) => {
                       translations {
                         key
                         locale
-                        value   // Add this to see what values were actually registered
                       }
                       userErrors {
                         field
                         message
-                        translationKey  // Request the specific key that failed
                       }
                     }
                   }`,
@@ -312,7 +307,7 @@ export const addSelectedLanguage = async (req, res) => {
               }
 
               // Add delay between batches for rate limiting
-              await delay(300);
+              // await delay(300);
             } catch (error) {
               console.error(
                 `❌ Batch ${batchIndex + 1}/${
@@ -320,41 +315,17 @@ export const addSelectedLanguage = async (req, res) => {
                 } failed with error:`,
                 error.message
               );
-              
-              // Add retry logic for failed batches
-              if (!batch.retryCount || batch.retryCount < 3) {
-                // Mark batch for retry with exponential backoff
-                batch.retryCount = (batch.retryCount || 0) + 1;
-                const backoffTime = Math.pow(2, batch.retryCount) * 1000;
-                
-                // Extract failed keys from userErrors
-                const failedKeys = userErrors.map(err => err.field?.replace('translations.', '') || '').filter(Boolean);
-                
-                // Create a new batch with only failed items
-                const failedItems = batch.filter((item, index) => failedKeys.includes(index.toString()) || failedKeys.includes(item.key));
-                
-                console.log(`📅 Scheduling retry #${batch.retryCount} for ${failedItems.length} failed items in ${backoffTime/1000}s`);
-                
-                // Put only failed items back in the queue
-                if (failedItems.length > 0) {
-                  setTimeout(() => {
-                    queue.push({...batch, items: failedItems, retryCount: batch.retryCount});
-                  }, backoffTime);
-                }
-              } else {
-                console.error(`❌ Batch ${batchIndex + 1} failed after ${batch.retryCount} retries, giving up`);
-                errorCount += batch.length;
-              }
+              errorCount += batch.length;
             }
           })();
 
-          // Use the promise status tracking (now uses the outer-scope promiseStatus)
+          // Add metadata to the promise to track its status
           promise.then(
             () => {
-              promiseStatus.set(promise, "fulfilled");
+              promise.status = "fulfilled";
             },
             () => {
-              promiseStatus.set(promise, "rejected");
+              promise.status = "rejected";
             }
           );
 
@@ -364,13 +335,13 @@ export const addSelectedLanguage = async (req, res) => {
         // Wait for any promise to complete
         await Promise.race(activePromises);
 
-        // More reliable way to filter out completed promises
+        // Remove completed promises - now we can reassign because activePromises is 'let'
         activePromises = activePromises.filter(
-          (p) => !promiseStatus.has(p) || (promiseStatus.get(p) !== "fulfilled" && promiseStatus.get(p) !== "rejected")
+          (p) => p.status !== "fulfilled" && p.status !== "rejected"
         );
 
         // Small delay to prevent CPU spinning
-        await delay(100);
+        // await delay(100);
       }
 
       // Wait for all remaining batches to complete
@@ -804,44 +775,6 @@ export const addSelectedLanguage = async (req, res) => {
     } catch (statusError) {
       console.error(`Error checking locale status: ${statusError.message}`);
     }
-
-    // Add after all batches have been processed:
-    console.log("Running verification of all translations...");
-    const missingTranslations = [];
-    const batchSize = 500;
-
-    // Check translations in batches to avoid query size limits
-    for (let i = 0; i < translations.length; i += batchSize) {
-      const keysToCheck = translations.slice(i, i + batchSize).map(t => t.key);
-      
-      const verifyResponse = await client.query({
-        data: `query {
-          translatableResource(resourceId: "${resourceId}") {
-            translations(locale: "${locale}", keys: [${keysToCheck.map(k => `"${k}"`).join(',')}]) {
-              key
-              value
-            }
-          }
-        }`
-      });
-      
-      const appliedKeys = new Set(verifyResponse?.body?.data?.translatableResource?.translations.map(t => t.key) || []);
-      
-      // Find missing keys in this batch
-      keysToCheck.forEach(key => {
-        if (!appliedKeys.has(key)) {
-          missingTranslations.push(key);
-        }
-      });
-      
-      console.log(`Verified batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(translations.length/batchSize)}: ${appliedKeys.size}/${keysToCheck.length} found`);
-    }
-
-    // Log detailed results
-    console.log(`=== MISSING TRANSLATIONS ===`);
-    console.log(`Total missing: ${missingTranslations.length} (${Math.round(missingTranslations.length/translations.length*100)}%)`);
-    console.log("Sample of missing keys:");
-    console.log(missingTranslations.slice(0, 20).join("\n"));
 
     const subscription = await UserSubscription.findOne({ shop: user.shop })
       .sort({ createdAt: -1 })
