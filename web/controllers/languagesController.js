@@ -205,131 +205,69 @@ export const addSelectedLanguage = async (req, res) => {
       let errorCount = 0;
       let errorSamples = [];
 
-      // Process batches with improved promise tracking
-      const CONCURRENCY = 2; // Reduced from 4 to prevent rate limiting
+      const CONCURRENCY = 2; // Lowered for reliability
 
-      // Add a delay function
-      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-      // Use a queue approach for better control
-      const queue = [...batches];
-      let activePromises = []; // Changed to let instead of const
-
-      // Process queue until empty
-      while (queue.length > 0 || activePromises.length > 0) {
-        // Fill up to concurrency limit
-        while (queue.length > 0 && activePromises.length < CONCURRENCY) {
-          const batch = queue.shift();
-          const batchIndex = batches.indexOf(batch);
-
-          const promise = (async () => {
-            try {
-              // Log batch processing start
-              console.log(
-                `Processing batch ${batchIndex + 1}/${batches.length} with ${
-                  batch.length
-                } translations...`
-              );
-
-              // Register translations for this batch
-              const response = await client.query({
-                data: {
-                  query: `mutation translationsRegister($resourceId: ID!, $translations: [TranslationInput!]!) {
-                    translationsRegister(resourceId: $resourceId, translations: $translations) {
-                      translations {
-                        key
-                        locale
-                      }
-                      userErrors {
-                        field
-                        message
-                      }
-                    }
-                  }`,
-                  variables: {
-                    resourceId,
-                    translations: batch,
-                  },
-                },
-              });
-
-              const result = response?.body?.data?.translationsRegister;
-              const userErrors = result?.userErrors || [];
-
-              if (userErrors.length > 0) {
-                console.warn(
-                  `Batch ${batchIndex + 1}/${batches.length}: ${
-                    userErrors.length
-                  } errors out of ${batch.length} translations`
-                );
-
-                // Log some example errors
-                userErrors.slice(0, 3).forEach((err) => {
-                  console.warn(
-                    `Error: ${err.message} for field: ${err.field || "unknown"}`
-                  );
-                  // Log specific product keys that failed
-                  if (err.field && err.field.includes("product")) {
-                    console.warn(`Failed product key: ${err.field}`);
-                  }
-                });
-
-                // Collect sample errors for debugging
-                if (errorSamples.length < 10) {
-                  errorSamples = [...errorSamples, ...userErrors.slice(0, 5)];
-                }
-
-                errorCount += userErrors.length;
-                successCount += batch.length - userErrors.length;
-              } else {
-                console.log(
-                  `✅ Batch ${batchIndex + 1}/${
-                    batches.length
-                  }: Successfully registered ${batch.length} translations`
-                );
-                successCount += batch.length;
-              }
-
-              // Add delay between batches for rate limiting
-              // await delay(300);
-            } catch (error) {
-              console.error(
-                `❌ Batch ${batchIndex + 1}/${
-                  batches.length
-                } failed with error:`,
-                error.message
-              );
-              errorCount += batch.length;
-            }
-          })();
-
-          // Add metadata to the promise to track its status
-          promise.then(
-            () => {
-              promise.status = "fulfilled";
-            },
-            () => {
-              promise.status = "rejected";
-            }
+      // Define batch processor
+      async function processBatch(batch, batchIndex) {
+        try {
+          console.log(
+            `Processing batch ${batchIndex + 1}/${batches.length} with ${batch.length} translations...`
           );
+          const response = await client.query({
+            data: {
+              query: `mutation translationsRegister($resourceId: ID!, $translations: [TranslationInput!]!) {
+                translationsRegister(resourceId: $resourceId, translations: $translations) {
+                  translations {
+                    key
+                    locale
+                  }
+                  userErrors {
+                    field
+                    message
+                  }
+                }
+              }`,
+              variables: {
+                resourceId,
+                translations: batch,
+              },
+            },
+          });
 
-          activePromises.push(promise);
+          const result = response?.body?.data?.translationsRegister;
+          const userErrors = result?.userErrors || [];
+
+          if (userErrors.length > 0) {
+            console.warn(
+              `Batch ${batchIndex + 1}/${batches.length}: ${userErrors.length} errors out of ${batch.length} translations`
+            );
+            userErrors.slice(0, 3).forEach((err) => {
+              console.warn(
+                `Error: ${err.message} for field: ${err.field || "unknown"}`
+              );
+            });
+            if (errorSamples.length < 10) {
+              errorSamples = [...errorSamples, ...userErrors.slice(0, 5)];
+            }
+            errorCount += userErrors.length;
+            successCount += batch.length - userErrors.length;
+          } else {
+            console.log(
+              `✅ Batch ${batchIndex + 1}/${batches.length}: Successfully registered ${batch.length} translations`
+            );
+            successCount += batch.length;
+          }
+        } catch (error) {
+          console.error(
+            `❌ Batch ${batchIndex + 1}/${batches.length} failed with error:`,
+            error.message
+          );
+          errorCount += batch.length;
         }
-
-        // Wait for any promise to complete
-        await Promise.race(activePromises);
-
-        // Remove completed promises - now we can reassign because activePromises is 'let'
-        activePromises = activePromises.filter(
-          (p) => p.status !== "fulfilled" && p.status !== "rejected"
-        );
-
-        // Small delay to prevent CPU spinning
-        // await delay(100);
       }
 
-      // Wait for all remaining batches to complete
-      await Promise.all(activePromises);
+      // Run batches with concurrency and retry
+      await processBatchesWithConcurrency(batches, CONCURRENCY, processBatch);
 
       // Log summary
       console.log(`\n=== Translation Registration Summary ===`);
@@ -681,3 +619,31 @@ let untranslatedKeys = [];
     });
   }
 };
+
+// Helper: Retry a batch up to N times with delay
+async function retryBatch(fn, retries = 2, delayMs = 1000) {
+  let lastError;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (i < retries) await new Promise(res => setTimeout(res, delayMs));
+    }
+  }
+  throw lastError;
+}
+
+// Optimized batch processing with lower concurrency and retry
+async function processBatchesWithConcurrency(batches, CONCURRENCY, processBatch) {
+  let index = 0;
+  async function worker() {
+    while (index < batches.length) {
+      const current = index++;
+      await retryBatch(() => processBatch(batches[current], current));
+      // Optional: add a small delay to avoid rate limits
+      await new Promise(res => setTimeout(res, 300));
+    }
+  }
+  await Promise.all(Array(CONCURRENCY).fill(0).map(worker));
+}
