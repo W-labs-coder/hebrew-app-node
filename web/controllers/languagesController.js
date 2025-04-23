@@ -492,9 +492,9 @@ export const addSelectedLanguage = async (req, res) => {
       console.log(`Found ${inUseKeys.size} keys currently in use in the theme for locale '${selectedLocaleCode}'`);
 
       // Prepare translations ONLY for keys in use
-      const translations = [];
-      const missingKeys = [];
-      const untranslatedKeys = [];
+      translations.length = 0;
+      missingKeys.length = 0;
+      untranslatedKeys.length = 0;
 
       for (const content of contentsToTranslate) {
         if (!inUseKeys.has(content.key)) continue; // Skip keys not in use
