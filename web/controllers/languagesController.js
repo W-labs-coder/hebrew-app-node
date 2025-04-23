@@ -155,28 +155,6 @@ export const addSelectedLanguage = async (req, res) => {
       contentsToTranslate.map(c => c.key)
     );
 
-    // Helper to chunk an array
-    function chunkArray(array, size) {
-      const result = [];
-      for (let i = 0; i < array.length; i += size) {
-        result.push(array.slice(i, i + size));
-      }
-      return result;
-    }
-
-    // Function to flatten nested JSON
-    function flattenJSON(obj, prefix = "") {
-      return Object.keys(obj).reduce((acc, key) => {
-        const pre = prefix.length ? `${prefix}.${key}` : key;
-
-        if (typeof obj[key] === "object" && obj[key] !== null) {
-          Object.assign(acc, flattenJSON(obj[key], pre));
-        } else {
-          acc[pre] = obj[key];
-        }
-        return acc;
-      }, {});
-    }
 
     // Validate translation before adding it
     function validateTranslation(key, value) {
@@ -228,7 +206,7 @@ export const addSelectedLanguage = async (req, res) => {
       let errorSamples = [];
 
       // Process batches with improved promise tracking
-      const CONCURRENCY = 8; // Reduced from 4 to prevent rate limiting
+      const CONCURRENCY = 4; // Reduced from 4 to prevent rate limiting
 
       // Add a delay function
       const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -453,18 +431,18 @@ let untranslatedKeys = [];
       }
 
       // Optionally, add custom keys from JSON that are not in Shopify (not required for completeness)
-      for (const [key, value] of Object.entries(flatTranslationData)) {
-        if (!shopifyKeys.has(key)) {
-          const validationResult = validateTranslation(key, value);
-          if (validationResult.isValid) {
-            translations.push({
-              key,
-              locale: selectedLocaleCode,
-              value: validationResult.value,
-            });
-          }
-        }
-      }
+      // for (const [key, value] of Object.entries(flatTranslationData)) {
+      //   if (!shopifyKeys.has(key)) {
+      //     const validationResult = validateTranslation(key, value);
+      //     if (validationResult.isValid) {
+      //       translations.push({
+      //         key,
+      //         locale: selectedLocaleCode,
+      //         value: validationResult.value,
+      //       });
+      //     }
+      //   }
+      // }
 
       console.log(
         `Prepared ${translations.length} translations (including ${missingKeys.length} missing and ${untranslatedKeys.length} untranslated keys)`
