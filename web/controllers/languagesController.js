@@ -415,6 +415,11 @@ export const addSelectedLanguage = async (req, res) => {
         digestMap[content.key] = content.digest;
       });
 
+      let translations = [];
+let missingKeys = [];
+let untranslatedKeys = [];
+
+
       // Add translations for all Shopify keys (even if missing in JSON)
       for (const content of contentsToTranslate) {
         let value = flatTranslationData[content.key];
