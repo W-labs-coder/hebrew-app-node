@@ -185,6 +185,11 @@ const LanguageSection = ({ languages }) => {
   const saveLanguage = async (e) => {
     e.preventDefault();
     setIsLanguageLoading(true);
+    setTimeout(() => {
+      setIsLanguageSubmitSuccessful(true);
+      setIsLanguageLoading(false);
+      toast.success("Language Added Successfully");
+    }, 5000);
     try {
       const response = await fetch("/api/settings/add-selected-language", {
         method: "POST",
@@ -193,11 +198,7 @@ const LanguageSection = ({ languages }) => {
         },
         body: JSON.stringify({ language: selectedLanguage }),
       });
-       setTimeout(() => {
-         setIsLanguageSubmitSuccessful(true);
-         setIsLanguageLoading(false);
-         toast.success("Language Added Successfully");
-       }, 5000);
+       
       if (response.ok) {
         const data = await response.json();
         const language = data.user.selectedLanguage;
