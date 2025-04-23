@@ -621,7 +621,7 @@ let untranslatedKeys = [];
 };
 
 // Helper: Retry a batch up to N times with delay
-async function retryBatch(fn, retries = 2, delayMs = 300) {
+async function retryBatch(fn, retries = 2, delayMs = 0) {
   let lastError;
   for (let i = 0; i <= retries; i++) {
     try {
@@ -642,7 +642,7 @@ async function processBatchesWithConcurrency(batches, CONCURRENCY, processBatch)
       const current = index++;
       await retryBatch(() => processBatch(batches[current], current));
       // Optional: add a small delay to avoid rate limits
-      await new Promise(res => setTimeout(res, 300));
+      await new Promise(res => setTimeout(res, 0));
     }
   }
   await Promise.all(Array(CONCURRENCY).fill(0).map(worker));
