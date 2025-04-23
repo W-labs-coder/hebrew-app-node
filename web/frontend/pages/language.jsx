@@ -15,7 +15,9 @@ import FontsImage from "../components/svgs/FontsImage";
 
 export default function Language() {
   const [themes, setThemes] = useState([]);
-  const userPermissions = useSelector(state => state.auth.subscription?.subscription?.permissions);
+  const userPermissions = useSelector(
+    (state) => state.auth.subscription?.subscription?.permissions
+  );
 
   const fonts = [
     {
@@ -141,25 +143,20 @@ export default function Language() {
       value: "hebrew",
     },
   ];
-  
 
   return (
     <div className="dashboard-container">
       <Sidebar />
       <div className="main-content">
-        <Page >
+        <Page>
           <Layout>
             <Layout.Section>
               <div>
                 {userPermissions?.includes("language") && (
                   <LanguageSection languages={languages} />
                 )}
-                {userPermissions?.includes("buyNowText") && (
-                  <BuyNow />
-                )}
-                {userPermissions?.includes("fonts") && (
-                  <Fonts fonts={fonts} />
-                )}
+                {userPermissions?.includes("buyNowText") && <BuyNow />}
+                {userPermissions?.includes("fonts") && <Fonts fonts={fonts} />}
               </div>
             </Layout.Section>
           </Layout>
@@ -169,66 +166,68 @@ export default function Language() {
   );
 }
 
-const LanguageSection = ({  languages }) => {
-  
+const LanguageSection = ({ languages }) => {
   const user = useSelector((state) => state.auth.user);
-  const [selectedLanguage, setSelectedLanguage] = useState(user?.selectedLanguage || "");
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    user?.selectedLanguage || ""
+  );
   const [shop, setShop] = useState("");
-  const [isLanguageSubmitSuccessful, setIsLanguageSubmitSuccessful] = useState(false);
-  const [isLangaugeLoading, setIsLanguageLoading] = useState(false)
+  const [isLanguageSubmitSuccessful, setIsLanguageSubmitSuccessful] =
+    useState(false);
+  const [isLangaugeLoading, setIsLanguageLoading] = useState(false);
 
   const handleLanguageChange = (e) => {
     setSelectedLanguage(e.target.value);
     setIsLanguageSubmitSuccessful(false); // Reset when theme changes
   };
- 
-const dispatch = useDispatch() 
-const saveLanguage = async (e) => {
-  e.preventDefault();
-  setIsLanguageLoading(true)
-  try {
-    const response = await fetch("/api/settings/add-selected-language", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ language: selectedLanguage }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      const language = data.user.selectedLanguage;
-      setTimeout(() => {
-        setIsLanguageSubmitSuccessful(true);
-      setIsLanguageLoading(false)
-      toast.success("Language Added Successfully")
-      }, 5000)
-      setSelectedLanguage(language);
-      setShop(data.user.shop);
-      dispatch(login({ user: data.user, subscription:data.subscription }));
-      
-    } else {
-      console.error("Failed to add theme");
+
+  const dispatch = useDispatch();
+  const saveLanguage = async (e) => {
+    e.preventDefault();
+    setIsLanguageLoading(true);
+    try {
+      const response = await fetch("/api/settings/add-selected-language", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ language: selectedLanguage }),
+      });
+       setTimeout(() => {
+         setIsLanguageSubmitSuccessful(true);
+         setIsLanguageLoading(false);
+         toast.success("Language Added Successfully");
+       }, 5000);
+      if (response.ok) {
+        const data = await response.json();
+        const language = data.user.selectedLanguage;
+       
+        setSelectedLanguage(language);
+        setShop(data.user.shop);
+        dispatch(login({ user: data.user, subscription: data.subscription }));
+      } else {
+        console.error("Failed to add theme");
+        setIsLanguageSubmitSuccessful(false);
+        setIsLanguageLoading(false);
+        toast.error("Error Adding Language");
+      }
+    } catch (error) {
+      console.error("Error adding theme:", error);
       setIsLanguageSubmitSuccessful(false);
       setIsLanguageLoading(false);
       toast.error("Error Adding Language");
     }
-  } catch (error) {
-    console.error("Error adding theme:", error);
-    setIsLanguageSubmitSuccessful(false);
-    setIsLanguageLoading(false)
-    toast.error("Error Adding Language");
-  }
-};
+  };
 
-const getLanguageEditorUrl = () => {
-  const shopifyAdmin = "https://admin.shopify.com/store";
-  // const themeIdMatch = selectedTheme.match(/\/(\d+)$/);
-  // const themeId = themeIdMatch ? themeIdMatch[1] : "";
-  return `${shopifyAdmin}/${shop.replace(
-    ".myshopify.com",
-    ""
-  )}/settings/languages`;
-};
+  const getLanguageEditorUrl = () => {
+    const shopifyAdmin = "https://admin.shopify.com/store";
+    // const themeIdMatch = selectedTheme.match(/\/(\d+)$/);
+    // const themeId = themeIdMatch ? themeIdMatch[1] : "";
+    return `${shopifyAdmin}/${shop.replace(
+      ".myshopify.com",
+      ""
+    )}/settings/languages`;
+  };
 
   return (
     <section className="rtl-section">
@@ -350,16 +349,15 @@ const getLanguageEditorUrl = () => {
   );
 };
 
-
 const BuyNow = () => {
   const user = useSelector((state) => state.auth.user);
   const [buyNow, setBuyNow] = useState({
     buyNowText: user?.buyNowText || "",
     buyNowSize: user?.buyNowSize || "",
   });
-  
+
   const dispatch = useDispatch();
-  
+
   const [isBuyNowSubmitSuccessful, setIsBuyNowSubmitSuccessful] =
     useState(false);
   const [isBuyNowLoading, setIsBuyNowLoading] = useState(false);
@@ -372,7 +370,6 @@ const BuyNow = () => {
     }));
     setIsBuyNowSubmitSuccessful(false);
   };
-  
 
   const saveBuyNow = async (e) => {
     e.preventDefault();
@@ -388,16 +385,16 @@ const BuyNow = () => {
 
       if (response.ok) {
         const data = await response.json();
-        dispatch(login({ user: data.user, subscription:data.subscription }));
+        dispatch(login({ user: data.user, subscription: data.subscription }));
         setIsBuyNowSubmitSuccessful(true);
-        
-        toast.success('Buy Now Text Added Successfully')
+
+        toast.success("Buy Now Text Added Successfully");
       } else {
         console.error("Failed to update Buy Now");
       }
     } catch (error) {
       console.error("Error updating Buy Now:", error);
-      toast.error('Could not add buy now text')
+      toast.error("Could not add buy now text");
     } finally {
       setIsBuyNowLoading(false);
     }
@@ -405,12 +402,12 @@ const BuyNow = () => {
 
   const getBuyNowEditor = () => {
     const shopifyAdmin = "https://admin.shopify.com/store";
-     const themeIdMatch = user?.selectedTheme.match(/\/(\d+)$/);
-     const themeId = themeIdMatch ? themeIdMatch[1] : "";
-     return `${shopifyAdmin}/${user?.shop.replace(
-       ".myshopify.com",
-       ""
-     )}/themes/${themeId}/editor?context=apps`;
+    const themeIdMatch = user?.selectedTheme.match(/\/(\d+)$/);
+    const themeId = themeIdMatch ? themeIdMatch[1] : "";
+    return `${shopifyAdmin}/${user?.shop.replace(
+      ".myshopify.com",
+      ""
+    )}/themes/${themeId}/editor?context=apps`;
   };
 
   return (
@@ -426,7 +423,6 @@ const BuyNow = () => {
           backgroundColor: "#FBFBFB",
         }}
       >
-        
         <form onSubmit={saveBuyNow}>
           <Input
             type="text"
@@ -475,24 +471,19 @@ const BuyNow = () => {
   );
 };
 
-
-const Fonts = ({fonts}) => {
+const Fonts = ({ fonts }) => {
   const user = useSelector((state) => state.auth.user);
-  const [font, setFont] = useState(
-    user?.font || "",
-  );
+  const [font, setFont] = useState(user?.font || "");
 
   const dispatch = useDispatch();
 
-  const [isFontSubmitSuccessful, setIsFontSubmitSuccessful] =
-    useState(false);
+  const [isFontSubmitSuccessful, setIsFontSubmitSuccessful] = useState(false);
   const [isFontLoading, setIsFontLoading] = useState(false);
 
   const handleFontChange = (e) => {
     const { name, value } = e.target;
-    setFont(value)
+    setFont(value);
   };
-   
 
   const saveFont = async (e) => {
     e.preventDefault();
@@ -508,7 +499,7 @@ const Fonts = ({fonts}) => {
 
       if (response.ok) {
         const data = await response.json();
-        dispatch(login({ user: data.user, subscription:data.subscription }));
+        dispatch(login({ user: data.user, subscription: data.subscription }));
         setIsFontSubmitSuccessful(true);
 
         toast.success("Font Added Successfully");
@@ -536,7 +527,7 @@ const Fonts = ({fonts}) => {
   return (
     <section className="rtl-section">
       <p className="fw700 fs18">התאמת גופנים</p>
-      <p className="fw500 fs14" style={{color : '#777 !important'}}>
+      <p className="fw500 fs14" style={{ color: "#777 !important" }}>
         בחר את סגנון הגופן המועדף עליך לקריאה אופטימלית
       </p>
       <div
