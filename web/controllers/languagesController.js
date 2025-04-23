@@ -206,7 +206,7 @@ export const addSelectedLanguage = async (req, res) => {
       let errorSamples = [];
 
       // Process batches with improved promise tracking
-      const CONCURRENCY = 4; // Reduced from 4 to prevent rate limiting
+      const CONCURRENCY = 2; // Reduced from 4 to prevent rate limiting
 
       // Add a delay function
       const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
