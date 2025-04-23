@@ -478,50 +478,7 @@ let untranslatedKeys = [];
       }
 
       // Fetch the actual keys in use for this theme and locale
-      const localeResponse = await client.query({
-        data: `query {
-          translatableResource(resourceId: "${themeId}") {
-            resourceId
-            translations(locale: "${selectedLocaleCode}") {
-              key
-              value
-            }
-          }
-        }`,
-      });
-
-      const inUseKeys = new Set(
-        (localeResponse?.body?.data?.translatableResource?.translations || []).map(t => t.key)
-      );
-
-      console.log(`Found ${inUseKeys.size} keys currently in use in the theme for locale '${selectedLocaleCode}'`);
-
-      // Prepare translations ONLY for keys in use
-      translations.length = 0;
-      missingKeys.length = 0;
-      untranslatedKeys.length = 0;
-
-      for (const content of contentsToTranslate) {
-        if (!inUseKeys.has(content.key)) continue; // Skip keys not in use
-
-        let value = flatTranslationData[content.key];
-        if (value === undefined || value === null || value === "") {
-          value = content.value;
-          missingKeys.push(content.key);
-        }
-        if (value === content.value) {
-          untranslatedKeys.push(content.key);
-        }
-        const validationResult = validateTranslation(content.key, value);
-        if (validationResult.isValid) {
-          translations.push({
-            key: content.key,
-            locale: selectedLocaleCode,
-            value: validationResult.value,
-            translatableContentDigest: content.digest,
-          });
-        }
-      }
+      
 
       console.log(
         `Prepared ${translations.length} translations for keys in use (including ${missingKeys.length} missing and ${untranslatedKeys.length} untranslated)`
