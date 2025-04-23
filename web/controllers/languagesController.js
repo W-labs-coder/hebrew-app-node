@@ -427,7 +427,7 @@ let untranslatedKeys = [];
       console.log("Verifying translations were actually applied...");
       try {
         // Wait a moment for translations to be processed
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         // Fetch the actual translations from the theme using the correct query structure
         const localeResponse = await client.query({
@@ -642,7 +642,7 @@ async function processBatchesWithConcurrency(batches, CONCURRENCY, processBatch)
       const current = index++;
       await retryBatch(() => processBatch(batches[current], current));
       // Optional: add a small delay to avoid rate limits
-      await new Promise(res => setTimeout(res, 0));
+    
     }
   }
   await Promise.all(Array(CONCURRENCY).fill(0).map(worker));
