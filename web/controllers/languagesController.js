@@ -406,6 +406,8 @@ export const addSelectedLanguage = async (req, res) => {
       // Create translations from the flat JSON data
       console.log(`Creating translations from flat JSON data...`);
       const translations = [];
+      const missingKeys = [];
+      const untranslatedKeys = [];
 
       // Create a set of Shopify keys for faster lookup
       const shopifyKeys = new Set(contentsToTranslate.map((c) => c.key));
@@ -415,88 +417,62 @@ export const addSelectedLanguage = async (req, res) => {
         digestMap[content.key] = content.digest;
       });
 
-      // Log analysis of keys
-      const jsonKeys = new Set(Object.keys(flatTranslationData));
-
-      // Find keys that exist in both sets
-      const matchingKeys = new Set(
-        [...jsonKeys].filter((k) => shopifyKeys.has(k))
-      );
-
-      // Find keys that exist only in JSON but not in Shopify
-      const onlyInJson = new Set(
-        [...jsonKeys].filter((k) => !shopifyKeys.has(k))
-      );
-
-      // Find keys that exist only in Shopify but not in JSON
-      const onlyInShopify = new Set(
-        [...shopifyKeys].filter((k) => !jsonKeys.has(k))
-      );
-
-      // Log the analysis
-      console.log(`=== KEY OVERLAP ANALYSIS ===`);
-      console.log(`Total JSON keys: ${jsonKeys.size}`);
-      console.log(`Total Shopify translatable keys: ${shopifyKeys.size}`);
-      console.log(
-        `Keys that match exactly: ${matchingKeys.size} (${Math.round(
-          (matchingKeys.size / shopifyKeys.size) * 100
-        )}%)`
-      );
-      console.log(`Keys only in JSON file: ${onlyInJson.size}`);
-      console.log(`Keys only in Shopify: ${onlyInShopify.size}`);
-
-      console.log(`\n=== SAMPLE KEYS ONLY IN SHOPIFY ===`);
-      console.log([...onlyInShopify].slice(0, 20).join("\n"));
-
-      console.log(`\n=== SAMPLE KEYS ONLY IN JSON ===`);
-      console.log([...onlyInJson].slice(0, 20).join("\n"));
-
-      // Add translations for existing Shopify keys
-      for (const [key, value] of Object.entries(flatTranslationData)) {
-        const validationResult = validateTranslation(key, value);
-
+      // Add translations for all Shopify keys (even if missing in JSON)
+      for (const content of contentsToTranslate) {
+        let value = flatTranslationData[content.key];
+        if (value === undefined || value === null || value === "") {
+          // Fallback: use original value if translation is missing
+          value = content.value;
+          missingKeys.push(content.key);
+        }
+        if (value === content.value) {
+          untranslatedKeys.push(content.key);
+        }
+        const validationResult = validateTranslation(content.key, value);
         if (validationResult.isValid) {
-          if (shopifyKeys.has(key)) {
-            translations.push({
-              key,
-              locale: selectedLocaleCode,
-              value: validationResult.value,
-              translatableContentDigest: digestMap[key],
-            });
-            console.log(`Registered existing key: ${key}`);
-          } else {
-            // If not in Shopify, still add as custom translation (optional)
-            translations.push({
-              key,
-              locale: selectedLocaleCode,
-              value: validationResult.value,
-            });
-            console.log(`Registered custom key: ${key}`);
-          }
+          translations.push({
+            key: content.key,
+            locale: selectedLocaleCode,
+            value: validationResult.value,
+            translatableContentDigest: content.digest,
+          });
         } else {
           console.warn(
-            `Skipping invalid translation for key "${key}": ${validationResult.reason}`
+            `Skipping invalid translation for key "${content.key}": ${validationResult.reason}`
           );
         }
       }
 
-      // Add all missing Shopify keys (that aren't in the JSON file)
-      for (const content of contentsToTranslate) {
-        if (!flatTranslationData.hasOwnProperty(content.key)) {
-          translations.push({
-            key: content.key,
-            locale: selectedLocaleCode,
-            value: content.value, // Use original value or translate it
-            translatableContentDigest: content.digest,
-          });
+      // Optionally, add custom keys from JSON that are not in Shopify (not required for completeness)
+      for (const [key, value] of Object.entries(flatTranslationData)) {
+        if (!shopifyKeys.has(key)) {
+          const validationResult = validateTranslation(key, value);
+          if (validationResult.isValid) {
+            translations.push({
+              key,
+              locale: selectedLocaleCode,
+              value: validationResult.value,
+            });
+          }
         }
       }
 
       console.log(
-        `Created ${translations.length} translations to register (including ${
-          contentsToTranslate.length - Object.keys(flatTranslationData).length
-        } Shopify-only keys)`
+        `Prepared ${translations.length} translations (including ${missingKeys.length} missing and ${untranslatedKeys.length} untranslated keys)`
       );
+
+      if (missingKeys.length > 0) {
+        console.warn(
+          `WARNING: ${missingKeys.length} keys had no translation and used fallback values.`
+        );
+        console.warn("Sample missing keys:", missingKeys.slice(0, 10));
+      }
+      if (untranslatedKeys.length > 0) {
+        console.warn(
+          `WARNING: ${untranslatedKeys.length} keys are untranslated (same as original value).`
+        );
+        console.warn("Sample untranslated keys:", untranslatedKeys.slice(0, 10));
+      }
 
       // Register all translations
       let translatedResourceId = themeId;
