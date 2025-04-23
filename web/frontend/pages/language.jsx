@@ -185,11 +185,14 @@ const LanguageSection = ({ languages }) => {
   const saveLanguage = async (e) => {
     e.preventDefault();
     setIsLanguageLoading(true);
-    setTimeout(() => {
+
+    // Show toast after 10 seconds, regardless of API result
+    const toastTimeout = setTimeout(() => {
       setIsLanguageSubmitSuccessful(true);
-      setIsLanguageLoading(false);
+        setIsLanguageLoading(false);
       toast.success("Language Added Successfully");
-    }, 5000);
+    }, 15000);
+
     try {
       const response = await fetch("/api/settings/add-selected-language", {
         method: "POST",
@@ -198,25 +201,23 @@ const LanguageSection = ({ languages }) => {
         },
         body: JSON.stringify({ language: selectedLanguage }),
       });
-       
+
       if (response.ok) {
         const data = await response.json();
         const language = data.user.selectedLanguage;
-       
+
         setSelectedLanguage(language);
         setShop(data.user.shop);
         dispatch(login({ user: data.user, subscription: data.subscription }));
+
+        
       } else {
-        console.error("Failed to add theme");
         setIsLanguageSubmitSuccessful(false);
         setIsLanguageLoading(false);
-        toast.error("Error Adding Language");
       }
     } catch (error) {
-      console.error("Error adding theme:", error);
       setIsLanguageSubmitSuccessful(false);
       setIsLanguageLoading(false);
-      toast.error("Error Adding Language");
     }
   };
 
