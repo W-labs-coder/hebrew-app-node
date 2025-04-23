@@ -171,7 +171,7 @@ const LanguageSection = ({ languages }) => {
   const [selectedLanguage, setSelectedLanguage] = useState(
     user?.selectedLanguage || ""
   );
-  const [shop, setShop] = useState("");
+  const [shop, setShop] = useState(user?.shop);
   const [isLanguageSubmitSuccessful, setIsLanguageSubmitSuccessful] =
     useState(false);
   const [isLangaugeLoading, setIsLanguageLoading] = useState(false);
