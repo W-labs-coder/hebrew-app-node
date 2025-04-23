@@ -149,6 +149,12 @@ export const addSelectedLanguage = async (req, res) => {
       (content) => content.value && content.value.trim() !== ""
     );
 
+    // Log ALL keys to inspect what Shopify expects
+    console.log(
+      "ALL contentsToTranslate keys:",
+      contentsToTranslate.map(c => c.key)
+    );
+
     // Helper to chunk an array
     function chunkArray(array, size) {
       const result = [];
