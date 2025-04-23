@@ -205,7 +205,7 @@ export const addSelectedLanguage = async (req, res) => {
       let errorCount = 0;
       let errorSamples = [];
 
-      const CONCURRENCY = 2; // Lowered for reliability
+      const CONCURRENCY = 1; // Lowered for reliability
 
       // Define batch processor
       async function processBatch(batch, batchIndex) {
