@@ -621,7 +621,7 @@ let untranslatedKeys = [];
 };
 
 // Helper: Retry a batch up to N times with delay
-async function retryBatch(fn, retries = 2, delayMs = 1000) {
+async function retryBatch(fn, retries = 2, delayMs = 300) {
   let lastError;
   for (let i = 0; i <= retries; i++) {
     try {
