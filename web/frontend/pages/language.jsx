@@ -197,12 +197,15 @@ const saveLanguage = async (e) => {
     if (response.ok) {
       const data = await response.json();
       const language = data.user.selectedLanguage;
+      setTimeout(() => {
+        setIsLanguageSubmitSuccessful(true);
+      setIsLanguageLoading(false)
+      toast.success("Language Added Successfully")
+      }, 5000)
       setSelectedLanguage(language);
       setShop(data.user.shop);
       dispatch(login({ user: data.user, subscription:data.subscription }));
-      setIsLanguageSubmitSuccessful(true);
-      setIsLanguageLoading(false)
-      toast.success("Language Added Successfully")
+      
     } else {
       console.error("Failed to add theme");
       setIsLanguageSubmitSuccessful(false);
