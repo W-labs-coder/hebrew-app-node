@@ -16,7 +16,7 @@ import Css2 from "../components/svgs/Css2";
 import Training2 from "../components/svgs/Training2";
 import { useDispatch } from "react-redux";
 import { login } from "../store/slices/authSlice";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
