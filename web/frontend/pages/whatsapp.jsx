@@ -295,7 +295,7 @@ const WhatsappSettings = () => {
         }
 
         if (!validatePhoneNumber(newContact.phone)) {
-          toast.error("Invalid phone number format");
+          toast.error("פורמט מספר טלפון לא חוקי");
           return false;
         }
 
@@ -352,7 +352,7 @@ const WhatsappSettings = () => {
         }
 
         toast.success(
-          editingContact ? "Contact updated successfully" : "Contact added successfully"
+          editingContact ? "איש הקשר עודכן בהצלחה" : "איש הקשר נוסף בהצלחה"
         );
 
         return true;
@@ -362,7 +362,7 @@ const WhatsappSettings = () => {
         
         if (retryCount < maxRetries - 1) {
           retryCount++;
-          toast.info(`Retrying... Attempt ${retryCount + 1} of ${maxRetries}`);
+          toast.info(`מנסה שוב... ניסיון ${retryCount + 1} of ${maxRetries}`);
           await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
           return await attemptUpdate();
         }
@@ -372,7 +372,7 @@ const WhatsappSettings = () => {
           window.location.href = "/auth";
           return;
         }
-        toast.error(error.message || "Failed to save contact");
+        toast.error(error.message || "שמירת איש הקשר נכשלה");
         return false;
       }
     };
