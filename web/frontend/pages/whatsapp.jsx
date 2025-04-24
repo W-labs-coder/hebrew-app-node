@@ -302,11 +302,11 @@ const WhatsappSettings = () => {
         let updatedContacts;
         if (editingContact) {
           updatedContacts = contacts.map((c) =>
-            c.id === editingContact.id ? { ...newContact, _id: c._id } : c
+            c._id === editingContact._id ? { ...newContact, _id: c._id } : c
           );
         } else {
           const newId = new Date().getTime().toString();
-          updatedContacts = [...contacts, { ...newContact, _id: newId }];
+          updatedContacts = [...contacts, { ...newContact }];
         }
 
         const updatedFormData = {
