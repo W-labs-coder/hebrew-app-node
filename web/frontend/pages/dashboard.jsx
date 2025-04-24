@@ -250,6 +250,7 @@ const SettingsCategorySection = ({ permissions }) => {
 
 const CategoryCard = ({ content }) => {
   const SvgIcon = content.icon;
+  const navigate = useNavigate()
   const handleNav = (link) => {
     navigate(link);
   };
