@@ -247,7 +247,7 @@ const SettingsCategorySection = ({ permissions }) => {
   );
 };
 
-const navigate = useNavigate();
+
 const CategoryCard = ({ content }) => {
   const SvgIcon = content.icon;
   const handleNav = (link) => {
