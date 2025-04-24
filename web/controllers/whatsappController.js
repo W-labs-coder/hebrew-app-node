@@ -548,7 +548,7 @@ export const deleteWhatsappContact = async (req, res) => {
     }
 
     // Remove the contact
-    user.contacts = user.contacts.filter(contact => contact.id.toString() !== id);
+    user.contacts = user.contacts.filter(contact => contact._id.toString() !== id);
     
     // Save the updated user
     await user.save();

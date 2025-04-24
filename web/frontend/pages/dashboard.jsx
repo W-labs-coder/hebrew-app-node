@@ -26,7 +26,7 @@ const categoryContents = [
     icon: Rtl2,
     content: "שנה את כיוון התצוגה של האתר שלך מימין לשמאל בלחיצה אחת!",
     button: "הגדרת RTL",
-    link: "rtl",
+    link: "/rtl",
     permission:'rtl'
   },
   {
@@ -35,7 +35,7 @@ const categoryContents = [
     content:
       "תרגם את האתר שלך לעברית באופן מיידי, כך שהקהל שלך יוכל לגלוש בשפה המועדפת עליו.",
     button: "שפת הגדרה",
-    link: "language",
+    link: "/language",
     permission: "language",
   },
   {
@@ -44,7 +44,7 @@ const categoryContents = [
     content:
       "ברוכים הבאים לחנות שלנו! אנחנו כאן כדי לעזור לכם בכל שאלה. אל תהססו לפנות אלינו. שתהיה לכם חווית קנייה מהנה!",
     button: "הגדר עכשיו",
-    link: "whatsapp",
+    link: "/whatsapp",
     permission: "whatsapp",
   },
   {
@@ -53,7 +53,7 @@ const categoryContents = [
     content:
       "שילוב סמלי שיטות תשלום מקומיות (ויזה, ביט, וכו') לאתר שלך, בהתאמה לאופציות התשלום המתקבלות - הכל בלחיצה אחת!",
     button: "הגדרת אמצעי תשלום",
-    link: "payment",
+    link: "/payment",
     permission: "payment",
   },
 
@@ -63,7 +63,7 @@ const categoryContents = [
     content:
       "ודאו שהלקוחות שלכם מקבלים התראות בעברית - התאימו את הטקסט לשפה ולמותג שלכם!",
     button: "הגדרות הודעות",
-    link: "alert",
+    link: "/alert",
     permission: "notifications",
   },
   {
@@ -72,7 +72,7 @@ const categoryContents = [
     content:
       "הגדר את שעות השבת של החנות שלך לסגירה ופתיחה אוטומטית, תוך שמירה על לקוחות מעודכנים לגבי לוח הזמנים שלך.",
     button: "קבע שבת",
-    link: "sabbath",
+    link: "/sabbath",
     permission: "sabbathMode",
   },
 
@@ -82,7 +82,7 @@ const categoryContents = [
     content:
       "הכלי שלנו לכתובת אוטומטית מעדכן את כתובות ההזמנה הנכנסות בהתאם לקלט של הלקוח, ומייעל את תהליך עיבוד ההזמנות שלך.",
     button: "הגדרת מיקוד אוטומטי",
-    link: "automatic-focus",
+    link: "/automatic-focus",
     permission: "zipCode",
   },
   {
@@ -91,7 +91,7 @@ const categoryContents = [
     content:
       "הפעל תוסף נגישות כדי לשפר את השימושיות של האתר שלך עבור משתמשים עם מוגבלויות. אפשרות בלחיצה אחת להצהרת נגישות כלולה!",
     button: "הגדרת נגישות",
-    link: "accessibility",
+    link: "/accessibility",
     permission: "accessibility",
   },
   {
@@ -100,7 +100,7 @@ const categoryContents = [
     content:
       "התאמת הגדרות עיצוב מתקדמות - מיועדות למשתמשים בעלי ידע טכני בלבד.",
     button: "עבור לדף ההנחיות",
-    link: "training",
+    link: "/training",
     permission: "training",
   },
   // {

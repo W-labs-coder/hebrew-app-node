@@ -303,11 +303,11 @@ const WhatsappSettings = () => {
         let updatedContacts;
         if (editingContact) {
           updatedContacts = contacts.map((c) =>
-            c.id === editingContact.id ? { ...newContact, id: c.id } : c
+            c.id === editingContact.id ? { ...newContact, _id: c._id } : c
           );
         } else {
           const newId = new Date().getTime().toString();
-          updatedContacts = [...contacts, { ...newContact, id: newId }];
+          updatedContacts = [...contacts, { ...newContact, _id: newId }];
         }
 
         const updatedFormData = {
@@ -991,7 +991,7 @@ const WhatsappSettings = () => {
                           </thead>
                           <tbody>
                             {contacts.map((contact) => (
-                              <tr key={contact.id}>
+                              <tr key={contact._id}>
                                 <td>{contact.name}</td>
                                 <td>{contact.role}</td>
                                 <td>{contact.phone}</td>
@@ -1010,7 +1010,7 @@ const WhatsappSettings = () => {
                                       className="btn btn-link p-0 text-danger"
                                       onClick={(e) => {
                                         e.preventDefault(); // Add this to prevent form submission
-                                        handleDeleteContact(contact.id);
+                                        handleDeleteContact(contact._id);
                                       }}
                                     >
                                       <i className="bi bi-trash"></i>
