@@ -233,16 +233,16 @@ const WhatsappSettings = () => {
 
   const handleDeleteContact = async (contactId) => {
     try {
-      setIsLoading(true); // <-- changed from setIsSubmitting(true)
-      
-      // First update local MongoDB
+      setIsLoading(true);
+
+      // Use contactId directly (should be _id)
       const response = await fetch(`/api/settings/whatsapp/contacts/${contactId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        credentials: 'include' // Important for session handling
+        credentials: 'include'
       });
   
       if (!response.ok) {
@@ -252,20 +252,19 @@ const WhatsappSettings = () => {
   
       const data = await response.json();
   
-      // Update local state and Redux store
       if (data.success) {
-        const updatedContacts = contacts.filter(contact => contact.id !== contactId);
+        // Use _id for filtering
+        const updatedContacts = contacts.filter(contact => contact._id !== contactId);
         setContacts(updatedContacts);
         setFormData(prev => ({
           ...prev,
           contacts: updatedContacts
         }));
-        
-        // Update Redux store
+  
         if (data.user) {
-          dispatch(login({ user: data.user, subscription:data.subscription }));
+          dispatch(login({ user: data.user, subscription: data.subscription }));
         }
-        
+  
         toast.success('Contact deleted successfully');
       }
   
@@ -273,7 +272,7 @@ const WhatsappSettings = () => {
       console.error('Error deleting contact:', error);
       toast.error(error.message || 'Failed to delete contact');
     } finally {
-      setIsLoading(false); // <-- changed from setIsSubmitting(false)
+      setIsLoading(false);
     }
   };
 
