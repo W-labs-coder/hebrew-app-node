@@ -136,10 +136,10 @@ export const updateWhatsappSettings = async (req, res) => {
         defaultMessage: defaultMessage || "היי! איך אפשר לעזור היום?",
         enableWidget: Boolean(enableWidget),
         contacts: contacts.map((contact) => ({
-          ...contact,
-          id: contact.id || new mongoose.Types.ObjectId(),
-          phone: contact.phone.replace(/\s+/g, ""),
-        })),
+  ...contact,
+  _id: contact._id ? contact._id : new mongoose.Types.ObjectId(),
+  phone: contact.phone.replace(/\s+/g, ""),
+})),
         titleBgColor,
         titleTextColor,
       };
@@ -479,15 +479,15 @@ export const addOrUpdateWhatsappContact = async (req, res) => {
     }
 
     // Update or add contact
-    if (contact.id) {
+    if (contact._id) {
       // Update existing contact
-      const contactIndex = user.contacts.findIndex(c => c.id.toString() === contact.id.toString());
+      const contactIndex = user.contacts.findIndex(c => c._id.toString() === contact._id.toString());
       if (contactIndex > -1) {
-        user.contacts[contactIndex] = contact;
+        user.contacts[contactIndex] = { ...contact, _id: user.contacts[contactIndex]._id }; // preserve ObjectId
       }
     } else {
       // Add new contact
-      contact.id = new mongoose.Types.ObjectId();
+      contact._id = new mongoose.Types.ObjectId();
       user.contacts.push(contact);
     }
 
