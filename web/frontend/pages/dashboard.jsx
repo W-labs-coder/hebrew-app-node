@@ -63,7 +63,7 @@ const categoryContents = [
     content:
       "ודאו שהלקוחות שלכם מקבלים התראות בעברית - התאימו את הטקסט לשפה ולמותג שלכם!",
     button: "הגדרות הודעות",
-    link: "/alert",
+    link: "/alerts",
     permission: "notifications",
   },
   {
@@ -82,7 +82,7 @@ const categoryContents = [
     content:
       "הכלי שלנו לכתובת אוטומטית מעדכן את כתובות ההזמנה הנכנסות בהתאם לקלט של הלקוח, ומייעל את תהליך עיבוד ההזמנות שלך.",
     button: "הגדרת מיקוד אוטומטי",
-    link: "/automatic-focus",
+    link: "/postal",
     permission: "zipCode",
   },
   {
