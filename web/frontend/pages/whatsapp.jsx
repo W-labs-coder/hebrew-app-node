@@ -290,15 +290,7 @@ const WhatsappSettings = () => {
             );
           }
 
-          Swal.fire({
-            title: "נמחק!",
-            text: "איש הקשר נמחק בהצלחה.",
-            icon: "success",
-            confirmButtonText: "אישור",
-            customClass: {
-              container: "rtl",
-            },
-          });
+          toast.success('איש הקשר נמחק בהצלחה')
         }
       } catch (error) {
         console.error("Error deleting contact:", error);
