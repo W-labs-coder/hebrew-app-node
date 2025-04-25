@@ -13,6 +13,7 @@ import { Form } from "react-bootstrap";
 import WhatsappIcon from "../components/svgs/WhatsAppIcon";
 import WhatsappIconPreview from "../components/svgs/WhatsappIconPreview";
 import UserAvatar from "../components/svgs/UserAvatar";
+import Swal from "sweetalert2";
 
 export default function Whatsapp() {
   return (
@@ -232,47 +233,87 @@ const WhatsappSettings = () => {
   };
 
   const handleDeleteContact = async (contactId) => {
-    try {
-      setIsLoading(true);
+    // Show confirmation dialog
+    const result = await Swal.fire({
+      title: "האם אתה בטוח?",
+      text: "לא ניתן יהיה לשחזר את איש הקשר הזה!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "כן, מחק!",
+      cancelButtonText: "ביטול",
+      reverseButtons: true,
+      customClass: {
+        container: "rtl",
+      },
+    });
 
-      // Use contactId directly (should be _id)
-      const response = await fetch(`/api/settings/whatsapp/contacts/${contactId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'include'
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete contact');
-      }
-  
-      const data = await response.json();
-  
-      if (data.success) {
-        // Use _id for filtering
-        const updatedContacts = contacts.filter(contact => contact._id !== contactId);
-        setContacts(updatedContacts);
-        setFormData(prev => ({
-          ...prev,
-          contacts: updatedContacts
-        }));
-  
-        if (data.user) {
-          dispatch(login({ user: data.user, subscription: data.subscription }));
+    // If user confirmed deletion
+    if (result.isConfirmed) {
+      try {
+        setIsLoading(true);
+
+        const response = await fetch(
+          `/api/settings/whatsapp/contacts/${contactId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to delete contact");
         }
-  
-        toast.success('Contact deleted successfully');
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Update contacts state
+          const updatedContacts = contacts.filter(
+            (contact) => contact._id !== contactId
+          );
+          setContacts(updatedContacts);
+          setFormData((prev) => ({
+            ...prev,
+            contacts: updatedContacts,
+          }));
+
+          if (data.user) {
+            dispatch(
+              login({ user: data.user, subscription: data.subscription })
+            );
+          }
+
+          Swal.fire({
+            title: "נמחק!",
+            text: "איש הקשר נמחק בהצלחה.",
+            icon: "success",
+            confirmButtonText: "אישור",
+            customClass: {
+              container: "rtl",
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Error deleting contact:", error);
+        Swal.fire({
+          title: "שגיאה!",
+          text: error.message || "מחיקת איש הקשר נכשלה",
+          icon: "error",
+          confirmButtonText: "אישור",
+          customClass: {
+            container: "rtl",
+          },
+        });
+      } finally {
+        setIsLoading(false);
       }
-  
-    } catch (error) {
-      console.error('Error deleting contact:', error);
-      toast.error(error.message || 'Failed to delete contact');
-    } finally {
-      setIsLoading(false);
     }
   };
 
