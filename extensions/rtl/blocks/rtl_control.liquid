@@ -140,11 +140,13 @@
 
 {% if block.settings.enable_whatsapp %}
   {% if whatsapp_widget_enabled and contacts.size > 0 %}
-    <div class="whatsapp-floating-widget" style="position: fixed; {{ whatsapp_position }}: 20px; bottom: 20px; z-index: 999999;">
+    <div class="whatsapp-floating-widget" style="position: fixed; {{ whatsapp_position }}: 20px; bottom: 30px; z-index: 999999;">
       <div class="whatsapp-widget-container" data-state="expanded">
         <!-- Widget Header -->
         <div class="whatsapp-widget-header" style="background-color: {{ whatsapp_title_bg_color }};">
-          <div class="whatsapp-widget-controls">
+          <div class="whatsapp-widget-controls" style="display : flex; justify-content:space-between;">
+            <h2 style="color: {{ whatsapp_title_text_color }};">
+              צ'אט איתנו</h2>
             <div class="whatsapp-minimize-button" aria-label="Minimize widget" style="color: {{ whatsapp_title_text_color }}; cursor:pointer">
               <svg width="12" height="12" viewBox="0 0 12 12">
                 <path stroke="{{ whatsapp_title_text_color }}" d="M2 6l4 4 4-4" stroke-width="2" fill="none"/>
@@ -152,8 +154,7 @@
             </div>
           </div>
           <div class="whatsapp-header-content" style="color: {{ whatsapp_title_text_color }};">
-            <h2 style="color: {{ whatsapp_title_bg_color }};">
-              צ'אט איתנו</h2>
+            
             <p>.אנחנו כאן כדי לעזור. שוחח איתנו בווטסאפ לכל שאלה</p>
           </div>
         </div>
@@ -184,7 +185,7 @@
   {% endif %}
 {% endif %}
 
-  {% if show_simple_button and whatsapp_phone != blank %}
+  {% if show_simple_button and whatsapp_phone != blank and whatsapp_widget_enabled == false %}
   <div class="whatsapp-widget">
     <a href="javascript:void(0);" 
        onclick="openWhatsApp('{{ whatsapp_phone }}')"
@@ -403,13 +404,7 @@
     display: none !important;
   }
   
-  /* Ensure footer banner images are properly sized */
-  .footer-banners .image-container img {
-    max-width: 50px;
-    height: auto;
-    margin: 5px;
-    display: inline-block;
-  }
+  
 
   .whatsapp-floating-widget {
     position: fixed !important;
@@ -527,7 +522,7 @@ flex-direction: column;
 }
 
 .whatsapp-header-content {
- 
+ display:block !important
   padding-right: 16px;
 }
 
@@ -580,13 +575,30 @@ flex-direction: column;
 .whatsapp-widget-body::-webkit-scrollbar-thumb:hover {
   background: #666;
 }
+
+.product-payment-icons .payment-processors h4 {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.product-payment-icons .image-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 5px 0;
+}
+.product-payment-icons .image-container img {
+  max-width: 50px;
+  height: auto;
+  margin: 5px;
+}
 </style>
 
 <!-- Fonts are loaded via schema.json externals -->
 
 
 <script>
-document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const t=document.documentElement,n=document.body;e?(t.setAttribute("dir","rtl"),t.setAttribute("lang","he"),n.setAttribute("dir","rtl"),n.style.direction="rtl",document.body.classList.add("rtl-enabled")):(t.setAttribute("dir","ltr"),t.setAttribute("lang","en"),n.setAttribute("dir","ltr"),n.style.direction="ltr",document.body.classList.remove("rtl-enabled"))}function updateBuyNowText(){if(window.enableBuyNowText&&window.buyNowText){document.querySelectorAll(".shopify-payment-button__button").forEach(e=>{e&&(e.textContent=window.buyNowText)});document.querySelectorAll(".shopify-payment-button__more-options").forEach(e=>{e&&(e.textContent=window.buyNowText)})}}function displayFooterBanners(){if(!window.enableFooterBanners)return;const e=document.querySelector("footer");if(!e)return;const t=document.querySelector(".footer-banners");t&&t.remove();const n=document.createElement("div");n.classList.add("footer-banners"),n.innerHTML=`<div class="footer-banner-content">{% if payment_processor_images != blank %}<div class="payment-processors"><h4>אמצעי תשלום</h4><div class="image-container">{{ payment_processor_images }}</div></div>{% endif %}{% if payment_features_images != blank and block.settings.enable_footer_banners %}<div class="payment-features"><div class="image-container">{{ payment_features_images }}</div></div>{% endif %}<div class="shipping-warranty">{% if shop.metafields.custom.shipping_option.value != blank %}<p>משלוח: {{ shop.metafields.custom.shipping_option.value }}</p>{% endif %}{% if shop.metafields.custom.warranty_days.value != blank %}<p>אחריות: {{ shop.metafields.custom.warranty_days.value }} ימים</p>{% endif %}</div></div><style>.footer-banners{width:100%;padding:20px;margin-top:20px;text-align:center;background:transparent}.footer-banner-content{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:20px}.payment-processors h4{margin-bottom:10px;font-weight:600}.image-container{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:10px 0}.image-container img{max-width:50px;height:auto;margin:5px}.shipping-warranty{font-weight:500;margin-top:10px}.shipping-warranty p{margin:5px 0}</style>`,e.insertAdjacentElement("afterbegin",n)}window.buyNowText={{ buy_now_text | json }},window.alternativeFont={{ alternative_font | json }},window.enableBuyNowText={{ block.settings.enable_buy_now_text }},window.enableAlternativeFont={{ block.settings.enable_alternative_font }},window.enableFooterBanners={{ enable_footer_banners | json }},window.enableWhatsApp={{ block.settings.enable_whatsapp }},setRTL({{ block.settings.enable_rtl }}),updateBuyNowText(),displayFooterBanners();const e=new MutationObserver(e=>{e.forEach(e=>{e.addedNodes.length&&updateBuyNowText()})});e.observe(document.body,{childList:!0,subtree:!0}),document.addEventListener("shopify:block:select",function(e){e.detail.blockId==={{ block.id | json }}&&(setRTL({{ block.settings.enable_rtl }}),updateBuyNowText(),displayFooterBanners())})});
+document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const t=document.documentElement,n=document.body;e?(t.setAttribute("dir","rtl"),t.setAttribute("lang","he"),n.setAttribute("dir","rtl"),n.style.direction="rtl",document.body.classList.add("rtl-enabled")):(t.setAttribute("dir","ltr"),t.setAttribute("lang","en"),n.setAttribute("dir","ltr"),n.style.direction="ltr",document.body.classList.remove("rtl-enabled"))}window.buyNowText={{ buy_now_text | json }},window.alternativeFont={{ alternative_font | json }},window.enableBuyNowText={{ block.settings.enable_buy_now_text }},window.enableAlternativeFont={{ block.settings.enable_alternative_font }},window.enableFooterBanners={{ enable_footer_banners | json }},window.enableWhatsApp={{ block.settings.enable_whatsapp }},setRTL({{ block.settings.enable_rtl }}),updateBuyNowText();const e=new MutationObserver(e=>{e.forEach(e=>{e.addedNodes.length&&updateBuyNowText()})});e.observe(document.body,{childList:!0,subtree:!0}),document.addEventListener("shopify:block:select",function(e){e.detail.blockId==={{ block.id | json }}&&(setRTL({{ block.settings.enable_rtl }}),updateBuyNowText())})});
 </script>
 
 <script>
@@ -680,119 +692,10 @@ document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const
         }
       }
 
-    function displayFooterBanners() {
-  // Early return if disabled
-  if (!window.enableFooterBanners) {
-    return;
-  }
-
-  // Find footer element
-  const footer = document.querySelector('footer');
-  if (!footer) {
-    return;
-  }
-
-  // Remove existing banner if present
-  const existingBanner = document.querySelector('.footer-banners');
-  if (existingBanner) {
-    existingBanner.remove();
-  }
-
-  // Create footer banner container
-  const footerBanner = document.createElement('div');
-  footerBanner.classList.add('footer-banners');
-  
-  // Build banner content with proper Liquid syntax
-  footerBanner.innerHTML = `
-    <div class="footer-banner-content">
-      {% if payment_processor_images != blank %}
-        <div class="payment-processors">
-          <h4>אמצעי תשלום</h4>
-          <div class="image-container">
-            {{ payment_processor_images }}
-          </div>
-        </div>
-      {% endif %}
-      
-      {% if payment_features_images != blank and block.settings.enable_footer_banners %}
-        <div class="payment-features">
-          <div class="image-container">
-            {{ payment_features_images }}
-          </div>
-        </div>
-      {% endif %}
-      
-      <div class="shipping-warranty">
-        {% if shop.metafields.custom.shipping_option.value != blank %}
-          <p>משלוח: {{ shop.metafields.custom.shipping_option.value }}</p>
-        {% endif %}
-        {% if shop.metafields.custom.warranty_days.value != blank %}
-          <p>אחריות: {{ shop.metafields.custom.warranty_days.value }} ימים</p>
-        {% endif %}
-      </div>
-    </div>
-  `;
-
-  // Add styles
-  const styles = `
-    <style>
-      .footer-banners {
-        width: 100%;
-        padding: 20px;
-        margin-top: 20px;
-        text-align: center;
-        background: transparent;
-      }
-      
-      .footer-banner-content {
-        max-width: 1200px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      
-      .payment-processors h4 {
-        margin-bottom: 10px;
-        font-weight: 600;
-      }
-      
-      .image-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        margin: 10px 0;
-      }
-      
-      .image-container img {
-        max-width: 50px;
-        height: auto;
-        margin: 5px;
-      }
-      
-      .shipping-warranty {
-        font-weight: 500;
-        margin-top: 10px;
-      }
-      
-      .shipping-warranty p {
-        margin: 5px 0;
-      }
-    </style>
-  `;
-  
-  // Insert styles and banner
-  footerBanner.insertAdjacentHTML('beforeend', styles);
-  footer.insertAdjacentElement('afterbegin', footerBanner);
-}
-
-
       // Set initial states
       setRTL({{ block.settings.enable_rtl }});
       updateBuyNowText();
-      setAlternativeFont({{ block.settings.enable_alternative_font }});
-      displayFooterBanners(); // Call to display footer banners
+      setAlternativeFont({{ block.settings.enable_alternative_font }}); // Call to display footer banners
       
       // Update WhatsApp visibility based on setting
       const whatsappButton = document.querySelector('.whatsapp-button');
@@ -805,8 +708,7 @@ document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const
         if (event.detail.blockId === {{ block.id | json }}) {
           setRTL({{ block.settings.enable_rtl }});
           updateBuyNowText();
-          setAlternativeFont({{ block.settings.enable_alternative_font }});
-          displayFooterBanners(); 
+          setAlternativeFont({{ block.settings.enable_alternative_font }}); 
           if (whatsappButton) {
             whatsappButton.style.display = enableWhatsApp ? 'flex' : 'none';
           }
@@ -821,7 +723,6 @@ document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const
   // Initialize all features
   setRTL({{ block.settings.enable_rtl }});
   updateBuyNowText();
-  displayFooterBanners();
 
   // Add mutation observer for dynamic content
   const observer = new MutationObserver((mutations) => {
@@ -854,7 +755,7 @@ document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const
       if (widget) {
         widget.style.cssText = `
           position: fixed !important;
-          bottom: 20px !important;
+          bottom: 30px !important;
           ${position}: 20px !important;
           z-index: 99999 !important;
           display: block !important;
@@ -2696,4 +2597,42 @@ body:not(.keyboard-nav) :focus {
   document.querySelectorAll('img[src^="http"]').forEach(img => {
     img.classList.add('remote-img');
   });
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (!window.enableFooterBanners) return;
+  var buyNowBtn = document.querySelector('.shopify-payment-button__button');
+  if (buyNowBtn) {
+    // Remove existing if present
+    var existing = document.querySelector('.product-payment-icons');
+    if (existing) existing.remove();
+
+    var icons = document.createElement('div');
+    icons.className = 'product-payment-icons';
+    icons.innerHTML = `
+      <div class="payment-processors" style="margin-top:16px;">
+        <h4 style="margin-bottom:10px;font-weight:600;">אמצעי תשלום</h4>
+        <div class="" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;">
+          {% if payment_processor_images != blank %}{{ payment_processor_images }}{% endif %}
+        </div>
+        {% if payment_features_images != blank %}
+        <div class="" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;">
+          {{ payment_features_images }}
+          </div>
+          {% endif %}
+        <div>
+        {% if shop.metafields.custom.shipping_option.value != blank %}
+          <p style="font-size:14px !important; font-weight:400 !important">משלוח: {{ shop.metafields.custom.shipping_option.value }}</p>
+        {% endif %}
+        {% if shop.metafields.custom.warranty_days.value != blank %}
+          <p style="font-size:14px !important; font-weight:400 !important">אחריות: {{ shop.metafields.custom.warranty_days.value }} ימים</p>
+        {% endif %}
+        </div>
+      </div>
+    `;
+    buyNowBtn.parentNode.insertBefore(icons, buyNowBtn.nextSibling);
+  }
+});
 </script>
