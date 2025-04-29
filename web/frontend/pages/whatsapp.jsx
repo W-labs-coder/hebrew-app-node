@@ -1416,7 +1416,7 @@ const WhatsappSettings = () => {
                       }}
                     >
                       <img
-                        src="../components/svgs/UserAvatar.png"
+                        src="https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png"
                         style={{
                           margin: "auto",
                           width: "100%",

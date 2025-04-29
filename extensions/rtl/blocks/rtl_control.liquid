@@ -150,14 +150,10 @@
                 <path stroke="{{ whatsapp_title_text_color }}" d="M2 6l4 4 4-4" stroke-width="2" fill="none"/>
               </svg>
             </div>
-            <div class="whatsapp-close-button" aria-label="Close widget" style="color: {{ whatsapp_title_text_color }}; cursor:pointer">
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <path stroke="{{ whatsapp_title_text_color }}" d="M1 1l10 10m0-10L1 11" stroke-width="2" fill="none"/>
-              </svg>
-            </div>
           </div>
           <div class="whatsapp-header-content" style="color: {{ whatsapp_title_text_color }};">
-            <h2>!היי</h2>
+            <h2 style="color: {{ whatsapp_title_bg_color }};">
+              צ'אט איתנו</h2>
             <p>.אנחנו כאן כדי לעזור. שוחח איתנו בווטסאפ לכל שאלה</p>
           </div>
         </div>
@@ -308,7 +304,7 @@
     }
 
     .whatsapp-button.text_and_icon {
-      min-width: 160px;
+      min-width: 100px;
     }
 
     .whatsapp-button.icon {
@@ -343,7 +339,7 @@
     border-radius: 10px;
     padding: 8px 16px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-width: 160px;
+    min-width: 100px;
     text-decoration: none;
   }
 
@@ -462,7 +458,9 @@
   .whatsapp-widget-container.minimized .whatsapp-widget-body {
     display: none !important;
   }
-
+.whatsapp-widget-container.minimized .whatsapp-widget-header {
+  display: block !important;
+}
   .whatsapp-minimize-button svg {
     transition: transform 0.3s ease;
   }
@@ -895,47 +893,26 @@ document.addEventListener('DOMContentLoaded',function(){function setRTL(e){const
 (function waitForWhatsAppWidget() {
   const container = document.querySelector('.whatsapp-widget-container');
   const minimizeButton = document.querySelector('.whatsapp-minimize-button');
-  const closeButton = document.querySelector('.whatsapp-close-button');
 
-  if (!container || !minimizeButton || !closeButton) {
+  if (!container || !minimizeButton) {
     setTimeout(waitForWhatsAppWidget, 300);
     return;
   }
 
   // Restore previous state on load
   const savedState = localStorage.getItem('whatsappWidgetState');
-  const isClosed = localStorage.getItem('whatsappWidgetClosed');
   if (savedState === 'minimized') {
     container.setAttribute('data-state', 'minimized');
     container.classList.add('minimized');
-  }
-  if (isClosed === 'true') {
-    container.style.display = 'none';
   }
 
   // Minimize button
   minimizeButton.onclick = function() {
     const isMinimized = container.getAttribute('data-state') === 'minimized';
     const newState = isMinimized ? 'expanded' : 'minimized';
-    
-    // Set data attribute for consistency
     container.setAttribute('data-state', newState);
-    
-    // Toggle class for CSS to work
     container.classList.toggle('minimized', newState === 'minimized');
-    
-    // Save state
     localStorage.setItem('whatsappWidgetState', newState);
-  };
-
-  // Close button
-  closeButton.onclick = function() {
-    container.classList.add('hidden');
-    localStorage.setItem('whatsappWidgetClosed', 'true');
-    setTimeout(() => {
-      container.classList.remove('hidden');
-      localStorage.removeItem('whatsappWidgetClosed');
-    }, 24 * 60 * 60 * 1000); // 24 hours
   };
 })();
 </script>
