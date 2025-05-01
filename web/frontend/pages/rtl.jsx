@@ -88,7 +88,7 @@ const RTLSection = ({ themes }) => {
         dispatch(login({ user: data.user, subscription: data.subscription }));
         setThemeLoading(false);
         setIsSubmitSuccessful(true);
-        toast.success('הנושא נבחר בהצלחה')
+        toast.success("ערכת הנושא שלך עודכנה");
       } else {
         console.error("הוספת העיצוב נכשלה");
         setIsSubmitSuccessful(false);
@@ -116,7 +116,7 @@ const RTLSection = ({ themes }) => {
   return (
     <section className="rtl-section">
       <div className="rtl-header">
-        <h2 className="rtl-title">RTL</h2>
+        <h2 className="rtl-title">תצוגה מימין לשמאל (RTL)</h2>
         <p className="rtl-description">
           אופטימיזציה של העיצוב שלך לשיפור הקריאות והנגישות כאשר אתה משתמש בטקסט
           מימין לשמאל.
@@ -128,7 +128,7 @@ const RTLSection = ({ themes }) => {
           יישר את האתר שלך מימין לשמאל כדי לשלב בצורה חלקה את השפה העברית.
         </p>
         <p className="fs14 fw500" style={{ color: "#777" }}>
-          אם התבנית שלך שלך לא מופיע כאן, אנא צור קשר ואנחנו נדאג להוסיף אותו
+          אם התבנית שלך שלך לא מופיעה כאן, אנא צור קשר ואנחנו נדאג להוסיף אותו
           עבורך.
         </p>
 

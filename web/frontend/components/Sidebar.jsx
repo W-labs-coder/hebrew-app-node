@@ -15,6 +15,7 @@ import TrainingIcon from "./svgs/TrainingIcon";
 import SupportIcon from "./svgs/SupportIcon";
 import AlertIcon from "./svgs/AlertIcon";
 import { useSelector } from "react-redux";
+import Logo from "./svgs/Logo";
 
 export const mainMenu = [
   {
@@ -25,7 +26,7 @@ export const mainMenu = [
     permissions: "dashboard",
   },
   {
-    title: "RTL",
+    title: "הגדרות RTL",
     slug: "rtl",
     link: "/rtl",
     icon: RtlIcon,
@@ -46,7 +47,7 @@ export const mainMenu = [
     permissions: "payment",
   },
   {
-    title: "תצורת WhatsApp",
+    title: "כפתור WhatsApp",
     slug: "whatsapp",
     link: "/whatsapp",
     icon: WhatsAppIcon,
@@ -163,6 +164,7 @@ const Sidebar = () => {
       }}
       className="sidebar"
     >
+    <Logo />
       {filteredMenu.map((item, index) => {
         const isActive = currentPath === item.link;
         const SvgIcon = item.icon;

@@ -52,7 +52,7 @@ const WhatsappSettings = () => {
     whatsappPosition: user?.whatsappPosition || "right",
     whatsappStyle: user?.whatsappStyle || "text_and_icon",
     whatsappText: user?.whatsappText || "",
-    buttonBgColor: user?.buttonBgColor || "#25D366",
+    buttonBgColor: user?.buttonBgColor || "#22d465",
     buttonTextColor: user?.buttonTextColor || "#FFFFFF",
     buttonIconColor: user?.buttonIconColor || "#FFFFFF",
     includeProductDetails: user?.includeProductDetails || false,
@@ -167,7 +167,7 @@ const WhatsappSettings = () => {
       }
   
       setIsSubmitSuccessful(true);
-      toast.success("WhatsApp settings updated successfully");
+      toast.success("הגדרות WhatsApp נשמרו ");
   
     } catch (error) {
       console.error('Error:', error);
@@ -423,11 +423,7 @@ const WhatsappSettings = () => {
   return (
     <section>
       <div>
-        <p className="fw700 fs18">אינטגרציית WhatsApp</p>
-        <p className="fs14 fw500" style={{ color: "#777" }}>
-          שפר את המעורבות של הלקוחות עם הודעת ווטסאפ מותאמת אישית למבקרים בחנות
-          שלך.
-        </p>
+        <p className="fw700 fs18">הגדרות WhatsApp </p>
       </div>
 
       <form onSubmit={(e) => handleSubmit(e, "general")}>
@@ -458,9 +454,6 @@ const WhatsappSettings = () => {
                 <div className="d-flex flex-column justify-content-end align-items-start mb-2">
                   <div>
                     <p className="fw700 fs14">הגדרת WhatsApp</p>
-                    <p className="fs14 fw500" style={{ color: "#777" }}>
-                      התאימו את האינטגרציה של WhatsApp עם ההגדרות הבאות:
-                    </p>
                   </div>
 
                   <div className="rtl">
@@ -933,25 +926,6 @@ const WhatsappSettings = () => {
                   </Button>
 
                   {/* Add the Editor URL link */}
-                  {isSubmitSuccessful && (
-                    <a
-                      href={getWhatsAppEditorUrl()}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="d-block text-center mt-3"
-                      style={{
-                        padding: "10px 20px",
-                        backgroundColor: "#FFC107",
-                        color: "#0D0D0D",
-                        textDecoration: "none",
-                        borderRadius: "5px",
-                        fontWeight: "bold",
-                        width: "fit-content",
-                      }}
-                    >
-                      עבור לערכת הנושא
-                    </a>
-                  )}
                 </div>
               </div>
             </div>
@@ -982,10 +956,9 @@ const WhatsappSettings = () => {
             {/* Left Column */}
             <div style={{ width: "60%" }}>
               <div className="mb-4">
-                <p className="fw700 fs14">אפשרויות התאמה אישית של ווידג'טים</p>
+                <p className="fw700 fs14">הוספת מספר חשבונות וואטספ</p>
                 <p className="fs14 fw500" style={{ color: "#777" }}>
-                  חבר מספר חשבונות וואטסאפ לווידג'ט שלך וניהול את כל התקשורת
-                  העסקית שלך ממקום אחד.
+                  חבר לשירות הלקוחות של האתר כמה סוכני שירות לקוחות שונים.
                 </p>
               </div>
 
@@ -1252,26 +1225,6 @@ const WhatsappSettings = () => {
                       "שמור"
                     )}
                   </Button>
-
-                  {isSubmitSuccessful && (
-                    <a
-                      href={getWhatsAppEditorUrl()}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="d-block text-center mt-3"
-                      style={{
-                        padding: "10px 20px",
-                        backgroundColor: "#FFC107",
-                        color: "#0D0D0D",
-                        textDecoration: "none",
-                        borderRadius: "5px",
-                        fontWeight: "bold",
-                        width: "fit-content",
-                      }}
-                    >
-                      עבור לערכת הנושא
-                    </a>
-                  )}
                 </div>
               </div>
             </div>
@@ -1477,10 +1430,11 @@ const WhatsappSettings = () => {
         <div className="steps mt-4">
           <h4>הדרכה לשימוש במסך זה:</h4>
           {[
-            "שלב 1 - התחל בהוספת מספר הטלפון הנייד שלך ב-WhatsApp כדי להפוך אותו לזמין עבור תמיכת לקוחות בחזית החנות שלך. אם יש לך מספר מספרי WhatsApp, הפעל את אפשרות הווידג'ט כדי להוסיף את כולם..",
-            "שלב 2 - בחר היכן תרצה שסמל WhatsApp יופיע בחזית החנות שלך - מיושר לצד שמאל או ימין של המסך.",
-            "שלב 3 - התאם אישית את מראה הסמל על ידי התאמת צבע הרקע וצבע הסמל כך שיתאימו למותג שלך.",
-            "שלב 4 - כתוב הודעת קבלת פנים מותאמת אישית שמשתמשים יראו כשהם פותחים את צ'אט WhatsApp בחזית החנות שלך. לאחר שתסיים, לחץ על 'שמור' כדי להחיל את ההגדרות שלך.",
+            "שלב 1 - הגדר את מספר ה-WhatsApp שלך (כולל קידומת +972 ) , בחר עיצוב, צבעים והתאם את הוידג׳ט לפי רצונך.",
+            "שלב 2 - כנס להגדרות האפליקציה בערכת הנושא.",
+            'שלב 3 - אשר הפעלת ״WhatsApp Button״.',
+            'נא להוסיף סרטון - של התקיעות והמסך שנשבר בדף המוצר (לוודא שזה לא קורה בדפים נוספים כמו עגלה / צור קשר / מאמרים / וכו׳ )'
+            
           ].map((item) => (
             <div
               className="d-flex aic gap-3 mb-2"

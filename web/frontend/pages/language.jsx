@@ -197,7 +197,7 @@ const saveLanguage = async (e) => {
     if (response.ok) {
       const data = await response.json();
       const language = data.user.selectedLanguage;
-      toast.success("Language Added Successfully")
+      toast.success(" הפונט עודכן בהצלחה ");
       setSelectedLanguage(language);
       setShop(data.user.shop);
       dispatch(login({ user: data.user, subscription:data.subscription }));
@@ -230,11 +230,7 @@ const getLanguageEditorUrl = () => {
   return (
     <section className="rtl-section">
       <div className="rtl-header">
-        <h2 className="rtl-title">כפתור שפה ודינמי</h2>
-        <p className="rtl-description fw500 fs14">
-          שפרו את חוויית המשתמש בחנות שלכם על ידי התאמה אישית של הגדרות תרגום
-          השפה.
-        </p>
+        <h2 className="rtl-title">תרגום שפה לעברית </h2>
       </div>
 
       <div
@@ -278,11 +274,8 @@ const getLanguageEditorUrl = () => {
           }}
         >
           <div style={{ width: "70%" }}>
-            <p className="fs14 fw700">בחרו את שפת האתר המועדפת עליכם:</p>
-            <p className="fs14 fw500" style={{ color: "#777" }}>
-              בחרו את השפה שברצונכם להחיל על החנות שלכם ואז בחרו אותה. פעולה זו
-              לא תשנה את השפה באופן מיידי - ראו הוראות נוספות בהמשך.
-            </p>
+            <p className="fs14 fw700">תרגמו את ערכת הנושא שלכם לשפה העברית </p>
+            
             <form onSubmit={saveLanguage} style={{ marginBottom: "16px" }}>
               <Input
                 type="select"
@@ -318,28 +311,7 @@ const getLanguageEditorUrl = () => {
                 עבור לערכת הנושא
               </a>
             )}
-            <div className="steps">
-              <h4>הדרכה לשימוש במסך זה:</h4>
-
-              {[
-                'שלב 1 - בחרו את בשפה העברית ולחצו על כפתור ה"שמירה" באפליקציה.',
-                "שלב 2 - לחצו על הכפתור התחתון (הגדרת שפות) כדי לנווט למסך הגדרות השפה.",
-                "שלב 3 - לחצו על הכפתור של ה-3 נקודות ליד השפה המוגדרת כברירת מחדל, ובחרו ב-'Change Default'",
-                "שלב 4 - בחר את השפה העברית מהרשימה.",
-                'שלב 5 - לחץ על כפתור "שמור".',
-              ].map((item) => (
-                <div
-                  className="d-flex aic gap-3 mb-2"
-                  style={{ justifyContent: "flex-start" }}
-                  key={item}
-                >
-                  <CheckLightIcon />
-                  <p className="fs14" style={{ color: "#FBFBFB !important" }}>
-                    {item}
-                  </p>
-                </div>
-              ))}
-            </div>
+            
           </div>
         </div>
       </div>
@@ -388,7 +360,7 @@ const BuyNow = () => {
         dispatch(login({ user: data.user, subscription:data.subscription }));
         setIsBuyNowSubmitSuccessful(true);
         
-        toast.success('Buy Now Text Added Successfully')
+        toast.success(" הפונט עודכן בהצלחה ");
       } else {
         console.error("Failed to update Buy Now");
       }
@@ -423,7 +395,6 @@ const BuyNow = () => {
           backgroundColor: "#FBFBFB",
         }}
       >
-        
         <form onSubmit={saveBuyNow}>
           <Input
             type="text"
@@ -467,6 +438,27 @@ const BuyNow = () => {
             עבור לערכת הנושא
           </a>
         )}
+        <div className="steps">
+          <h4>הדרכה לשימוש במסך זה:</h4>
+
+          {[
+            "שלב 1 - בחרו את הפונט המועדף עליכם מרשימת הגופנים",
+            'שלב 2 - לחצו "שמירה״',
+            "שלב 3 - הכנסו להגדרות האפליקציה בערכת הנושא",
+            'שלב 4 - וודאו שהאפליקציה מופעלת וש" Enable Alternative Font" מסומן',
+          ].map((item) => (
+            <div
+              className="d-flex aic gap-3 mb-2"
+              style={{ justifyContent: "flex-start" }}
+              key={item}
+            >
+              <CheckLightIcon />
+              <p className="fs14" style={{ color: "#FBFBFB !important" }}>
+                {item}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -508,7 +500,7 @@ const Fonts = ({fonts}) => {
         dispatch(login({ user: data.user, subscription:data.subscription }));
         setIsFontSubmitSuccessful(true);
 
-        toast.success("Font Added Successfully");
+        toast.success(" הפונט עודכן בהצלחה ");
       } else {
         console.error("Failed to update Font");
       }

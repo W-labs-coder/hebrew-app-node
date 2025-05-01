@@ -171,10 +171,7 @@ const PaymentSection = () => {
   return (
     <section>
       <div>
-        <p className="fw700 fs18">משדרגים את הביטחון:חיזוק הביטחון ללקוחותיך</p>
-        <p className="fs14 fw500" style={{ color: "#777" }}>
-          בחר את שיטת התשלום המועדפת עליך לחוויית תשלום חלקה.
-        </p>
+        <p className="fw700 fs18">סמלים ותווי אמון</p>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -202,7 +199,7 @@ const PaymentSection = () => {
             <div>
               <div>
                 <div className="d-flex flex-column justify-content-end align-items-start mb-2">
-                  <p className="fs14 fw700">בחירת צבע רקע:</p>
+                  <p className="fs14 fw700"> לוגויים של כרטיסי אשראי</p>
                   <div className="background-options">
                     <div className="form-check rtl">
                       <input
@@ -263,41 +260,6 @@ const PaymentSection = () => {
                     onChange={handleInputChange}
                     value={formData.customProcessor.name}
                   />
-
-                  {formData.customProcessor.icon && (
-                    <div style={{ marginTop: "16px" }}>
-                      <p>תצוגה מקדימה:</p>
-                      <div>
-                        {typeof formData.customProcessor.icon === "string" ? (
-                          <img
-                            src={formData.customProcessor.icon}
-                            alt="Custom Processor Preview"
-                            style={{
-                              maxWidth: "100px",
-                              maxHeight: "100px",
-                              border: "1px solid #ddd",
-                              borderRadius: "8px",
-                            }}
-                          />
-                        ) : (
-                          <div
-                            style={{
-                              display: "inline-block",
-                              width: "100px",
-                              height: "100px",
-                              border: "1px solid #ddd",
-                              borderRadius: "8px",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {formData.customProcessor.icon}
-                          </div>
-                        )}
-                      </div>
-                      <p>{formData.customProcessor.name}</p>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -321,7 +283,10 @@ const PaymentSection = () => {
                             )}
                             onChange={handleInputChange}
                           />
-                          <span className="me-2" style={{ whiteSpace: "nowrap" }}>
+                          <span
+                            className="me-2"
+                            style={{ whiteSpace: "nowrap" }}
+                          >
                             {processor.name}
                           </span>
                         </div>
