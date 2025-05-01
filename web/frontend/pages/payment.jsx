@@ -325,8 +325,8 @@ const PaymentSection = () => {
           >
             <div>
               <div>
-                <p className="fw700 fs14">החזר כספי מובטח:</p>
-                <p className="my-2 fs14">בחר כל סגנון סמל</p>
+                <p className="fw700 fs14">תווים להגברת אמינות :</p>
+                <p className="my-2 fs14">בחר סמלים שתרצה להוסיף.</p>
 
                 <div className="row jcs w-100">
                   {features.map((feature) => (
