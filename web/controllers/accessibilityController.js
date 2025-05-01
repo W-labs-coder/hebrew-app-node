@@ -44,7 +44,7 @@ export const updateAccessibilitySettings = async (req, res) => {
 
     // Set default values for optional fields
     const settingsData = {
-      iconLocation: iconLocation || 'bottom_right',
+      iconLocation: iconLocation || 'bottom_left',
       iconShape: iconShape || 'rounded',
       iconSize: iconSize || 'medium',
       iconType: iconType || 'default',

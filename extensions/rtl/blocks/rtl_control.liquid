@@ -1221,6 +1221,7 @@ function getCurrentTimeInShopTimeZone() {
 </script>
 
 {% if block.settings.enable_accessibility %}
+   <!-- DEBUG: accessibility_icon_location = {{ accessibility_icon_location }} -->
   <div class="accessibility-widget-container" 
        style="position: fixed; z-index: {{ accessibility_zindex }}; 
               {% case accessibility_icon_location %}
