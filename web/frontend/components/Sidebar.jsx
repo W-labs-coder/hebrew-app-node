@@ -58,7 +58,7 @@ export const mainMenu = [
     slug: "sabbath",
     link: "/sabbath",
     icon: SabbathIcon,
-    permissions: "sabbathMode",
+    permissions: "shabbatMode",
   },
   {
     title: "התראות",

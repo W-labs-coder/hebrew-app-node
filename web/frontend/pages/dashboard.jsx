@@ -72,7 +72,7 @@ const categoryContents = [
       "הגדר את שעות השבת של החנות שלך לסגירה ופתיחה אוטומטית, תוך שמירה על לקוחות מעודכנים לגבי לוח הזמנים שלך.",
     button: "קבע שבת",
     link: "/sabbath",
-    permission: "sabbathMode",
+    permission: "shabbatMode",
   },
 
   {
