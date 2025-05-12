@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/slices/authSlice";
 import { toast } from "react-toastify";
 import SabbathPreview from "../components/SabbathPreview";
+import AlertDangerIcon from "../components/svgs/AlertDangerIcon";
 
 // Add these functions after your imports
 const uploadToCloudflare = async (file) => {
