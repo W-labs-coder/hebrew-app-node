@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
-import { Frame, Layout, Page } from "@shopify/polaris";
+import { Frame, Layout, Page, Modal } from "@shopify/polaris";
 import Input from "../components/form/Input";
 import Button from "../components/form/Button";
 import CheckLightIcon from "../components/svgs/CheckLightIcon";
@@ -16,6 +16,20 @@ import FontsImage from "../components/svgs/FontsImage";
 export default function Language() {
   const [themes, setThemes] = useState([]);
   const userPermissions = useSelector(state => state.auth.subscription?.subscription?.permissions);
+
+  // Modal state
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+
+  // Handler for blocked actions
+  const handleBlocked = () => setShowPermissionModal(true);
+  const handleUpgrade = () => {
+    setShowPermissionModal(false);
+    window.location.href = "/plans";
+  };
+  const handleCancel = () => setShowPermissionModal(false);
+
+  // Helper to check permission
+  const hasPermission = (perm) => userPermissions?.includes(perm);
 
   const fonts = [
     {
@@ -151,20 +165,46 @@ export default function Language() {
           <Layout>
             <Layout.Section>
               <div>
-                {userPermissions?.includes("language") && (
+                {hasPermission("language") ? (
                   <LanguageSection languages={languages} />
+                ) : (
+                  <Button onClick={handleBlocked}>הפעל תרגום שפה</Button>
                 )}
-                {userPermissions?.includes("buyNowText") && (
+                {hasPermission("buyNowText") ? (
                   <BuyNow />
+                ) : (
+                  <Button onClick={handleBlocked}>הפעל שינוי טקסט קנייה</Button>
                 )}
-                {userPermissions?.includes("fonts") && (
+                {hasPermission("fonts") ? (
                   <Fonts fonts={fonts} />
+                ) : (
+                  <Button onClick={handleBlocked}>הפעל גופנים</Button>
                 )}
               </div>
             </Layout.Section>
           </Layout>
         </Page>
       </div>
+      {/* Permission Modal */}
+      <Modal
+        open={showPermissionModal}
+        onClose={handleCancel}
+        title="אין לך הרשאה"
+        primaryAction={{
+          content: "שדרג עכשיו",
+          onAction: handleUpgrade,
+        }}
+        secondaryActions={[
+          {
+            content: "ביטול",
+            onAction: handleCancel,
+          },
+        ]}
+      >
+        <Modal.Section>
+          <p>אין לך הרשאה לגשת לאזור זה. שדרג את התוכנית שלך כדי לקבל גישה.</p>
+        </Modal.Section>
+      </Modal>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Sidebar from "../components/Sidebar";
-import { Frame, Layout, Page } from "@shopify/polaris";
+import { Frame, Layout, Page, Modal } from "@shopify/polaris";
 import VideoSvg from "../components/svgs/VideoSvg";
 import Rtl2 from "../components/svgs/Rtl2";
 import Button from "../components/form/Button";
@@ -116,6 +116,9 @@ export default function dashboard() {
   const navigate = useNavigate()
   const userPermissions = useSelector(state => state.auth.subscription?.subscription?.permissions);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const [showPermissionModal, setShowPermissionModal] = React.useState(false);
+  const [pendingLink, setPendingLink] = React.useState(null);
+
   useEffect(() => {
     if (!isAuthenticated) {
       toast.error("You are not authenticated!");
@@ -153,6 +156,23 @@ export default function dashboard() {
         console.error("Error fetching subscription:", error);
       }
     };
+
+  const handleBlocked = (link) => {
+    setPendingLink(link);
+    setShowPermissionModal(true);
+  };
+
+  const handleUpgrade = () => {
+    setShowPermissionModal(false);
+    setPendingLink(null);
+    navigate("/plans");
+  };
+
+  const handleCancel = () => {
+    setShowPermissionModal(false);
+    setPendingLink(null);
+  };
+
   return (
     <div className="dashboard-container">
       <Sidebar />
@@ -163,12 +183,35 @@ export default function dashboard() {
               <div className="rtl-section">
                 <WelcomeSection />
                 <VideoIntroSection />
-                <SettingsCategorySection permissions={userPermissions} />
+                <SettingsCategorySection
+                  permissions={userPermissions}
+                  onBlocked={handleBlocked}
+                />
               </div>
             </Layout.Section>
           </Layout>
         </Page>
       </div>
+      {/* Permission Modal */}
+      <Modal
+        open={showPermissionModal}
+        onClose={handleCancel}
+        title="אין לך הרשאה"
+        primaryAction={{
+          content: "שדרג עכשיו",
+          onAction: handleUpgrade,
+        }}
+        secondaryActions={[
+          {
+            content: "ביטול",
+            onAction: handleCancel,
+          },
+        ]}
+      >
+        <Modal.Section>
+          <p>אין לך הרשאה לגשת לאזור זה. שדרג את התוכנית שלך כדי לקבל גישה.</p>
+        </Modal.Section>
+      </Modal>
     </div>
   );
 }
@@ -222,12 +265,7 @@ const VideoIntroSection = () => (
   </section>
 );
 
-const SettingsCategorySection = ({ permissions }) => {
-  // Filter categoryContents based on user permissions
-  const filteredCategoryContents = categoryContents.filter((content) =>
-    permissions?.includes(content.permission)
-  );
-
+const SettingsCategorySection = ({ permissions, onBlocked }) => {
   return (
     <section>
       <div>
@@ -238,20 +276,28 @@ const SettingsCategorySection = ({ permissions }) => {
         </p>
       </div>
       <div className="row aic" style={{ gap: "16px", marginTop: "16px" }}>
-        {filteredCategoryContents.map((content, index) => (
-          <CategoryCard key={index} content={content} />
+        {categoryContents.map((content, index) => (
+          <CategoryCard
+            key={index}
+            content={content}
+            hasPermission={permissions?.includes(content.permission)}
+            onBlocked={onBlocked}
+          />
         ))}
       </div>
     </section>
   );
 };
 
-
-const CategoryCard = ({ content }) => {
+const CategoryCard = ({ content, hasPermission, onBlocked }) => {
   const SvgIcon = content.icon;
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const handleNav = (link) => {
-    navigate(link);
+    if (hasPermission) {
+      navigate(link);
+    } else {
+      onBlocked(link);
+    }
   };
   return (
     <div
