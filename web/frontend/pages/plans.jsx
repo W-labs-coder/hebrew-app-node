@@ -11,9 +11,56 @@ import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/slices/authSlice";
 import { toast } from "react-toastify";
 import HomePage from ".";
+import Subscription from "../components/Subscription";
+import { useAppBridge } from "@shopify/app-bridge-react";
+import { Redirect } from "@shopify/app-bridge/actions";
 
 export default function Plans() {
-  const [themes, setThemes] = useState([]);
+const app = useAppBridge();
+const [subscriptions, setSubscriptions] = useState([]);
+const redirect = Redirect.create(app);
+
+
+    const appBridge = useAppBridge();
+    
+      const shopify = useMemo(() => {
+        if (appBridge) {
+          return {
+            ...appBridge,
+            navigate: Redirect.create(appBridge),
+          };
+        }
+        return null;
+      }, [appBridge]);
+    
+      useEffect(() => {
+        fetchSubscriptions();
+        // eslint-disable-next-line
+      }, []);
+
+
+  const fetchSubscriptions = async () => {
+      try {
+        const response = await fetch("/api/billing/fetch-subscription", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setSubscriptions(data);
+        } else {
+          console.error("Failed to fetch subscriptions");
+        }
+      } catch (error) {
+        console.error("Error fetching subscriptions:", error);
+      }
+    };
+  
+    const handleRedirect = (url) => {
+      redirect.dispatch(Redirect.Action.APP, url);
+    };
 
  
 
@@ -25,7 +72,11 @@ export default function Plans() {
           <Layout>
             <Layout.Section>
               <div>
-                <HomePage />
+                 <Subscription
+                              subscriptions={subscriptions}
+                              app={app}
+                              onRedirect={handleRedirect}
+                            />
               </div>
             </Layout.Section>
           </Layout>
