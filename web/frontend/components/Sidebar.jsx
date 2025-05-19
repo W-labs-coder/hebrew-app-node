@@ -118,7 +118,7 @@ export const mainMenu = [
     permissions: "support",
   },
   {
-    title: "תמיכה",
+    title: "תוכניות",
     slug: "plans",
     link: "/plans",
     icon: SupportIcon,
