@@ -315,7 +315,7 @@ const getLanguageEditorUrl = () => {
         >
           <div style={{ width: "70%" }}>
             <p className="fs14 fw700">תרגמו את ערכת הנושא שלכם לשפה העברית </p>
-            
+
             <form onSubmit={saveLanguage} style={{ marginBottom: "16px" }}>
               <Input
                 type="select"
@@ -351,7 +351,28 @@ const getLanguageEditorUrl = () => {
                 עבור לערכת הנושא
               </a>
             )}
-            
+            <div className="steps">
+              <h4>הדרכה לשימוש במסך זה:</h4>
+
+              {[
+                'שלב 1 - בחרו את בשפה העברית ולחצו על כפתור ה"שמירה" באפליקציה.',
+                "שלב 2 - לחצו על הכפתור התחתון (הגדרת שפות) כדי לנווט למסך הגדרות השפה.",
+                "שלב 3 - לחצו על הכפתור של ה-3 נקודות ליד השפה המוגדרת כברירת מחדל, ובחרו ב-'Change Default'",
+                "שלב 4 - בחר את השפה העברית מהרשימה.",
+                'שלב 5 - לחץ על כפתור "שמור".',
+              ].map((item) => (
+                <div
+                  className="d-flex aic gap-3 mb-2"
+                  style={{ justifyContent: "flex-start" }}
+                  key={item}
+                >
+                  <CheckLightIcon />
+                  <p className="fs14" style={{ color: "#FBFBFB !important" }}>
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -478,14 +499,14 @@ const BuyNow = () => {
             עבור לערכת הנושא
           </a>
         )}
-        <div className="steps">
-          <h4>הדרכה לשימוש במסך זה:</h4>
+        <div className="steps mt-4">
+          {/* <h4>הדרכה לשימוש במסך זה:</h4> */}
 
           {[
-            "שלב 1 - בחרו את הפונט המועדף עליכם מרשימת הגופנים",
-            'שלב 2 - לחצו "שמירה״',
-            "שלב 3 - הכנסו להגדרות האפליקציה בערכת הנושא",
-            'שלב 4 - וודאו שהאפליקציה מופעלת וש" Enable Alternative Font" מסומן',
+            "שלב 1 - כתבו את הטקסט שאתם מעוניינים שיופיע על כפתור קנייה.",
+            'שלב 2 - לחצו "שמירה"',
+            'שלב 3 - הכנסו ל"הגדרות האפליקציה בהערכת נושא"',
+            'שלב 4 - וודאו שהאפליקציה מופעלת ושמסומן "Translation"',
           ].map((item) => (
             <div
               className="d-flex aic gap-3 mb-2"
@@ -565,11 +586,11 @@ const Fonts = ({fonts}) => {
   return (
     <section className="rtl-section">
       <p className="fw700 fs18">התאמת גופנים</p>
-      <p className="fw500 fs14" style={{color : '#777 !important'}}>
+      <p className="fw500 fs14" style={{ color: "#777 !important" }}>
         בחר את סגנון הגופן המועדף עליך לקריאה אופטימלית
       </p>
       <div
-        className="d-flex jcb"
+        className="d-lg-flex jcb"
         style={{
           margin: "16px 0",
           border: "1px solid #C6C6C6",
@@ -600,6 +621,31 @@ const Fonts = ({fonts}) => {
               שמור
             </Button>
           </form>
+          {/* Font Preview */}
+          {font && (
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "12px",
+                border: "1px dashed #C6C6C6",
+                borderRadius: "8px",
+                background: "#fff",
+              }}
+            >
+              <p className="fs14 fw700 mb-2">תצוגה מקדימה של הגופן:</p>
+              <span
+                style={{
+                  fontFamily: `'${font}', sans-serif`,
+                  fontSize: "22px",
+                  direction: "rtl",
+                  display: "block",
+                  color: "#222",
+                }}
+              >
+                זהו טקסט לדוגמה בעברית
+              </span>
+            </div>
+          )}
           {isFontSubmitSuccessful && (
             <a
               href={getFontEditor()}
@@ -620,14 +666,14 @@ const Fonts = ({fonts}) => {
             </a>
           )}
 
-          <div className="steps mt-4">
-            {/* <h4>הדרכה לשימוש במסך זה:</h4> */}
+          <div className="steps">
+            <h4>הדרכה לשימוש במסך זה:</h4>
 
             {[
-              "שלב 1 - כתבו את הטקסט שאתם מעוניינים שיופיע על כפתור קנייה.",
-              'שלב 2 - לחצו "שמירה"',
-              'שלב 3 - הכנסו ל"הגדרות האפליקציה בהערכת נושא"',
-              'שלב 4 - וודאו שהאפליקציה מופעלת ושמסומן "Translation"',
+              "שלב 1 - בחרו את הפונט המועדף עליכם מרשימת הגופנים",
+              'שלב 2 - לחצו "שמירה״',
+              "שלב 3 - הכנסו להגדרות האפליקציה בערכת הנושא",
+              'שלב 4 - וודאו שהאפליקציה מופעלת וש" Enable Alternative Font" מסומן',
             ].map((item) => (
               <div
                 className="d-flex aic gap-3 mb-2"
@@ -642,7 +688,36 @@ const Fonts = ({fonts}) => {
             ))}
           </div>
         </div>
-        <FontsImage />
+        <div>
+          <FontsImage />
+          {/* Font Preview */}
+          {font && (
+            <div
+              style={{
+                marginTop: "16px",
+                padding: "12px",
+                border: "1px dashed #C6C6C6",
+                borderRadius: "8px",
+                background: "#fff",
+                minWidth: "220px",
+                maxWidth: "300px",
+              }}
+            >
+              <p className="fs14 fw700 mb-2">תצוגה מקדימה:</p>
+              <span
+                style={{
+                  fontFamily: `'${font}', sans-serif`,
+                  fontSize: "22px",
+                  direction: "rtl",
+                  display: "block",
+                  color: "#222",
+                }}
+              >
+                זהו טקסט לדוגמה בעברית
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
