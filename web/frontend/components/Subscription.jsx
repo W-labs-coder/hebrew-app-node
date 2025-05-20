@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { getSessionToken } from "@shopify/app-bridge-utils";
 import { Redirect } from "@shopify/app-bridge/actions";
+import { useSelector } from "react-redux";
 
 
 const Subscription = ({ subscriptions }) => {
@@ -11,6 +12,12 @@ const Subscription = ({ subscriptions }) => {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [selected, setSelected] = useState(null)
+  
+  
+
+  const userSubscription = useSelector(state => state.auth.subscription); 
+
+ 
 
   useEffect(() => {
     const updatedSubscriptions = subscriptions.filter(
@@ -159,7 +166,7 @@ const handleSelectPlan = async (id) => {
                     : "#C6C6C6",
                 borderRadius: "12px",
                 cursor: "pointer",
-                flexGrow: 1
+                flexGrow: 1,
               }}
             >
               <p className="fs14 text-center" style={{ padding: "10px 26px" }}>
@@ -195,16 +202,24 @@ const handleSelectPlan = async (id) => {
                       subscription.name.toLowerCase() === "pro"
                         ? "#FBB105"
                         : "transparent",
-                    opacity: subscription.isActive ? 0.6 : 1,
-                    pointerEvents: subscription.isActive ? "none" : "auto",
+                    opacity:
+                      subscription._id == userSubscription?._id ? 0.6 : 1,
+                    pointerEvents:
+                      subscription._id == userSubscription?._id
+                        ? "none"
+                        : "auto",
                   }}
                   className="d-flex aic jcc subscribe-button"
                   onClick={() =>
-                    !subscription.isActive && handleSelectPlan(subscription._id)
+                    subscription._id != userSubscription?._id &&
+                    handleSelectPlan(subscription._id)
                   }
                 >
-                  {subscription.isActive ? (
-                    <p className="fs14 text-center" style={{ color: "#0D0D0D" }}>
+                  {subscription._id == userSubscription?._id ? (
+                    <p
+                      className="fs14 text-center"
+                      style={{ color: "#0D0D0D" }}
+                    >
                       פעיל
                     </p>
                   ) : selected === subscription._id && loading ? (
