@@ -399,13 +399,13 @@ const PaymentSection = () => {
                 <p className="my-2 fs14">בחר סמלים שתרצה להוסיף.</p>
 
                 <div className="row jcs w-100">
-                  {features?.map((feature) => (
+                  {/* {features?.map((feature) => (
                     <div className="col-3" key={feature.name}>
                       <label
                         className="fs14 fw500 d-flex gap-2"
                         style={{ color: "#0D0D0D", width: "60px" }}
                       >
-                        {/* <input
+                        <input
                           type="checkbox"
                           name="feature"
                           value={feature.name}
@@ -413,11 +413,11 @@ const PaymentSection = () => {
                             feature.name
                           )}
                           onChange={handleInputChange}
-                        /> */}
+                        />
                         {feature.icon}
                       </label>
                     </div>
-                  ))}
+                  ))} */}
                 </div>
                 <div>
                   <div>
