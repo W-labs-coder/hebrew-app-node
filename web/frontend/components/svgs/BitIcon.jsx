@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function BitIcon() {
   return (
-   < <svg viewBox="0 -9 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 -9 58 58" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
       <g
         id="SVGRepo_tracerCarrier"
@@ -63,6 +63,6 @@ export default function BitIcon() {
           fill="#002855"
         ></path>{" "}
       </g>
-    </svg>>
+    </svg>
   );
 }
