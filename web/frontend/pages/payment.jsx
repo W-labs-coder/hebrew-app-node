@@ -420,7 +420,7 @@ const PaymentSection = () => {
                   ))}
                 </div>
                 <div>
-                  <div>
+                  {/* <div>
                     <label className="fw700 fs14 d-flex gap-2" style={{ alignItems: "center" }}>
                       <input
                         type="checkbox"
@@ -452,7 +452,7 @@ const PaymentSection = () => {
                         />
                       </div>
                     )}
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <div className="mt-5">
