@@ -2629,12 +2629,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
           {% endif %}
         <div>
-        {% if shop.metafields.custom.shipping_option.value != blank %}
-          <p style="font-size:14px !important; font-weight:400 !important">משלוח: {{ shop.metafields.custom.shipping_option.value }}</p>
-        {% endif %}
-        {% if shop.metafields.custom.warranty_days.value != blank %}
-          <p style="font-size:14px !important; font-weight:400 !important">אחריות: {{ shop.metafields.custom.warranty_days.value }} ימים</p>
-        {% endif %}
+       
         <div>
   {% if shop.metafields.custom.has_free_shipping.value == true or shop.metafields.custom.has_free_shipping.value == 'true' %}
     {% if shop.metafields.custom.free_shipping_text.value != blank %}
