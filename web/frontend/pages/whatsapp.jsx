@@ -823,6 +823,26 @@ const WhatsappSettings = () => {
         </div>
         {/* End Section 1 */}
 
+        {/* steps */}
+        <div className="steps mt-4">
+          <h4>הדרכה לשימוש במסך זה:</h4>
+          {[
+            "שלב 1 - הגדר את מספר ה-WhatsApp שלך (כולל קידומת +972 ) , בחר עיצוב, צבעים והתאם את הוידג׳ט לפי רצונך.",
+            "שלב 2 - כנס להגדרות האפליקציה בערכת הנושא.",
+            "שלב 3 - אשר הפעלת ״WhatsApp Button״.",
+          ].map((item) => (
+            <div
+              className="d-flex aic gap-3 mb-2"
+              style={{ justifyContent: "flex-start" }}
+              key={item}
+            >
+              <CheckLightIcon />
+              <p className="fs14">{item}</p>
+            </div>
+          ))}
+        </div>
+        {/* End steps */}
+
         {/* Section 2 */}
 
         {/* End Section 2 */}
@@ -1425,26 +1445,6 @@ const WhatsappSettings = () => {
           </div>
         </div>
         {/* End Section 4 */}
-
-        {/* steps */}
-        <div className="steps mt-4">
-          <h4>הדרכה לשימוש במסך זה:</h4>
-          {[
-            "שלב 1 - הגדר את מספר ה-WhatsApp שלך (כולל קידומת +972 ) , בחר עיצוב, צבעים והתאם את הוידג׳ט לפי רצונך.",
-            "שלב 2 - כנס להגדרות האפליקציה בערכת הנושא.",
-            'שלב 3 - אשר הפעלת ״WhatsApp Button״.',
-          ].map((item) => (
-            <div
-              className="d-flex aic gap-3 mb-2"
-              style={{ justifyContent: "flex-start" }}
-              key={item}
-            >
-              <CheckLightIcon />
-              <p className="fs14">{item}</p>
-            </div>
-          ))}
-        </div>
-        {/* End steps */}
       </form>
     </section>
   );
