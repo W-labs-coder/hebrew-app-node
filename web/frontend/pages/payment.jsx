@@ -28,6 +28,8 @@ import AppointmentIcon from "../components/svgs/AppointmentIcon";
 const PaymentSection = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [isSubmittingProcessors, setIsSubmittingProcessors] = useState(false);
+  const [isProcessorsSaveSuccess, setIsProcessorsSaveSuccess] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
@@ -71,8 +73,8 @@ const PaymentSection = () => {
     selectedProcessors: user?.selectedProcessors || [],
     customProcessor: user?.customProcessor || { name: "", icon: null },
     selectedFeatures: user?.selectedFeatures || [],
-    shipping: user?.shipping || "",
-    customShipping: user?.customShipping || "",
+    hasFreeShipping: user?.hasFreeShipping || false,
+    freeShippingText: user?.freeShippingText || "",
     warranty: user?.warranty || "",
     selectedCalendars: user?.selectedCalendars || [],
     paymentBackgroundColor: user?.paymentBackgroundColor || "transparent",
@@ -85,17 +87,31 @@ const PaymentSection = () => {
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
     if (type === "checkbox") {
-      const list =
-        name === "processor"
-          ? "selectedProcessors"
-          : name === "feature"
-          ? "selectedFeatures"
-          : "selectedCalendars";
+      if (name === "hasFreeShipping") {
+        setFormData((prevState) => ({
+          ...prevState,
+          hasFreeShipping: checked,
+          // Optionally clear text if unchecked
+          freeShippingText: checked ? prevState.freeShippingText : "",
+        }));
+      } else {
+        const list =
+          name === "processor"
+            ? "selectedProcessors"
+            : name === "feature"
+            ? "selectedFeatures"
+            : "selectedCalendars";
+        setFormData((prevState) => ({
+          ...prevState,
+          [list]: checked
+            ? [...prevState[list], value]
+            : prevState[list].filter((item) => item !== value),
+        }));
+      }
+    } else if (name === "freeShippingText") {
       setFormData((prevState) => ({
         ...prevState,
-        [list]: checked
-          ? [...prevState[list], value]
-          : prevState[list].filter((item) => item !== value),
+        freeShippingText: value,
       }));
     } else if (name === "customProcessorName") {
       setFormData((prevState) => ({
@@ -158,6 +174,35 @@ const PaymentSection = () => {
       toast.error("לא ניתן להוסיף אמצעי תשלום");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleProcessorsSave = async () => {
+    setIsSubmittingProcessors(true);
+    setIsProcessorsSaveSuccess(false);
+    try {
+      const response = await fetch("/api/settings/update-processors", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          selectedProcessors: formData.selectedProcessors,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "תגובת הרשת לא הייתה בסדר");
+      }
+
+      setIsProcessorsSaveSuccess(true);
+      toast.success("אמצעי התשלום נשמרו בהצלחה");
+    } catch (error) {
+      console.error("שגיאה בשליחת הטופס:", error);
+      toast.error("לא ניתן לשמור את אמצעי התשלום");
+    } finally {
+      setIsSubmittingProcessors(false);
     }
   };
 
@@ -294,6 +339,31 @@ const PaymentSection = () => {
                     </div>
                   ))}
                 </div>
+                <div style={{ marginTop: "16px" }}>
+                  <Button
+                    type="button"
+                    loading={isSubmittingProcessors}
+                    disabled={isSubmittingProcessors}
+                    onClick={handleProcessorsSave}
+                  >
+                    {isSubmittingProcessors ? "שומר..." : "שמור אמצעי תשלום"}
+                  </Button>
+                  {isProcessorsSaveSuccess && (
+                    <div
+                      className="success-message"
+                      style={{
+                        marginTop: "8px",
+                        padding: "8px",
+                        backgroundColor: "#e6f7e6",
+                        color: "#2e7d32",
+                        borderRadius: "4px",
+                        textAlign: "center",
+                      }}
+                    >
+                      אמצעי התשלום נשמרו בהצלחה!
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="">
@@ -325,7 +395,7 @@ const PaymentSection = () => {
           >
             <div>
               <div>
-                <p className="fw700 fs14">תווים להגברת אמינות :</p>
+                <p className="fw700 fs14">תווים להגברת אמינות</p>
                 <p className="my-2 fs14">בחר סמלים שתרצה להוסיף.</p>
 
                 <div className="row jcs w-100">
@@ -350,39 +420,39 @@ const PaymentSection = () => {
                   ))}
                 </div>
                 <div>
-                  <Input
-                    type="select"
-                    label="בחר דרישות משלוח חינם:"
-                    id="shipping"
-                    name="shipping"
-                    options={shippings}
-                    placeholder="לִבחוֹר"
-                    onChange={handleInputChange}
-                    value={formData.shipping}
-                  />
-
-                  {formData.shipping === "custom" && (
-                    <div style={{ marginTop: "16px" }}>
-                      <label htmlFor="customShipping" className="fw700 fs14">
-                        הכנס דרישה מותאמת אישית:
-                      </label>
+                  <div>
+                    <label className="fw700 fs14 d-flex gap-2" style={{ alignItems: "center" }}>
                       <input
-                        type="text"
-                        id="customShipping"
-                        name="customShipping"
-                        value={formData.customShipping}
-                        placeholder="הכנס ערך מותאם אישית..."
+                        type="checkbox"
+                        name="hasFreeShipping"
+                        checked={formData.hasFreeShipping}
                         onChange={handleInputChange}
-                        style={{
-                          width: "100%",
-                          padding: "8px",
-                          marginTop: "8px",
-                          border: "1px solid #C6C6C6",
-                          borderRadius: "8px",
-                        }}
                       />
-                    </div>
-                  )}
+                      הצג משלוח חינם
+                    </label>
+                    {formData.hasFreeShipping && (
+                      <div style={{ marginTop: "16px" }}>
+                        <label htmlFor="freeShippingText" className="fw700 fs14">
+                          טקסט משלוח חינם:
+                        </label>
+                        <input
+                          type="text"
+                          id="freeShippingText"
+                          name="freeShippingText"
+                          value={formData.freeShippingText}
+                          placeholder="הכנס טקסט משלוח חינם..."
+                          onChange={handleInputChange}
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            marginTop: "8px",
+                            border: "1px solid #C6C6C6",
+                            borderRadius: "8px",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="mt-5">

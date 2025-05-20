@@ -454,7 +454,6 @@ const WhatsappSettings = () => {
                 <div className="d-flex flex-column justify-content-end align-items-start mb-2">
                   <div>
                     <p className="fw700 fs14">הגדרת WhatsApp</p>
-                    
                   </div>
 
                   <div className="rtl">
@@ -1433,8 +1432,9 @@ const WhatsappSettings = () => {
           {[
             "שלב 1 - הגדר את מספר ה-WhatsApp שלך (כולל קידומת +972 ) , בחר עיצוב, צבעים והתאם את הוידג׳ט לפי רצונך.",
             "שלב 2 - כנס להגדרות האפליקציה בערכת הנושא.",
-            "שלב 3 - אשר הפעלת ״WhatsApp Button״.",
-            "נא להוסיף סרטון - של התקיעות והמסך שנשבר בדף המוצר (לוודא שזה לא קורה בדפים נוספים כמו עגלה / צור קשר / מאמרים / וכו׳ )",
+            'שלב 3 - אשר הפעלת ״WhatsApp Button״.',
+            'נא להוסיף סרטון - של התקיעות והמסך שנשבר בדף המוצר (לוודא שזה לא קורה בדפים נוספים כמו עגלה / צור קשר / מאמרים / וכו׳ )'
+            
           ].map((item) => (
             <div
               className="d-flex aic gap-3 mb-2"
