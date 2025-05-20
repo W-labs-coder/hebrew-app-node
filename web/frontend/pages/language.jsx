@@ -73,9 +73,9 @@ export default function Language() {
       value: "david libre",
     },
     {
-      id: "frank ruhl lible",
-      name: "Frank Ruhl Lible",
-      value: "frank ruhl lible",
+      id: "frank ruhl libre",
+      name: "Frank Ruhl Libre",
+      value: "frank ruhl libre",
     },
     {
       id: "fredoka",
@@ -142,11 +142,7 @@ export default function Language() {
       name: "Varela Round",
       value: "varela round",
     },
-    {
-      id: "greycliff hebrew cf",
-      name: "Greycliff Hebrew CF",
-      value: "greycliff hebrew cf",
-    },
+   
   ];
   const languages = [
     {
@@ -622,30 +618,7 @@ const Fonts = ({fonts}) => {
             </Button>
           </form>
           {/* Font Preview */}
-          {font && (
-            <div
-              style={{
-                marginTop: "16px",
-                padding: "12px",
-                border: "1px dashed #C6C6C6",
-                borderRadius: "8px",
-                background: "#fff",
-              }}
-            >
-              <p className="fs14 fw700 mb-2">תצוגה מקדימה של הגופן:</p>
-              <span
-                style={{
-                  fontFamily: `'${font}', sans-serif`,
-                  fontSize: "22px",
-                  direction: "rtl",
-                  display: "block",
-                  color: "#222",
-                }}
-              >
-                זהו טקסט לדוגמה בעברית
-              </span>
-            </div>
-          )}
+        
           {isFontSubmitSuccessful && (
             <a
               href={getFontEditor()}
