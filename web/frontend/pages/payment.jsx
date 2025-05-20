@@ -414,7 +414,7 @@ const PaymentSection = () => {
                           )}
                           onChange={handleInputChange}
                         />
-                        {feature.icon}
+                        {feature?.icon}
                       </label>
                     </div>
                   ))}
