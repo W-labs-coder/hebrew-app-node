@@ -12,9 +12,9 @@ import { useDispatch, useSelector } from "react-redux";
 import AmericanExpressIcon from "../components/svgs/AmericanExpressIcon";
 import DinersIcon from "../components/svgs/DinersIcon";
 import ApplePayIcon from "../components/svgs/ApplePayIcon";
-// import BitIcon from "../components/svgs/BitIcon";
+import BitIcon from "../components/svgs/BitIcon";
 import MasterCardIcon from "../components/svgs/MasterCardIcon";
-// import IsracardIcon from "../components/svgs/IsracardIcon";
+import IsracardIcon from "../components/svgs/IsracardIcon";
 import GooglePayIcon from "../components/svgs/GooglePayIcon";
 import VisaIcon from "../components/svgs/VisaIcon";
 import PaypalIcon from "../components/svgs/PaypalIcon";
@@ -38,8 +38,8 @@ const PaymentSection = () => {
     { name: "American Express", icon: <AmericanExpressIcon /> },
     { name: "Diners", icon: <DinersIcon /> },
     { name: "Apple Pay", icon: <ApplePayIcon /> },
-    // { name: "Bit", icon: <BitIcon /> },
-    // { name: "Isracard", icon: <IsracardIcon /> },
+    { name: "Bit", icon: <BitIcon /> },
+    { name: "Isracard", icon: <IsracardIcon /> },
     { name: "Google Pay", icon: <GooglePayIcon /> },
     { name: "Visa", icon: <VisaIcon /> },
     { name: "Master Card", icon: <MasterCardIcon /> },
