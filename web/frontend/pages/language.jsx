@@ -528,6 +528,8 @@ const Fonts = ({fonts}) => {
     user?.font || "",
   );
 
+  
+
   const dispatch = useDispatch();
 
   const [isFontSubmitSuccessful, setIsFontSubmitSuccessful] =
