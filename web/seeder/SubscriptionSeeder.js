@@ -145,7 +145,7 @@ const subscriptions = [
       "buyNowText",
       "notifications",
       "payment",
-      "sabbathMode",
+      "shabbatMode",
       "customSabbathMode",
       "whatsapp",
       "support",
