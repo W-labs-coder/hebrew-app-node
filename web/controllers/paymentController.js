@@ -10,8 +10,8 @@ export const updatePaymentSettings = async (req, res) => {
       selectedProcessors = [],
       customProcessor = { name: "", icon: null },
       selectedFeatures = [],
-      shipping = "",
-      customShipping = "",
+      hasFreeShipping = false,
+      freeShippingText = "",
       warranty = "",
       selectedCalendars = [],
       paymentBackgroundColor = "transparent",
@@ -32,8 +32,8 @@ export const updatePaymentSettings = async (req, res) => {
           selectedProcessors,
           customProcessor,
           selectedFeatures,
-          shipping,
-          customShipping,
+          hasFreeShipping,
+          freeShippingText,
           warranty,
           selectedCalendars,
           paymentBackgroundColor,
@@ -118,23 +118,23 @@ export const updatePaymentSettings = async (req, res) => {
       });
     }
 
-    if (shipping) {
+    if (hasFreeShipping) {
       metafields.push({
-        key: "shipping_option",
+        key: "has_free_shipping",
         namespace: "custom",
         ownerId: shopGid,
-        type: "single_line_text_field",
-        value: shipping,
+        type: "boolean",
+        value: hasFreeShipping.toString(),
       });
     }
 
-    if (customShipping) {
+    if (freeShippingText) {
       metafields.push({
-        key: "custom_shipping",
+        key: "free_shipping_text",
         namespace: "custom",
         ownerId: shopGid,
         type: "single_line_text_field",
-        value: customShipping,
+        value: freeShippingText,
       });
     }
 
