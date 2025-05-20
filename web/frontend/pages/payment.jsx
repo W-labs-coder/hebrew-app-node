@@ -412,9 +412,9 @@ const PaymentSection = () => {
                           checked={formData.selectedFeatures.includes(
                             feature.name
                           )}
-                          // onChange={handleInputChange}
+                          onChange={handleInputChange}
                         />
-                        {feature.icon}
+                        {/* {feature.icon} */}
                       </label>
                     </div>
                   ))}
