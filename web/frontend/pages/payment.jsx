@@ -50,7 +50,7 @@ const PaymentSection = () => {
     { name: "Delivery", icon: <TruckDeliveryIcon /> },
     { name: "Package", icon: <PackageIcon /> },
     { name: "Airplane", icon: <AirplaneIcon /> },
-    { name: "Sent", icon: <SendIcon /> },
+    // { name: "Sent", icon: <SendIcon /> },
   ];
 
   const calendars = [
@@ -399,7 +399,7 @@ const PaymentSection = () => {
                 <p className="my-2 fs14">בחר סמלים שתרצה להוסיף.</p>
 
                 <div className="row jcs w-100">
-                  {/* {features.map((feature) => (
+                  {features.map((feature) => (
                     <div className="col-3" key={feature.name}>
                       <label
                         className="fs14 fw500 d-flex gap-2"
@@ -417,7 +417,7 @@ const PaymentSection = () => {
                         {feature.icon}
                       </label>
                     </div>
-                  ))} */}
+                  ))}
                 </div>
                 <div>
                   <div>
