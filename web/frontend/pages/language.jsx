@@ -20,14 +20,6 @@ export default function Language() {
   // Modal state
   const [showPermissionModal, setShowPermissionModal] = useState(false);
 
-  // Handler for blocked actions
-  const handleBlocked = () => setShowPermissionModal(true);
-  const handleUpgrade = () => {
-    setShowPermissionModal(false);
-    window.location.href = "/plans";
-  };
-  const handleCancel = () => setShowPermissionModal(false);
-
   // Helper to check permission
   const hasPermission = (perm) => userPermissions?.includes(perm);
 
@@ -161,21 +153,20 @@ export default function Language() {
           <Layout>
             <Layout.Section>
               <div>
-                {hasPermission("language") ? (
-                  <LanguageSection languages={languages} />
-                ) : (
-                  <Button onClick={handleBlocked}>הפעל תרגום שפה</Button>
-                )}
-                {hasPermission("buyNowText") ? (
-                  <BuyNow />
-                ) : (
-                  <Button onClick={handleBlocked}>הפעל שינוי טקסט קנייה</Button>
-                )}
-                {hasPermission("fonts") ? (
-                  <Fonts fonts={fonts} />
-                ) : (
-                  <Button onClick={handleBlocked}>הפעל גופנים</Button>
-                )}
+                <LanguageSection
+                  languages={languages}
+                  hasPermission={hasPermission}
+                  setShowPermissionModal={setShowPermissionModal}
+                />
+                <BuyNow
+                  hasPermission={hasPermission}
+                  setShowPermissionModal={setShowPermissionModal}
+                />
+                <Fonts
+                  fonts={fonts}
+                  hasPermission={hasPermission}
+                  setShowPermissionModal={setShowPermissionModal}
+                />
               </div>
             </Layout.Section>
           </Layout>
@@ -184,16 +175,19 @@ export default function Language() {
       {/* Permission Modal */}
       <Modal
         open={showPermissionModal}
-        onClose={handleCancel}
+        onClose={() => setShowPermissionModal(false)}
         title="אין לך הרשאה"
         primaryAction={{
           content: "שדרג עכשיו",
-          onAction: handleUpgrade,
+          onAction: () => {
+            setShowPermissionModal(false);
+            window.location.href = "/plans";
+          },
         }}
         secondaryActions={[
           {
             content: "ביטול",
-            onAction: handleCancel,
+            onAction: () => setShowPermissionModal(false),
           },
         ]}
       >
@@ -205,7 +199,7 @@ export default function Language() {
   );
 }
 
-const LanguageSection = ({  languages }) => {
+const LanguageSection = ({  languages, hasPermission, setShowPermissionModal }) => {
   
   const user = useSelector((state) => state.auth.user);
   const [selectedLanguage, setSelectedLanguage] = useState(user?.selectedLanguage || "");
@@ -221,6 +215,10 @@ const LanguageSection = ({  languages }) => {
 const dispatch = useDispatch() 
 const saveLanguage = async (e) => {
   e.preventDefault();
+  if (!hasPermission("language")) {
+    setShowPermissionModal(true);
+    return;
+  }
   setIsLanguageLoading(true)
   try {
     const response = await fetch("/api/settings/add-selected-language", {
@@ -377,7 +375,7 @@ const getLanguageEditorUrl = () => {
 };
 
 
-const BuyNow = () => {
+const BuyNow = ({ hasPermission, setShowPermissionModal }) => {
   const user = useSelector((state) => state.auth.user);
   const [buyNow, setBuyNow] = useState({
     buyNowText: user?.buyNowText || "",
@@ -402,6 +400,10 @@ const BuyNow = () => {
 
   const saveBuyNow = async (e) => {
     e.preventDefault();
+    if (!hasPermission("buyNowText")) {
+      setShowPermissionModal(true);
+      return;
+    }
     setIsBuyNowLoading(true);
     try {
       const response = await fetch("/api/settings/add-buy-now", {
@@ -522,7 +524,7 @@ const BuyNow = () => {
 };
 
 
-const Fonts = ({fonts}) => {
+const Fonts = ({fonts, hasPermission, setShowPermissionModal}) => {
   const user = useSelector((state) => state.auth.user);
   const [font, setFont] = useState(
     user?.font || "",
@@ -544,6 +546,10 @@ const Fonts = ({fonts}) => {
 
   const saveFont = async (e) => {
     e.preventDefault();
+    if (!hasPermission("fonts")) {
+      setShowPermissionModal(true);
+      return;
+    }
     setIsFontLoading(true);
     try {
       const response = await fetch("/api/settings/add-font", {
