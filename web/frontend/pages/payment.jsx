@@ -94,7 +94,7 @@ const PaymentSection = () => {
           // Optionally clear text if unchecked
           freeShippingText: checked ? prevState.freeShippingText : "",
         }));
-      } else {
+      } else if (name === "processor" || name === "feature" || name === "calendar") {
         const list =
           name === "processor"
             ? "selectedProcessors"
@@ -372,7 +372,7 @@ const PaymentSection = () => {
           </div>
         </div>
 
-        {/* <div
+        <div
           className="d-flex flex-column jcs"
           style={{
             margin: "16px 0",
@@ -563,7 +563,7 @@ const PaymentSection = () => {
               </div>
             ))}
           </div>
-        </div> */}
+        </div>
       </form>
     </section>
   );
