@@ -175,14 +175,22 @@ export const confirmSubscription = async (req, res) => {
       // Continue with subscription setup
     }
 
-    const user = await User.create({shop});
+    const fetchUser = await User.findOne({ shop });
+    if (!fetchUser) {
+      await User.create({ shop });
+    }
 
-    return res
-      .status(200)
-      .json({
-        url: `/?shop=${shop}&host=${host}&subscriptionActive=true`,
-        user,
-      });
+
+    const user = await User.findOne({ shop }).populate("subscription");
+    const _subscription = await UserSubscription.findOne({ shop })
+      .sort({ createdAt: -1 })
+      .populate("subscription");
+      
+    return res.status(200).json({
+      url: `/?shop=${shop}&host=${host}&subscriptionActive=true`,
+      user,
+      subscription: _subscription,
+    });
   } catch (error) {
     console.error("Detailed error:", error);
     return res.status(500).json({error: error});

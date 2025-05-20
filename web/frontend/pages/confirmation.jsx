@@ -65,9 +65,10 @@ export default function Confirmation() {
       );
       const data = await response.json();
       const user = data.user
+      const subscription = data.subscription
 
       console.log("Subscription confirmation response:", data);
-      dispatch(login({ user }));
+      dispatch(login({ user, subscription }));
 
       setStatus("success");
 
