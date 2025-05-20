@@ -17,6 +17,8 @@ const Subscription = ({ subscriptions }) => {
 
   const userSubscription = useSelector(state => state.auth.subscription); 
 
+  console.log("userSubscription", userSubscription);
+
  
 
   useEffect(() => {
