@@ -8,6 +8,6 @@ const UserSubscriptionSchema = new mongoose.Schema({
   endDate: Date,
   chargeId: String,
   trialEndDate : Date,
-});
+},{timestamps : true});
 
 export default mongoose.model("UserSubscription", UserSubscriptionSchema);
