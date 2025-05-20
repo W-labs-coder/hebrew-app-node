@@ -49,7 +49,7 @@ const PaymentSection = () => {
   const features = [
     { name: "Delivery", icon: <TruckDeliveryIcon /> },
     { name: "Package", icon: <PackageIcon /> },
-    { name: "Airplane", icon: <AirplaneIcon /> },
+    // { name: "Airplane", icon: <AirplaneIcon /> },
     { name: "Sent", icon: <SendIcon /> },
   ];
 
@@ -414,7 +414,7 @@ const PaymentSection = () => {
                           )}
                           onChange={handleInputChange}
                         />
-                        {/* {feature.icon} */}
+                        {feature.icon}
                       </label>
                     </div>
                   ))}
