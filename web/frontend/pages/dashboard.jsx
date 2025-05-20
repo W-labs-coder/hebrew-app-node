@@ -51,7 +51,7 @@ const categoryContents = [
     icon: Payment2,
     content:
       "הוסף לאתר שלך בקלות לוגואים של כרטיסי אשראי, משלוחים חינם, החזרות, ותווי אמון נוספים – לחיזוק תחושת הביטחון של הלקוחות והגדלת ההמרות.",
-    button: "הגדרת אמצעי תשלום",
+    button: "הגדר עכשיו",
     link: "/payment",
     permission: "payment",
   },
