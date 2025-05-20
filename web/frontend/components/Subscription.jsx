@@ -15,7 +15,7 @@ const Subscription = ({ subscriptions }) => {
   
   
 
-  const userSubscription = useSelector(state => state.auth.subscription); 
+  const userSubscription = useSelector(state => state.auth.subscription?.subscription); 
 
   console.log("userSubscription", userSubscription);
 
