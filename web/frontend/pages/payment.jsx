@@ -399,7 +399,7 @@ const PaymentSection = () => {
                 <p className="my-2 fs14">בחר סמלים שתרצה להוסיף.</p>
 
                 <div className="row jcs w-100">
-                  {features?.map((feature) => (
+                  {features.map((feature) => (
                     <div className="col-3" key={feature.name}>
                       <label
                         className="fs14 fw500 d-flex gap-2"
@@ -421,7 +421,10 @@ const PaymentSection = () => {
                 </div>
                 <div>
                   <div>
-                    <label className="fw700 fs14 d-flex gap-2" style={{ alignItems: "center" }}>
+                    <label
+                      className="fw700 fs14 d-flex gap-2"
+                      style={{ alignItems: "center" }}
+                    >
                       <input
                         type="checkbox"
                         name="hasFreeShipping"
@@ -432,7 +435,10 @@ const PaymentSection = () => {
                     </label>
                     {formData.hasFreeShipping && (
                       <div style={{ marginTop: "16px" }}>
-                        <label htmlFor="freeShippingText" className="fw700 fs14">
+                        <label
+                          htmlFor="freeShippingText"
+                          className="fw700 fs14"
+                        >
                           טקסט משלוח חינם:
                         </label>
                         <input
