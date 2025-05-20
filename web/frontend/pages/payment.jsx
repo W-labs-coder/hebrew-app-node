@@ -419,7 +419,7 @@ const PaymentSection = () => {
                     </div>
                   ))}
                 </div>
-                <div>
+                <div className="mt-2">
                   <div>
                     <label
                       className="fw700 fs14 d-flex gap-2"
