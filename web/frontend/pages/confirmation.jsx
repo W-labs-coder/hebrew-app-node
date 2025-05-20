@@ -67,9 +67,12 @@ export default function Confirmation() {
       const user = data.user
       const subscription = data.subscription
 
+      console.log("Subscription confirmation data:", data);
+
       console.log("Subscription confirmation response:", data);
       dispatch(login({ user, subscription }));
 
+      console.log('dispatched')
       setStatus("success");
 
       // Use the new navigation function
