@@ -73,8 +73,8 @@ const PaymentSection = () => {
     selectedProcessors: user?.selectedProcessors || [],
     customProcessor: user?.customProcessor || { name: "", icon: null },
     selectedFeatures: user?.selectedFeatures || [],
-    shipping: user?.shipping || "",
-    customShipping: user?.customShipping || "",
+    hasFreeShipping: user?.hasFreeShipping || false,
+    freeShippingText: user?.freeShippingText || "",
     warranty: user?.warranty || "",
     selectedCalendars: user?.selectedCalendars || [],
     paymentBackgroundColor: user?.paymentBackgroundColor || "transparent",
@@ -87,17 +87,31 @@ const PaymentSection = () => {
   const handleInputChange = (event) => {
     const { name, value, type, checked } = event.target;
     if (type === "checkbox") {
-      const list =
-        name === "processor"
-          ? "selectedProcessors"
-          : name === "feature"
-          ? "selectedFeatures"
-          : "selectedCalendars";
+      if (name === "hasFreeShipping") {
+        setFormData((prevState) => ({
+          ...prevState,
+          hasFreeShipping: checked,
+          // Optionally clear text if unchecked
+          freeShippingText: checked ? prevState.freeShippingText : "",
+        }));
+      } else {
+        const list =
+          name === "processor"
+            ? "selectedProcessors"
+            : name === "feature"
+            ? "selectedFeatures"
+            : "selectedCalendars";
+        setFormData((prevState) => ({
+          ...prevState,
+          [list]: checked
+            ? [...prevState[list], value]
+            : prevState[list].filter((item) => item !== value),
+        }));
+      }
+    } else if (name === "freeShippingText") {
       setFormData((prevState) => ({
         ...prevState,
-        [list]: checked
-          ? [...prevState[list], value]
-          : prevState[list].filter((item) => item !== value),
+        freeShippingText: value,
       }));
     } else if (name === "customProcessorName") {
       setFormData((prevState) => ({
@@ -381,7 +395,7 @@ const PaymentSection = () => {
           >
             <div>
               <div>
-                <p className="fw700 fs14">תווים להגברת אמינות :</p>
+                <p className="fw700 fs14">תווים להגברת אמינות</p>
                 <p className="my-2 fs14">בחר סמלים שתרצה להוסיף.</p>
 
                 <div className="row jcs w-100">
@@ -406,39 +420,39 @@ const PaymentSection = () => {
                   ))}
                 </div>
                 <div>
-                  <Input
-                    type="select"
-                    label="בחר דרישות משלוח חינם:"
-                    id="shipping"
-                    name="shipping"
-                    options={shippings}
-                    placeholder="לִבחוֹר"
-                    onChange={handleInputChange}
-                    value={formData.shipping}
-                  />
-
-                  {formData.shipping === "custom" && (
-                    <div style={{ marginTop: "16px" }}>
-                      <label htmlFor="customShipping" className="fw700 fs14">
-                        הכנס דרישה מותאמת אישית:
-                      </label>
+                  <div>
+                    <label className="fw700 fs14 d-flex gap-2" style={{ alignItems: "center" }}>
                       <input
-                        type="text"
-                        id="customShipping"
-                        name="customShipping"
-                        value={formData.customShipping}
-                        placeholder="הכנס ערך מותאם אישית..."
+                        type="checkbox"
+                        name="hasFreeShipping"
+                        checked={formData.hasFreeShipping}
                         onChange={handleInputChange}
-                        style={{
-                          width: "100%",
-                          padding: "8px",
-                          marginTop: "8px",
-                          border: "1px solid #C6C6C6",
-                          borderRadius: "8px",
-                        }}
                       />
-                    </div>
-                  )}
+                      הצג משלוח חינם
+                    </label>
+                    {formData.hasFreeShipping && (
+                      <div style={{ marginTop: "16px" }}>
+                        <label htmlFor="freeShippingText" className="fw700 fs14">
+                          טקסט משלוח חינם:
+                        </label>
+                        <input
+                          type="text"
+                          id="freeShippingText"
+                          name="freeShippingText"
+                          value={formData.freeShippingText}
+                          placeholder="הכנס טקסט משלוח חינם..."
+                          onChange={handleInputChange}
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            marginTop: "8px",
+                            border: "1px solid #C6C6C6",
+                            borderRadius: "8px",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="mt-5">
