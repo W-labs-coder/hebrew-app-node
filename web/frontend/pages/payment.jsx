@@ -28,6 +28,8 @@ import AppointmentIcon from "../components/svgs/AppointmentIcon";
 const PaymentSection = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [isSubmittingProcessors, setIsSubmittingProcessors] = useState(false);
+  const [isProcessorsSaveSuccess, setIsProcessorsSaveSuccess] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
@@ -158,6 +160,35 @@ const PaymentSection = () => {
       toast.error("לא ניתן להוסיף אמצעי תשלום");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleProcessorsSave = async () => {
+    setIsSubmittingProcessors(true);
+    setIsProcessorsSaveSuccess(false);
+    try {
+      const response = await fetch("/api/settings/update-processors", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          selectedProcessors: formData.selectedProcessors,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "תגובת הרשת לא הייתה בסדר");
+      }
+
+      setIsProcessorsSaveSuccess(true);
+      toast.success("אמצעי התשלום נשמרו בהצלחה");
+    } catch (error) {
+      console.error("שגיאה בשליחת הטופס:", error);
+      toast.error("לא ניתן לשמור את אמצעי התשלום");
+    } finally {
+      setIsSubmittingProcessors(false);
     }
   };
 
@@ -293,6 +324,31 @@ const PaymentSection = () => {
                       </label>
                     </div>
                   ))}
+                </div>
+                <div style={{ marginTop: "16px" }}>
+                  <Button
+                    type="button"
+                    loading={isSubmittingProcessors}
+                    disabled={isSubmittingProcessors}
+                    onClick={handleProcessorsSave}
+                  >
+                    {isSubmittingProcessors ? "שומר..." : "שמור אמצעי תשלום"}
+                  </Button>
+                  {isProcessorsSaveSuccess && (
+                    <div
+                      className="success-message"
+                      style={{
+                        marginTop: "8px",
+                        padding: "8px",
+                        backgroundColor: "#e6f7e6",
+                        color: "#2e7d32",
+                        borderRadius: "4px",
+                        textAlign: "center",
+                      }}
+                    >
+                      אמצעי התשלום נשמרו בהצלחה!
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
