@@ -2,7 +2,17 @@ import React from 'react'
 
 export default function PackageIcon() {
   return (
-    <svg viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      height="200px"
+      width="200px"
+      version="1.1"
+      id="Layer_1"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      viewBox="0 0 512 512"
+      xml:space="preserve"
+      fill="#000000"
+    >
       <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
       <g
         id="SVGRepo_tracerCarrier"
@@ -11,11 +21,41 @@ export default function PackageIcon() {
       ></g>
       <g id="SVGRepo_iconCarrier">
         {" "}
-        <path
-          d="M12.5 13V22M12.5 13L4.5 8M12.5 13L20.5 8M8.5 5.5L16.5 10.5M4.5 8L12.5 3L20.5 8V17L12.5 22L4.5 17V8Z"
-          stroke="#121923"
-          stroke-width="1.2"
-        ></path>{" "}
+        <polygon
+          style="fill:#E0B76E;"
+          points="376.808,187.877 256,512 28.996,384.006 28.996,127.994 "
+        ></polygon>{" "}
+        <polygon
+          style="fill:#F4CE8F;"
+          points="256,0 28.996,127.994 256,256 256,512 483.004,384.006 483.004,127.994 "
+        ></polygon>{" "}
+        <polygon
+          style="fill:#F2CA7F;"
+          points="256,256 256,512 483.004,384.006 483.004,127.994 "
+        ></polygon>{" "}
+        <polyline
+          style="fill:#8CC1EA;"
+          points="174.431,466.018 174.431,210.006 268.189,157.134 268.201,157.134 268.199,157.134 191.405,157.134 191.794,121.013 191.8,121.008 104.201,170.4 104.201,425.526 "
+        ></polyline>{" "}
+        <polyline
+          style="fill:#79B1D6;"
+          points="174.431,466.018 174.431,210.006 104.201,170.4 104.201,425.526 "
+        ></polyline>{" "}
+        <polyline
+          style="fill:#8CC1EA;"
+          points="331.708,42.166 237.949,95.039 237.937,95.039 237.94,95.039 314.734,95.039 314.345,131.16 314.339,131.164 401.937,81.773 "
+        ></polyline>{" "}
+        <g>
+          {" "}
+          <polygon
+            style="fill:#898686;"
+            points="374.872,292.189 340.931,268.603 305.907,330.967 331.691,316.469 331.691,422.122 349.634,412.002 349.634,306.381 "
+          ></polygon>{" "}
+          <polygon
+            style="fill:#898686;"
+            points="370.318,361.73 404.259,385.316 439.283,322.952 413.498,337.45 413.498,231.797 395.555,241.917 395.555,347.54 "
+          ></polygon>{" "}
+        </g>{" "}
       </g>
     </svg>
   );

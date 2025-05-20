@@ -973,7 +973,7 @@ flex-direction: column;
          <img src="{% if processor == 'Apple Pay' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/apple-pay-payment-mark-logo-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
      alt="Apple Pay" width="35" height="35">
 {% when "Isracard" %}
-  <img src="{% if processor == 'Isracard' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/Isracard.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
+  <img src="{% if processor == 'Isracard' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/isracard_new.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
      alt="Isracard" width="35" height="35">
         {% when "Paypal" %}
          <img src="{% if processor == 'Paypal' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/paypal-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
@@ -1007,9 +1007,9 @@ flex-direction: column;
           <img src="{% if feature == 'Delivery' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/delivery-truck-truck-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
      alt="Delivery" width="24" height="24">
         {% when "Package" %}
-          <img src="{% if feature == 'Package' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/package-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Package" width="24" height="24">
+          <img src="{% if feature == 'Package' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/package-box-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Package" width="24" height="24">
         {% when "Airplane" %}
-          <img src="{% if feature == 'Airplane' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/airplane-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Airplane" width="24" height="24">
+          <img src="{% if feature == 'Airplane' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/departures-plane-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Airplane" width="24" height="24">
           {% when "Sent" %}
           <img src="{% if feature == 'Sent' %}https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/paper-plane-svgrepo-com.svg{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Sent" width="24" height="24">
         {% else %}
