@@ -14,6 +14,7 @@ import CancellationHistoryIcon from "./svgs/CancellationHistoryIcon";
 import TrainingIcon from "./svgs/TrainingIcon";
 import SupportIcon from "./svgs/SupportIcon";
 import AlertIcon from "./svgs/AlertIcon";
+import PlansIcon from "./svgs/PlansIcon";
 import { useSelector } from "react-redux";
 import Logo from "./svgs/Logo";
 import { Modal, Button } from "@shopify/polaris"; // Add this import if using Polaris, or use your own modal
@@ -121,7 +122,7 @@ export const mainMenu = [
     title: "תוכניות",
     slug: "plans",
     link: "/plans",
-    icon: SupportIcon,
+    icon: PlansIcon,
     permissions: "dashboard",
   },
 ];

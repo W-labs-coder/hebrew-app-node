@@ -195,18 +195,24 @@ const handleSelectPlan = async (id) => {
                       subscription.name.toLowerCase() === "pro"
                         ? "#FBB105"
                         : "transparent",
+                    opacity: subscription.isActive ? 0.6 : 1,
+                    pointerEvents: subscription.isActive ? "none" : "auto",
                   }}
                   className="d-flex aic jcc subscribe-button"
-                  onClick={() => handleSelectPlan(subscription._id)}
+                  onClick={() =>
+                    !subscription.isActive && handleSelectPlan(subscription._id)
+                  }
                 >
-                  {!loading ? (
+                  {subscription.isActive ? (
+                    <p className="fs14 text-center" style={{ color: "#0D0D0D" }}>
+                      פעיל
+                    </p>
+                  ) : selected === subscription._id && loading ? (
+                    <p className="fs14 text-center">Loading... Please wait</p>
+                  ) : (
                     <p className="fs14 text-center">
                       התחל ניסיון של 8 ימים בחינם
                     </p>
-                  ) : (
-                    selected == subscription?._id && (
-                      <p className="fs14 text-center">Loading... Please wait</p>
-                    )
                   )}
                 </div>
                 <p className="fw600 fs16">{subscription.name} Plan</p>
