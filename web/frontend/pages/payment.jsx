@@ -372,7 +372,7 @@ const PaymentSection = () => {
           </div>
         </div>
 
-        <div
+        {/* <div
           className="d-flex flex-column jcs"
           style={{
             margin: "16px 0",
@@ -563,7 +563,7 @@ const PaymentSection = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </form>
     </section>
   );
