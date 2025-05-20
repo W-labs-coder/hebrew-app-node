@@ -49,8 +49,8 @@ const PaymentSection = () => {
   const features = [
     { name: "Delivery", icon: <TruckDeliveryIcon /> },
     { name: "Package", icon: <PackageIcon /> },
-    // { name: "Airplane", icon: <AirplaneIcon /> },
-    // { name: "Sent", icon: <SendIcon /> },
+    { name: "Airplane", icon: <AirplaneIcon /> },
+    { name: "Sent", icon: <SendIcon /> },
   ];
 
   const calendars = [
