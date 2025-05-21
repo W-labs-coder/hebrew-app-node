@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
 import mongoose from "mongoose";
+import { uploadToR2 } from "../config/r2.js"; // Make sure this exists
 
 export const updateWhatsappSettings = async (req, res) => {
   const startTime = Date.now();
@@ -580,5 +581,18 @@ export const deleteWhatsappContact = async (req, res) => {
       message: "Error deleting contact",
       error: error.message
     });
+  }
+};
+
+export const uploadContactAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const key = `whatsapp-contacts/${Date.now()}-${req.file.originalname}`;
+    const url = await uploadToR2(req.file, key);
+    res.json({ url });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

@@ -211,12 +211,8 @@ export const updateAccessibilitySettings = async (req, res) => {
       variables: {
         metafields: metafields
       }
-    }).catch(error => {
-      console.error('Error in metafieldsSet mutation:', error.response?.data || error.message);
-      throw new Error(`MetafieldsSet mutation failed: ${error.message}`);
-    });
-
-     const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
+    }).then(() => {
+const subscription = await UserSubscription.findOne({ shop:user.shop }).sort({ createdAt: -1 }).populate("subscription");
         
             if (!subscription) {
               return res.status(404).json({ success: false, message: "No subscription found" });
@@ -239,6 +235,12 @@ export const updateAccessibilitySettings = async (req, res) => {
       timestamp: Date.now() - startTime,
       subscription,
     });
+    }).catch(error => {
+      console.error('Error in metafieldsSet mutation:', error.response?.data || error.message);
+      throw new Error(`MetafieldsSet mutation failed: ${error.message}`);
+    });
+
+     
 
   } catch (error) {
     console.error("Error updating accessibility settings:", error);

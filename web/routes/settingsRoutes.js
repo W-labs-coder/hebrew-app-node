@@ -12,7 +12,8 @@ import {
   updateWhatsappSettings,
   addOrUpdateWhatsappContact,
   deleteWhatsappContact,
- } from "../controllers/whatsappController.js";
+  uploadContactAvatar,
+} from "../controllers/whatsappController.js";
 import {
   updateSabbathSettings,
   uploadSabbathFile,
@@ -64,6 +65,11 @@ router.post("/fetch-user", fetchUser);
 router.post("/update-whatsapp-settings", updateWhatsappSettings);
 router.post("/whatsapp/contacts", addOrUpdateWhatsappContact);
 router.delete("/whatsapp/contacts/:id", deleteWhatsappContact);
+router.post(
+  "/whatsapp/upload-contact-avatar",
+  upload.single("avatar"),
+  uploadContactAvatar
+);
 router.post("/update-sabbath", updateSabbathSettings);
 router.post("/toggle-sabbath-theme", toggleSabbathTheme);
 router.get("/get-sabbath", getSabbathSettings);

@@ -65,40 +65,40 @@
     }
 
     .accessibility-panel {
-      display: none;
-      position: absolute;
-      width: 300px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      
-      {% case accessibility_icon_location %}
-        {% when 'top_left' %}
-          top: 100%;
-          left: 0;
-        {% when 'top_right' %}
-          top: 100%;
-          right: 0;
-        {% when 'bottom_left' %}
-          bottom: 100%;
-          left: 0 !important;
-        {% when 'bottom_right' %}
-          bottom: 100%;
-          right: 0;
-      {% endcase %}
-    }
+  display: none;
+  position: absolute;
+  width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 999999;
+  {% case accessibility_icon_location %}
+    {% when 'top_left' %}
+      top: 100%;
+      left: 0;
+      margin-top: 8px;
+    {% when 'top_right' %}
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+    {% when 'bottom_left' %}
+      bottom: 100%;
+      left: 0;
+      margin-bottom: 8px;
+    {% when 'bottom_right' %}
+      bottom: 100%;
+      right: 0;
+      margin-bottom: 8px;
+  {% endcase %}
+}
 
     .accessibility-panel.active {
       display: block;
     }
 
-    .accessibility-panel-header {
-      padding: 16px;
-      border-bottom: 1px solid #eee;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    
 
     .accessibility-panel-header h2 {
       margin: 0;
@@ -180,21 +180,8 @@
   height: 100%;
 }
 
-.accessibility-panel {
-  display: none;
-  position: absolute;
-  width: 320px;
-  max-height: 80vh;
-  overflow-y: auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 999999;
-}
 
-.accessibility-panel.active {
-  display: block;
-}
+
 
 .accessibility-panel-header {
   padding: 16px;
@@ -1649,7 +1636,7 @@ function getCurrentTimeInShopTimeZone() {
 </script>
 
 {% if block.settings.enable_accessibility %}
-   <!-- DEBUG: accessibility_icon_location = {{ accessibility_icon_location }} -->
+   <!-- DEBUG: metafields = {{ shop.metafields.custom | json }} -->
   <div class="accessibility-widget-container" 
        style="position: fixed; z-index: {{ accessibility_zindex }}; 
               {% case accessibility_icon_location %}
@@ -1667,18 +1654,18 @@ function getCurrentTimeInShopTimeZone() {
             aria-label="{{ accessibility_help_title }}"
             aria-expanded="false"
             aria-controls="accessibility-panel"
-            style="background-color: {{ accessibility_button_bg_color }};
+            style="background-color: {{ accessibility_button_bg_color }} !important;
                    border-radius: {% if accessibility_icon_shape == 'rounded' %}50%{% else %}8px{% endif %};
                    width: {% case accessibility_icon_size %}
                             {% when 'small' %}32px
                             {% when 'large' %}64px
-                            {% else %}48px
-                          {% endcase %};
+                            {% else %}30px
+                          {% endcase %} !important;
                    height: {% case accessibility_icon_size %}
                             {% when 'small' %}32px
                             {% when 'large' %}64px
-                            {% else %}48px
-                          {% endcase %};">
+                            {% else %}30px
+                          {% endcase %} !important;">
       
       <span class="accessibility-icon" style="color: {{ accessibility_button_icon_color }};">
         {% case accessibility_icon_type %}
