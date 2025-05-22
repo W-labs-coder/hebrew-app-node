@@ -267,7 +267,7 @@ export const updateAccessibilitySettings = async (req, res) => {
       ?.map(edge => edge.node)
       ?.filter(mf => metafieldKeys.includes(mf.key));
 
-      console.log("fetchedMetafields", fetchedMetafields);
+      console.log("metafieldsResponse", metafieldsResponse);
 
     const subscription = await UserSubscription.findOne({ shop: user.shop })
       .sort({ createdAt: -1 })
