@@ -263,7 +263,7 @@ export const updateAccessibilitySettings = async (req, res) => {
 
     const metafieldsResponse = await client.request(metafieldsQuery);
 
-    const fetchedMetafields = metafieldsResponse?.data?.shop?.metafields?.edges
+    const fetchedMetafields = metafieldsResponse?.shop?.metafields?.edges
       ?.map(edge => edge.node)
       ?.filter(mf => metafieldKeys.includes(mf.key));
 
