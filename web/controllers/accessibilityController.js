@@ -22,6 +22,7 @@ export const updateAccessibilitySettings = async (req, res) => {
       iconLocation,
       iconShape,
       iconSize,
+      iconType,
       helpTitle,
       helpText,
       ownerEmail,
@@ -139,7 +140,7 @@ export const updateAccessibilitySettings = async (req, res) => {
         namespace: "custom",
         ownerId: shopGid,
         type: "single_line_text_field",
-        value: settingsData.ownerEmail || " ",
+        value: settingsData.ownerEmail || "",
       },
       {
         key: "accessibility_left_spacing",

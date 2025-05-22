@@ -488,6 +488,15 @@ const AccessibilitySettings = () => {
                         onChange={handleInputChange}
                       />
                       <Input
+                        type="select"
+                        label="סוג האייקון:"
+                        id="icon_type"
+                        name="icon_type"
+                        options={iconTypes}
+                        value={formData.iconType}
+                        onChange={handleInputChange}
+                      />
+                      <Input
                         type="number"
                         label="ריווח האייקון ימין-שמאל (בפיקסלים):"
                         id="leftIconSpacing"
