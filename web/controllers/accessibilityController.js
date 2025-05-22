@@ -22,7 +22,6 @@ export const updateAccessibilitySettings = async (req, res) => {
       iconLocation,
       iconShape,
       iconSize,
-      iconType,
       helpTitle,
       helpText,
       ownerEmail,

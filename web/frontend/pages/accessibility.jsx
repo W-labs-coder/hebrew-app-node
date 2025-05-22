@@ -71,8 +71,44 @@ const AccessibilitySettings = () => {
     }
   };
 
+  // Add this validation function inside AccessibilitySettings
+  const validateForm = () => {
+    // List all required fields
+    const requiredFields = [
+      "iconLocation",
+      "iconShape",
+      "iconSize",
+      "helpTitle",
+      "helpText",
+      "ownerEmail",
+      "leftIconSpacing",
+      "topBottomSpacing",
+      "zIndex",
+      "accessibilityButtonBgColor",
+      "accessibilityButtonTextColor",
+      "accessibilityButtonIconColor",
+    ];
+    for (const field of requiredFields) {
+      if (
+        formData[field] === undefined ||
+        formData[field] === null ||
+        formData[field] === "" ||
+        (typeof formData[field] === "string" && formData[field].trim() === "")
+      ) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // Validate all fields before submitting
+    if (!validateForm()) {
+      toast.error("אנא מלאו את כל השדות הנדרשים לפני שמירה.");
+      return;
+    }
 
     setIsSubmitting(true);
     setIsSubmitSuccessful(false);
@@ -450,15 +486,6 @@ const AccessibilitySettings = () => {
                         options={iconSize}
                         value={formData.iconSize}
                         onChange={handleInputChange}
-                      />
-                      <Input
-                        type="select"
-                        label="סוג האייקון:"
-                        id="icon_type"
-                        name="icon_type"
-                        options={iconTypes}
-                        value={selectedIconLocation}
-                        onChange={handleIconLocationChange}
                       />
                       <Input
                         type="number"
