@@ -227,6 +227,46 @@ export const updateAccessibilitySettings = async (req, res) => {
       });
     }
 
+    // After updating metafields
+    const metafieldKeys = [
+      "accessibility_icon_location",
+      "accessibility_icon_shape",
+      "accessibility_icon_size",
+      "accessibility_icon_type",
+      "accessibility_help_title",
+      "accessibility_help_text",
+      "accessibility_owner_email",
+      "accessibility_left_spacing",
+      "accessibility_top_spacing",
+      "accessibility_zindex",
+      "accessibility_button_bg_color",
+      "accessibility_button_text_color",
+      "accessibility_button_icon_color",
+    ];
+
+    const metafieldsQuery = `
+      query GetAccessibilityMetafields($ownerId: ID!) {
+        metafields(ownerId: $ownerId, first: 20, namespace: "custom") {
+          edges {
+            node {
+              key
+              value
+              namespace
+              type
+            }
+          }
+        }
+      }
+    `;
+
+    const metafieldsResponse = await client.request(metafieldsQuery, {
+      variables: { ownerId: shopGid }
+    });
+
+    const fetchedMetafields = metafieldsResponse?.data?.metafields?.edges
+      ?.map(edge => edge.node)
+      ?.filter(mf => metafieldKeys.includes(mf.key));
+
     const subscription = await UserSubscription.findOne({ shop: user.shop })
       .sort({ createdAt: -1 })
       .populate("subscription");
@@ -251,6 +291,7 @@ export const updateAccessibilitySettings = async (req, res) => {
       success: true,
       message: "Accessibility settings updated successfully",
       user,
+      metafields: fetchedMetafields,
       timestamp: Date.now() - startTime,
       subscription,
     });

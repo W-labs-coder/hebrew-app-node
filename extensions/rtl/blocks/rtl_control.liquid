@@ -1636,7 +1636,7 @@ function getCurrentTimeInShopTimeZone() {
 </script>
 
 {% if block.settings.enable_accessibility %}
-   <!-- DEBUG: metafields = {{ shop.metafields.custom | json }} -->
+   <!-- DEBUG: metafields = {{ shop.metafields.custom.accessibility_button_bg_color | json }} -->
   <div class="accessibility-widget-container" 
        style="position: fixed; z-index: {{ accessibility_zindex }}; 
               {% case accessibility_icon_location %}
@@ -1657,13 +1657,13 @@ function getCurrentTimeInShopTimeZone() {
             style="background-color: {{ accessibility_button_bg_color }} !important;
                    border-radius: {% if accessibility_icon_shape == 'rounded' %}50%{% else %}8px{% endif %};
                    width: {% case accessibility_icon_size %}
-                            {% when 'small' %}32px
-                            {% when 'large' %}64px
+                            {% when 'small' %}33px2px
+                            {% when 'large' %}40px
                             {% else %}30px
                           {% endcase %} !important;
                    height: {% case accessibility_icon_size %}
-                            {% when 'small' %}32px
-                            {% when 'large' %}64px
+                            {% when 'small' %}3px
+                            {% when 'large' %}40px
                             {% else %}30px
                           {% endcase %} !important;">
       
