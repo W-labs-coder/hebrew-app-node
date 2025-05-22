@@ -245,14 +245,16 @@ export const updateAccessibilitySettings = async (req, res) => {
     ];
 
     const metafieldsQuery = `
-      query GetAccessibilityMetafields($ownerId: ID!) {
-        metafields(ownerId: $ownerId, first: 20, namespace: "custom") {
-          edges {
-            node {
-              key
-              value
-              namespace
-              type
+      query GetAccessibilityMetafields($id: ID!) {
+        shop(id: $id) {
+          metafields(first: 20, namespace: "custom") {
+            edges {
+              node {
+                key
+                value
+                namespace
+                type
+              }
             }
           }
         }
@@ -260,10 +262,10 @@ export const updateAccessibilitySettings = async (req, res) => {
     `;
 
     const metafieldsResponse = await client.request(metafieldsQuery, {
-      variables: { ownerId: shopGid }
+      variables: { id: shopGid }
     });
 
-    const fetchedMetafields = metafieldsResponse?.data?.metafields?.edges
+    const fetchedMetafields = metafieldsResponse?.data?.shop?.metafields?.edges
       ?.map(edge => edge.node)
       ?.filter(mf => metafieldKeys.includes(mf.key));
 
