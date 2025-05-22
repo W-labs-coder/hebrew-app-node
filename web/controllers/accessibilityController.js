@@ -133,14 +133,14 @@ export const updateAccessibilitySettings = async (req, res) => {
         namespace: "custom",
         ownerId: shopGid,
         type: "multi_line_text_field",
-        value: settingsData.helpText || "",
+        value: settingsData.helpText && settingsData.helpText.trim() !== "" ? settingsData.helpText : " ",
       },
       {
         key: "accessibility_owner_email",
         namespace: "custom",
         ownerId: shopGid,
         type: "single_line_text_field",
-        value: settingsData.ownerEmail || "",
+        value: settingsData.ownerEmail || " ",
       },
       {
         key: "accessibility_left_spacing",
