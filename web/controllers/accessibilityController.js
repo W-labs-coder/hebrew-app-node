@@ -245,8 +245,8 @@ export const updateAccessibilitySettings = async (req, res) => {
     ];
 
     const metafieldsQuery = `
-      query GetAccessibilityMetafields($id: ID!) {
-        shop(id: $id) {
+      query GetAccessibilityMetafields {
+        shop {
           metafields(first: 20, namespace: "custom") {
             edges {
               node {
@@ -261,9 +261,7 @@ export const updateAccessibilitySettings = async (req, res) => {
       }
     `;
 
-    const metafieldsResponse = await client.request(metafieldsQuery, {
-      variables: { id: shopGid }
-    });
+    const metafieldsResponse = await client.request(metafieldsQuery);
 
     const fetchedMetafields = metafieldsResponse?.data?.shop?.metafields?.edges
       ?.map(edge => edge.node)
