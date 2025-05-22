@@ -214,16 +214,17 @@ export const updateAccessibilitySettings = async (req, res) => {
     const response = await client.request(metafieldSetMutation, {
       variables: { metafields }
     });
+
+    // FIX: Check for userErrors in the correct place
     if (
-      response.metafieldsSet &&
-      response.metafieldsSet.userErrors &&
-      response.metafieldsSet.userErrors.length > 0
+      response.data?.metafieldsSet?.userErrors &&
+      response.data.metafieldsSet.userErrors.length > 0
     ) {
-      console.error('Shopify metafield userErrors:', response.metafieldsSet.userErrors);
+      console.error('Shopify metafield userErrors:', response.data.metafieldsSet.userErrors);
       return res.status(400).json({
         success: false,
         message: "Shopify metafield userErrors",
-        errors: response.metafieldsSet.userErrors,
+        errors: response.data.metafieldsSet.userErrors,
       });
     }
 
