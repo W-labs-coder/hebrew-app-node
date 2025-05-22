@@ -4,7 +4,7 @@ import shopify from "../shopify.js";
 
 export const updateAccessibilitySettings = async (req, res) => {
   const startTime = Date.now();
-  const timeout = 30000; // 30 seconds timeout
+
 
   try {
     const session = res.locals.shopify.session;
