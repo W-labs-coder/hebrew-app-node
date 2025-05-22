@@ -294,18 +294,6 @@ const PaymentSection = () => {
                     </div>
                   </div>
                 </div>
-                <p className="fw700 fs14">בחירת אמצעי תשלום מותאם אישית:</p>
-                <div>
-                  <Input
-                    type="text"
-                    label="שם אמצעי התשלום:"
-                    id="customProcessorName"
-                    name="customProcessorName"
-                    placeholder="הכנס שם..."
-                    onChange={handleInputChange}
-                    value={formData.customProcessor.name}
-                  />
-                </div>
               </div>
 
               <div>

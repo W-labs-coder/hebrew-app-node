@@ -1036,20 +1036,21 @@ flex-direction: column;
 {% endif %}
 
 {% assign show_simple_button = block.settings.enable_whatsapp | default: false %}
-{% assign accessibility_icon_type = shop.metafields.custom.accessibility_icon_type.value | default: 'default' %}
-{% assign accessibility_button_icon_color = shop.metafields.custom.accessibility_button_icon_color.value | default: '#FFFFFF' %}
-{% assign accessibility_button_text_color = shop.metafields.custom.accessibility_button_text_color.value | default: '#FFFFFF' %}
-{% assign accessibility_help_title = shop.metafields.custom.accessibility_help_title.value | default: 'Accessibility Options' %}
-{% assign accessibility_button_bg_color = shop.metafields.custom.accessibility_button_bg_color.value | default: '#0066cc' %}
+
+
+{% assign accessibility_icon_location = shop.metafields.custom.accessibility_icon_location.value | default: 'bottom_right' %}
 {% assign accessibility_icon_shape = shop.metafields.custom.accessibility_icon_shape.value | default: 'rounded' %}
 {% assign accessibility_icon_size = shop.metafields.custom.accessibility_icon_size.value | default: 'medium' %}
+{% assign accessibility_icon_type = shop.metafields.custom.accessibility_icon_type.value | default: 'default' %}
+{% assign accessibility_help_title = shop.metafields.custom.accessibility_help_title.value | default: 'Accessibility Options' %}
 {% assign accessibility_help_text = shop.metafields.custom.accessibility_help_text.value | default: 'This website is committed to accessibility for all users.' %}
 {% assign accessibility_owner_email = shop.metafields.custom.accessibility_owner_email.value | default: '' %}
-{% assign accessibility_zindex = shop.metafields.custom.accessibility_zindex.value | default: '999999' %}
-{% assign accessibility_top_spacing = shop.metafields.custom.accessibility_top_spacing.value | default: '20' %}
 {% assign accessibility_left_spacing = shop.metafields.custom.accessibility_left_spacing.value | default: '20' %}
-{% assign accessibility_icon_location = shop.metafields.custom.accessibility_icon_location.value | default: 'bottom_right' %}
-
+{% assign accessibility_top_spacing = shop.metafields.custom.accessibility_top_spacing.value | default: '20' %}
+{% assign accessibility_zindex = shop.metafields.custom.accessibility_zindex.value | default: '999999' %}
+{% assign accessibility_button_bg_color = shop.metafields.custom.accessibility_button_bg_color.value | default: '#0066cc' %}
+{% assign accessibility_button_text_color = shop.metafields.custom.accessibility_button_text_color.value | default: '#FFFFFF' %}
+{% assign accessibility_button_icon_color = shop.metafields.custom.accessibility_button_icon_color.value | default: '#FFFFFF' %}
 
 {% if block.settings.enable_whatsapp %}
   {% if whatsapp_widget_enabled and contacts.size > 0 %}
@@ -1657,12 +1658,12 @@ function getCurrentTimeInShopTimeZone() {
             style="background-color: {{ accessibility_button_bg_color }} !important;
                    border-radius: {% if accessibility_icon_shape == 'rounded' %}50%{% else %}8px{% endif %};
                    width: {% case accessibility_icon_size %}
-                            {% when 'small' %}33px2px
+                            {% when 'small' %}30px
                             {% when 'large' %}40px
                             {% else %}30px
                           {% endcase %} !important;
                    height: {% case accessibility_icon_size %}
-                            {% when 'small' %}3px
+                            {% when 'small' %}30px
                             {% when 'large' %}40px
                             {% else %}30px
                           {% endcase %} !important;">
