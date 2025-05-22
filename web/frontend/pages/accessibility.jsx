@@ -46,9 +46,9 @@ const AccessibilitySettings = () => {
     leftIconSpacing: user?.leftIconSpacing || 20,
     topBottomSpacing: user?.topBottomSpacing || 20,
     zIndex: user?.zIndex || 999,
-    buttonBgColor: user?.buttonBgColor || "#25D366",
-    buttonTextColor: user?.buttonTextColor || "#FFFFFF",
-    buttonIconColor: user?.buttonIconColor || "#FFFFFF",
+    accessibilityButtonBgColor: user?.accessibilityButtonBgColor || "#25D366",
+    accessibilityButtonTextColor: user?.accessibilityButtonTextColor || "#FFFFFF",
+    accessibilityButtonIconColor: user?.accessibilityButtonIconColor || "#FFFFFF",
   });
 
 
@@ -236,20 +236,22 @@ const AccessibilitySettings = () => {
   const renderPreview = () => (
     <>
       <div className="preview-container">
-        <div className="preview-frame" 
-          style={{ 
-            position: 'relative', 
-            width: '100%', 
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            backgroundColor: '#fff',
-            overflow: 'hidden'
-          }}>
+        <div
+          className="preview-frame"
+          style={{
+            position: "relative",
+            width: "100%",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            backgroundColor: "#fff",
+            overflow: "hidden",
+          }}
+        >
           <div className="preview-content">
             <div
               className={`accessibility-button `}
               style={{
-                backgroundColor: formData.buttonBgColor,
+                backgroundColor: formData.accessibilityButtonBgColor,
                 position: "absolute",
                 ...getIconPosition(formData.iconLocation),
                 display: "flex",
@@ -265,55 +267,55 @@ const AccessibilitySettings = () => {
               }}
             >
               <AccessibilityIconPreview
-                color={formData.buttonIconColor}
+                color={formData.accessibilityButtonIconColor}
                 style={{
-                  width: '100%',
-                  height: '100%'
+                  width: "100%",
+                  height: "100%",
                 }}
               />
-              <div 
-                className="help-title" 
+              <div
+                className="help-title"
                 style={{
-                  position: 'absolute',
-                  bottom: '-25px',
-                  right: '50%',
-                  transform: 'translateX(50%)',
-                  whiteSpace: 'nowrap',
-                  fontSize: '12px',
-                  color: '#000',
+                  position: "absolute",
+                  bottom: "-25px",
+                  right: "50%",
+                  transform: "translateX(50%)",
+                  whiteSpace: "nowrap",
+                  fontSize: "12px",
+                  color: "#000",
                   opacity: 0,
-                  transition: 'opacity 0.3s',
+                  transition: "opacity 0.3s",
                 }}
               >
-                {formData.helpTitle || 'כלי נגישות'}
+                {formData.helpTitle || "כלי נגישות"}
               </div>
             </div>
           </div>
         </div>
-        <div className="preview-info" style={{ marginTop: '20px' }}>
+        <div className="preview-info" style={{ marginTop: "20px" }}>
           <div className="preview-color-row">
             <div
               className="color-square"
-              style={{ 
-                backgroundColor: formData.buttonBgColor,
-                width: '20px',
-                height: '20px',
-                borderRadius: '4px',
-                marginRight: '8px'
+              style={{
+                backgroundColor: formData.accessibilityButtonBgColor,
+                width: "20px",
+                height: "20px",
+                borderRadius: "4px",
+                marginRight: "8px",
               }}
             />
             <span>:צבע רקע</span>
           </div>
-          <div className="preview-color-row" style={{ marginTop: '8px' }}>
+          <div className="preview-color-row" style={{ marginTop: "8px" }}>
             <div
               className="color-square"
               style={{
-                backgroundColor: formData.buttonIconColor,
-                width: '20px',
-                height: '20px',
-                borderRadius: '4px',
+                backgroundColor: formData.accessibilityButtonIconColor,
+                width: "20px",
+                height: "20px",
+                borderRadius: "4px",
                 border: "1px solid #C6C6C6",
-                marginRight: '8px'
+                marginRight: "8px",
               }}
             />
             <span>:צבע האייקון</span>
@@ -497,14 +499,14 @@ const AccessibilitySettings = () => {
                         </label>
                         <div className="color-picker-wrapper">
                           <span className="color-value">
-                            {formData.buttonBgColor.toUpperCase()}
+                            {formData.accessibilityButtonBgColor.toUpperCase()}
                           </span>
                           <input
                             type="color"
                             className="form-control form-control-color"
                             id="buttonBgColor"
                             name="buttonBgColor"
-                            value={formData.buttonBgColor}
+                            value={formData.accessibilityButtonBgColor}
                             onChange={handleInputChange}
                             title="בחר צבע רקע"
                           />
@@ -520,14 +522,14 @@ const AccessibilitySettings = () => {
                         </label>
                         <div className="color-picker-wrapper">
                           <span className="color-value">
-                            {formData.buttonIconColor.toUpperCase()}
+                            {formData.accessibilityButtonIconColor.toUpperCase()}
                           </span>
                           <input
                             type="color"
                             className="form-control form-control-color"
                             id="buttonIconColor"
                             name="buttonIconColor"
-                            value={formData.buttonIconColor}
+                            value={formData.accessibilityButtonIconColor}
                             onChange={handleInputChange}
                             title="בחר צבע אייקון"
                           />

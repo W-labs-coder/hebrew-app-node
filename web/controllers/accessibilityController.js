@@ -29,9 +29,9 @@ export const updateAccessibilitySettings = async (req, res) => {
       leftIconSpacing,
       topBottomSpacing,
       zIndex,
-      buttonBgColor,
-      buttonTextColor,
-      buttonIconColor,
+      accessibilityButtonBgColor,
+      accessibilityButtonTextColor,
+      accessibilityButtonIconColor,
     } = req.body;
 
     // Validate required fields
@@ -54,9 +54,9 @@ export const updateAccessibilitySettings = async (req, res) => {
       leftIconSpacing: parseInt(leftIconSpacing) || 20,
       topBottomSpacing: parseInt(topBottomSpacing) || 20,
       zIndex: parseInt(zIndex) || 999,
-      buttonBgColor: buttonBgColor || "#25D366",
-      buttonTextColor: buttonTextColor || "#FFFFFF",
-      buttonIconColor: buttonIconColor || "#FFFFFF",
+      accessibilityButtonBgColor: accessibilityButtonBgColor || "#25D366",
+      accessibilityButtonTextColor: accessibilityButtonTextColor || "#FFFFFF",
+      accessibilityButtonIconColor: accessibilityButtonIconColor || "#FFFFFF",
     };
 
     // First update MongoDB without depending on Shopify API
@@ -159,21 +159,21 @@ export const updateAccessibilitySettings = async (req, res) => {
         namespace: "custom",
         ownerId: shopGid,
         type: "single_line_text_field",
-        value: settingsData.buttonBgColor,
+        value: settingsData.accessibilityButtonBgColor,
       },
       {
         key: "accessibility_button_text_color",
         namespace: "custom",
         ownerId: shopGid,
         type: "single_line_text_field",
-        value: settingsData.buttonTextColor,
+        value: settingsData.accessibilityButtonTextColor,
       },
       {
         key: "accessibility_button_icon_color",
         namespace: "custom",
         ownerId: shopGid,
         type: "single_line_text_field",
-        value: settingsData.buttonIconColor,
+        value: settingsData.accessibilityButtonIconColor,
       },
     ];
 

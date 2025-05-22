@@ -247,6 +247,9 @@ const userSchema = new mongoose.Schema(
       default: "מספר הזמנה",
     },
     termOfUseShortMessage: String,
+    accessibilityButtonBgColor:String,
+    accessibilityButtonTextColor:String,
+    accessibilityButtonIconColor:String,
   },
   { timestamps: true }
 );
