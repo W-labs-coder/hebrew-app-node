@@ -492,7 +492,7 @@ const AccessibilitySettings = () => {
                     <div className="d-flex gap-1 flex-wrap">
                       <div className="color-picker-group rtl">
                         <label
-                          htmlFor="buttonBgColor"
+                          htmlFor="accessibilityButtonBgColor"
                           className="form-label fs14 mb-2"
                         >
                           רקע כפתור
@@ -504,8 +504,8 @@ const AccessibilitySettings = () => {
                           <input
                             type="color"
                             className="form-control form-control-color"
-                            id="buttonBgColor"
-                            name="buttonBgColor"
+                            id="accessibilityButtonBgColor"
+                            name="accessibilityButtonBgColor"
                             value={formData.accessibilityButtonBgColor}
                             onChange={handleInputChange}
                             title="בחר צבע רקע"
@@ -515,7 +515,7 @@ const AccessibilitySettings = () => {
 
                       <div className="color-picker-group rtl">
                         <label
-                          htmlFor="buttonIconColor"
+                          htmlFor="accessibilityButtonIconColor"
                           className="form-label fs14 mb-2"
                         >
                           צבע אייקון הכפתור
@@ -527,8 +527,8 @@ const AccessibilitySettings = () => {
                           <input
                             type="color"
                             className="form-control form-control-color"
-                            id="buttonIconColor"
-                            name="buttonIconColor"
+                            id="accessibilityButtonIconColor"
+                            name="accessibilityButtonIconColor"
                             value={formData.accessibilityButtonIconColor}
                             onChange={handleInputChange}
                             title="בחר צבע אייקון"
