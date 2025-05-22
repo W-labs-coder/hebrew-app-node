@@ -67,7 +67,16 @@ export const updateAccessibilitySettings = async (req, res) => {
       { new: true, upsert: true }
     );
 
-    const client = new shopify.api.clients.Graphql({ session });
+    const client = new shopify.api.clients.Graphql({
+      session,
+      clientOptions: {
+        timeout: 10000,
+        keepAlive: true,
+        headers: {
+          "X-Shopify-Access-Token": session.accessToken,
+        },
+      },
+    });
     const shopResponse = await client.request(`
           query {
             shop {
