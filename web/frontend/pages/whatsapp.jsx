@@ -454,6 +454,9 @@ const WhatsappSettings = () => {
                 <div className="d-flex flex-column justify-content-end align-items-start mb-2">
                   <div>
                     <p className="fw700 fs14">הגדרת WhatsApp</p>
+                    <p className="fw400 fs12">
+                      עצבו את כפתור הוואטספ שלכם ובחרו מספר טלפון.
+                    </p>
                   </div>
 
                   <div className="rtl">

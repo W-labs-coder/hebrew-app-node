@@ -1,44 +1,31 @@
 {% comment %}
   This extension controls RTL/LTR direction, Buy Now text, theme font, and footer banners.
 {% endcomment %}
-<script>
-  // Set RTL/LTR as early as possible to avoid flash
-  (function() {
-    var enableRTL = {{ block.settings.enable_rtl | default: false | json }};
-    if (enableRTL) {
-      document.documentElement.setAttribute('dir', 'rtl');
-      document.documentElement.setAttribute('lang', 'he');
-    } else {
-      document.documentElement.setAttribute('dir', 'ltr');
-      document.documentElement.setAttribute('lang', 'en');
-    }
-  })();
-</script>
+
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alef:wght@400;700&family=Amatic+SC:wght@400;700&family=Arimo:ital,wght@0,400..700;1,400..700&family=Assistant:wght@200..800&family=Bellefair&family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Cousine:ital,wght@0,400;0,700;1,400;1,700&family=David+Libre:wght@400;500;700&family=Frank+Ruhl+Libre:wght@300..900&family=Fredoka:wght@300..700&family=Heebo:wght@100..900&family=IBM+Plex+Sans+Hebrew:wght@100;200;300;400;500;600;700&family=Karantina:wght@300;400;700&family=Miriam+Libre:wght@400..700&family=Noto+Rashi+Hebrew:wght@100..900&family=Noto+Sans+Hebrew:wght@100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Rubik:ital,wght@0,300..900;1,300..900&family=Secular+One&family=Suez+One&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Varela+Round&display=swap" rel="stylesheet">
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var enableRTL = {{ block.settings.enable_rtl | default: false | json }};
-  console.log('enableRTL:', enableRTL); // Debug
-  if (enableRTL === true) {
-    document.documentElement.setAttribute('dir', 'rtl');
-    document.documentElement.setAttribute('lang', 'he');
-    document.body.setAttribute('dir', 'rtl');
-    document.body.style.direction = 'rtl';
-  } else {
-    document.documentElement.setAttribute('dir', 'ltr');
-    document.documentElement.setAttribute('lang', 'en');
-    document.body.setAttribute('dir', 'ltr');
-    document.body.style.direction = 'ltr';
-  }
-});
+<script type="text/javascript">
+console.log({{ shop.metafields.custom.enable_rtl.value }})
+
+let direction  = '{{ shop.metafields.custom.enable_rtl.value }}'
+
+if (direction == 'true' || direction == true) {
+  document.documentElement.setAttribute('dir', 'rtl');
+  document.documentElement.setAttribute('lang', 'he');
+} else {
+  document.documentElement.setAttribute('dir', 'ltr');
+  document.documentElement.setAttribute('lang', 'en');
+}
+
 </script>
+
+<!-- DEBUG : {{ shop.metafields.custom.enable_rtl.value }} -->
 <style>
   body{
-    direction: {% if block.settings.enable_rtl %}rtl{% else %}ltr{% endif %};
+    direction: {% if shop.metafields.custom.enable_rtl.value %}rtl{% else %}ltr{% endif %} !important;
   }
 
     .accessibility-widget-container {
@@ -1240,6 +1227,18 @@ document.addEventListener('DOMContentLoaded',function(){window.buyNowText={{ buy
       const enableWhatsApp = {{ block.settings.enable_whatsapp }};
 
      
+      let lastRTL = {{ shop.metafields.custom.enable_rtl.value | json }};
+
+      // Monitor RTL toggle and call endpoint
+      function sendRtlStatus(enableRTL) {
+        fetch('https://hebrew-app-node.onrender.com/set-rtl', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shop: "{{ shop.permanent_domain }}", enable_rtl: {{ block.settings.enable_rtl }} })
+        }).catch(() => {});
+      }
+      // Initial call
+      sendRtlStatus(lastRTL);
 
 
      function updateBuyNowText() {
@@ -1297,7 +1296,7 @@ document.addEventListener('DOMContentLoaded',function(){window.buyNowText={{ buy
       }
 
       // Set initial states
-      // setRTL({{ block.settings.enable_rtl }});
+      // setRTL({{ shop.metafields.custom.buy_now_button_text.value }});
       updateBuyNowText();
       setAlternativeFont({{ block.settings.enable_alternative_font }}); // Call to display footer banners
       
@@ -1310,7 +1309,7 @@ document.addEventListener('DOMContentLoaded',function(){window.buyNowText={{ buy
       // Listen for changes from the Shopify Theme Editor
       document.addEventListener('shopify:block:select', function (event) {
         if (event.detail.blockId === {{ block.id | json }}) {
-          // setRTL({{ block.settings.enable_rtl }});
+          // setRTL({{ shop.metafields.custom.buy_now_button_text.value }});
           updateBuyNowText();
           setAlternativeFont({{ block.settings.enable_alternative_font }}); 
           if (whatsappButton) {
@@ -2658,20 +2657,4 @@ document.addEventListener('DOMContentLoaded', function() {
     buyNowBtn.parentNode.insertBefore(icons, buyNowBtn.nextSibling);
   }
 });
-</script>
-<script>
-  // Listen for changes to the RTL toggle in the Theme Editor
-  document.addEventListener('shopify:block:select', function(event) {
-    // Only run for this block
-    if (event.detail.blockId === {{ block.id | json }}) {
-      var enableRTL = {{ block.settings.enable_rtl | default: false | json }};
-      var shop = {{ shop.permanent_domain | json }};
-      // Send to your backend to update the metafield
-      fetch('https://hebrew-app-node.onrender.com/set-rtl', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shop: shop, enable_rtl: enableRTL })
-      });
-    }
-  });
 </script>
