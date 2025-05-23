@@ -1,6 +1,15 @@
+<html
+  lang="{% if shop.metafields.custom.enable_rtl == true or shop.metafields.custom.enable_rtl == 'true' %}he{% else %}en{% endif %}"
+  dir="{% if shop.metafields.custom.enable_rtl == true or shop.metafields.custom.enable_rtl == 'true' %}rtl{% else %}ltr{% endif %}"
+>
 <head>
   <!-- Add these meta tags near the top of your head section -->
   <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *;">
   <meta name="referrer" content="no-referrer-when-downgrade">
   <!-- ... rest of your head content ... -->
 </head>
+<body
+  dir="{% if shop.metafields.custom.enable_rtl == true or shop.metafields.custom.enable_rtl == 'true' %}rtl{% else %}ltr{% endif %}"
+  style="direction: {% if shop.metafields.custom.enable_rtl == true or shop.metafields.custom.enable_rtl == 'true' %}rtl{% else %}ltr{% endif %};"
+>
+<!-- ... -->

@@ -522,6 +522,79 @@ app.use("/proxy", async(req, res) => {
     `);
 });
 
+app.post("/set-rtl", async (req, res) => {
+  try {
+    const { shop, enable_rtl } = req.body;
+    if (!shop) {
+      return res.status(400).json({ success: false, message: "Missing shop parameter" });
+    }
+
+    // Load offline session for the shop
+    const offlineSessionId = `offline_${shop}`;
+    const shopifySession = await shopify.config.sessionStorage.loadSession(offlineSessionId);
+
+    if (!shopifySession?.accessToken) {
+      return res.status(401).json({ success: false, message: "No offline session found for shop" });
+    }
+
+    // Get shop GID
+    const client = new shopify.api.clients.Graphql({ session: shopifySession });
+    const shopQuery = await client.query({
+      data: {
+        query: `query { shop { id } }`
+      }
+    });
+    const shopGid = shopQuery.body.data.shop.id;
+
+    // Prepare metafield input
+    const metafields = [
+      {
+        key: "enable_rtl",
+        namespace: "custom",
+        ownerId: shopGid,
+        type: "boolean",
+        value: enable_rtl ? "true" : "false"
+      }
+    ];
+
+    // GraphQL mutation to set metafield
+    const metafieldSetMutation = `
+      mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+        metafieldsSet(metafields: $metafields) {
+          metafields {
+            key
+            namespace
+            value
+            type
+          }
+          userErrors {
+            field
+            message
+            code
+          }
+        }
+      }
+    `;
+
+    const mutationResponse = await client.query({
+      data: {
+        query: metafieldSetMutation,
+        variables: { metafields }
+      }
+    });
+
+    const userErrors = mutationResponse.body.data.metafieldsSet.userErrors;
+    if (userErrors && userErrors.length > 0) {
+      return res.status(400).json({ success: false, message: userErrors[0].message });
+    }
+
+    res.status(200).json({ success: true, message: "RTL metafield updated" });
+  } catch (error) {
+    console.error("Error setting RTL metafield:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 app.use('/assets', express.static(join(__dirname, 'frontend/assets')));
 
 app.get("/debug", (req, res) => {
