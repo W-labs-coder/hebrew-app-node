@@ -1144,6 +1144,53 @@ const WhatsappSettings = () => {
                                 ></button>
                               </div>
                               <div className="modal-body">
+                                {/* Avatar Upload */}
+                                <div className="mb-3 text-center">
+                                  <label className="form-label d-block">תמונה (אופציונלי)</label>
+                                  <div style={{ marginBottom: 8 }}>
+                                    <img
+                                      src={
+                                        newContact.avatar_url ||
+                                        "https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png"
+                                      }
+                                      alt="avatar"
+                                      style={{
+                                        width: 64,
+                                        height: 64,
+                                        borderRadius: "50%",
+                                        objectFit: "cover",
+                                        border: "1px solid #ddd",
+                                      }}
+                                    />
+                                  </div>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={async (e) => {
+                                      const file = e.target.files[0];
+                                      if (!file) return;
+                                      // Upload to backend
+                                      const formDataUpload = new FormData();
+                                      formDataUpload.append("avatar", file);
+                                      try {
+                                        const res = await fetch("/api/settings/whatsapp/upload-contact-avatar", {
+                                          method: "POST",
+                                          body: formDataUpload,
+                                        });
+                                        const data = await res.json();
+                                        if (data.url) {
+                                          setNewContact((prev) => ({
+                                            ...prev,
+                                            avatar_url: data.url,
+                                          }));
+                                        }
+                                      } catch (err) {
+                                        toast.error("שגיאה בהעלאת תמונה");
+                                      }
+                                    }}
+                                    className="form-control"
+                                  />
+                                </div>
                                 <div className="mb-3">
                                   <label className="form-label">שם</label>
                                   <input

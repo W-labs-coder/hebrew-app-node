@@ -21,7 +21,8 @@ const contactSchema = new mongoose.Schema({
       },
       message: props => `${props.value} is not a valid phone number!`
     }
-  }
+  },
+  avatar_url: { type: String, default: "" } // <-- Add this line
 }, { _id: true, timestamps: true });
 
 const userSchema = new mongoose.Schema(

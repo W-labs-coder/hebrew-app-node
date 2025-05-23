@@ -140,6 +140,7 @@ export const updateWhatsappSettings = async (req, res) => {
   ...contact,
   _id: contact._id ? contact._id : new mongoose.Types.ObjectId(),
   phone: contact.phone.replace(/\s+/g, ""),
+  avatar_url: contact.avatar_url || "", // <-- Ensure avatar_url is saved
 })),
         titleBgColor,
         titleTextColor,

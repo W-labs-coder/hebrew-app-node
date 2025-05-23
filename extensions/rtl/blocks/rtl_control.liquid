@@ -1099,7 +1099,7 @@ flex-direction: column;
                  onclick="openWhatsApp('{{ contact.phone }}', '{{ contact.default_message }}')" 
                  style="cursor: pointer; gap:10px">
               <div class="whatsapp-avatar">
-                  <img src="https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png" alt="" width="40" height="40">
+                <img src="{{ contact.avatar_url | default: 'https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png' }}" alt="{{ contact.name }}" class="contact-avatar" />
               </div>
               <div class="whatsapp-contact-info">
                 <span class="contact-name" style="font-size: 16px; font-weight: 600">{{ contact.name }}</span>
