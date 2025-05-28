@@ -181,7 +181,7 @@ const PaymentSection = () => {
     setIsSubmittingProcessors(true);
     setIsProcessorsSaveSuccess(false);
     try {
-      const response = await fetch("/api/settings/update-processors", {
+      const response = await fetch("/api/settings/update-payment-settings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

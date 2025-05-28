@@ -33,6 +33,11 @@ if (direction == 'true' || direction == true) {
       pointer-events: auto;
     }
 
+    .accessibility-widget-container,
+.whatsapp-floating-widget {
+  position: fixed !important;
+  z-index: 999999 !important;
+}
     .accessibility-button {
       display: flex;
       align-items: center;
@@ -85,7 +90,9 @@ if (direction == 'true' || direction == true) {
       opacity: 1;
     }
 
-    .accessibility-panel {
+    
+
+.accessibility-panel {
   display: none;
   position: absolute;
   width: 320px;
@@ -95,25 +102,11 @@ if (direction == 'true' || direction == true) {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 999999;
-  {% case accessibility_icon_location %}
-    {% when 'top_left' %}
-      top: 100%;
-      left: 0;
-      margin-top: 8px;
-    {% when 'top_right' %}
-      top: 100%;
-      right: 0;
-      margin-top: 8px;
-    {% when 'bottom_left' %}
-      bottom: 100%;
-      left: 0;
-      margin-bottom: 8px;
-    {% when 'bottom_right' %}
-      bottom: 100%;
-      right: 0;
-      margin-bottom: 8px;
-  {% endcase %}
+  
 }
+
+
+
 
     .accessibility-panel.active {
       display: block;
@@ -393,7 +386,8 @@ body.keyboard-nav :focus {
 }
 
 /* Focus not visible when not in keyboard nav mode */
-body:not(.keyboard-nav) :focus {
+body:not(.keyboard-nav) button:focus,
+body:not(.keyboard-nav) a:focus {
     align-items: center;
     justify-content: center;
     padding: 8px;
@@ -652,14 +646,12 @@ body:not(.keyboard-nav) :focus {
 .whatsapp-widget-header h3 {
   margin: 0 0 8px 0;
   font-size: 14px;
-  line-height: 31px;
   font-weight: 600;
 }
 
 .whatsapp-widget-header p {
   margin: 0;
   font-size: 12px;
-  line-height: 21px;
   font-weight: 500;
 }
 
@@ -1098,7 +1090,8 @@ flex-direction: column;
             <div class="whatsapp-contact" 
                  onclick="openWhatsApp('{{ contact.phone }}', '{{ contact.default_message }}')" 
                  style="cursor: pointer; gap:10px">
-              <div class="whatsapp-avatar">
+              <div class="whatsapp-avatar" style="width:30px; height:30px; border-radius:50%; overflow:hidden">
+                
                 <img src="{{ contact.avatar_url | default: 'https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png' }}" alt="{{ contact.name }}" class="contact-avatar" />
               </div>
               <div class="whatsapp-contact-info">
@@ -1700,7 +1693,26 @@ function getCurrentTimeInShopTimeZone() {
       </span>
     </button>
 
-    <div id="accessibility-panel" class="accessibility-panel" aria-hidden="true">
+    <div id="accessibility-panel" class="accessibility-panel" aria-hidden="true" style="{% case accessibility_icon_location %}
+    {% when 'top_left' %}
+      top: 100% !important;
+      left: 0 !important;
+      margin-top: 8px !important;
+    {% when 'top_right' %}
+      top: 100% !important;
+      right: 0;
+      margin-top: 8px !important;
+    {% when 'bottom_left' %}
+      bottom: 100% !important;
+      left: 0 !important;
+      margin-bottom: 8px !important;
+      top: auto !important;
+    {% when 'bottom_right' %}
+      bottom: 100% !important;
+      right: 0 !important;
+      margin-bottom: 8px !important;
+      top: auto !important;
+  {% endcase %}">
       <div class="accessibility-panel-header">
         <h2>{{ accessibility_help_title }}</h2>
         <button class="close-panel" aria-label="Close accessibility panel">&times;</button>
@@ -1861,14 +1873,20 @@ function getCurrentTimeInShopTimeZone() {
         panel.setAttribute('aria-hidden', 'true');
       });
 
-      // Close panel when clicking outside
-      document.addEventListener('click', function(event) {
-        if (!panel.contains(event.target) && !button.contains(event.target)) {
-          panel.classList.remove('active');
-          button.setAttribute('aria-expanded', 'false');
-          panel.setAttribute('aria-hidden', 'true');
-        }
-      });
+   
+
+      
+
+      document.addEventListener('mousedown', function(event) {
+  const panel = document.querySelector('.accessibility-panel');
+  const button = document.querySelector('.accessibility-button');
+  if (!panel || !button) return;
+  if (!panel.contains(event.target) && !button.contains(event.target)) {
+    panel.classList.remove('active');
+    button.setAttribute('aria-expanded', 'false');
+    panel.setAttribute('aria-hidden', 'true');
+  }
+});
 
       // Add keyboard navigation
       document.addEventListener('keydown', function(event) {
