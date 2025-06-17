@@ -44,7 +44,7 @@ const subscriptions = [
   {
     id: 2,
     name: "Basic",
-    amount: 12.75,
+    amount: 65,
     duration: "yearly",
     features: [
       "יישור מימין לשמאל (RTL)",
@@ -101,7 +101,7 @@ const subscriptions = [
   {
     id: 4,
     name: "Pro",
-    amount: 18.75,
+    amount: 145,
     duration: "yearly",
     features: [
       "כל אפשרויות חבילת ה-Basic",
@@ -157,7 +157,7 @@ const subscriptions = [
   {
     id: 6,
     name: "Premium",
-    amount: 114.75,
+    amount: 84,
     duration: "yearly",
     features: [
       "כל אפשרויות חבילת ה-Basic",
