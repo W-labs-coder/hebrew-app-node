@@ -228,6 +228,7 @@ const saveLanguage = async (e) => {
       },
       body: JSON.stringify({ language: selectedLanguage }),
     });
+          toast.info("אנא המתן בזמן שאנו מעבדים את התרגום");
     if (response.ok) {
       const data = await response.json();
       const language = data.user.selectedLanguage;

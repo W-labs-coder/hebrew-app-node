@@ -2674,6 +2674,7 @@ document.addEventListener('DOMContentLoaded', function() {
           {% if payment_processor_images != blank %}{{ payment_processor_images }}{% endif %}
         </div>
         {% if payment_features_images != blank %}
+        <hr style="margin:0 !important;" />
         <div class="" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;">
           {{ payment_features_images }}
           </div>
@@ -2683,16 +2684,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <div>
   {% if shop.metafields.custom.has_free_shipping.value == true or shop.metafields.custom.has_free_shipping.value == 'true' %}
     {% if shop.metafields.custom.free_shipping_text.value != blank %}
+    <hr style="margin:0 !important;" />
       <p style="font-size:14px !important; font-weight:400 !important">
         {{ shop.metafields.custom.free_shipping_text.value }}
-      </p>
-    {% else %}
-      <p style="font-size:14px !important; font-weight:400 !important">
-        משלוח חינם
       </p>
     {% endif %}
   {% endif %}
   {% if shop.metafields.custom.warranty_days.value != blank %}
+  <hr style="margin:0 !important;" />
     <p style="font-size:14px !important; font-weight:400 !important">
       אחריות: {{ shop.metafields.custom.warranty_days.value }} ימים
     </p>
