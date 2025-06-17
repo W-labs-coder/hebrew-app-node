@@ -108,7 +108,13 @@ const handleSelectPlan = async (id) => {
                 planType === "yearly" ? "active" : ""
               }`}
               style={{
-                background: planType === "yearly" ? "#FBFBFB" : "", padding : '2px 8px'
+                background: planType === "yearly" ? "#FBFBFB" : "",
+                padding: "2px 8px",
+                boxShadow: "0px 1px 4px -2px #00000021",
+                borderRadius: "8px",
+                height: "37px",
+                width: "115px",
+                cursor: "pointer",
               }}
               onClick={() => handlePlanChange("yearly")}
             >
@@ -157,7 +163,8 @@ const handleSelectPlan = async (id) => {
         }}
       >
         <div className="d-lg-flex flex-wrap ais my-3 jcc px-2">
-          {filteredSubscriptions?.slice()
+          {filteredSubscriptions
+            ?.slice()
             ?.sort((a, b) => {
               const order = ["Basic", "Pro", "Premium"];
               return order.indexOf(a.name) - order.indexOf(b.name);
