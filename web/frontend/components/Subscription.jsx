@@ -159,7 +159,7 @@ const handleSelectPlan = async (id) => {
         <div className="d-lg-flex flex-wrap ais my-3 jcc px-2">
           {filteredSubscriptions?.slice()
             ?.sort((a, b) => {
-              const order = ["Basic", "Premium", "Pro"];
+              const order = ["Basic", "Pro", "Premium"];
               return order.indexOf(a.name) - order.indexOf(b.name);
             })
             .map((subscription) => (
