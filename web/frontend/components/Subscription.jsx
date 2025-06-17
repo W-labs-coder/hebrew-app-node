@@ -108,7 +108,7 @@ const handleSelectPlan = async (id) => {
                 planType === "yearly" ? "active" : ""
               }`}
               style={{
-                background: planType === "yearly" ? "#FBFBFB" : "",
+                background: planType === "yearly" ? "#FBFBFB" : "", padding : '2px 8px'
               }}
               onClick={() => handlePlanChange("yearly")}
             >
