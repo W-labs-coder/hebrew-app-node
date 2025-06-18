@@ -12,4 +12,5 @@
   dir="{% if shop.metafields.custom.enable_rtl == true or shop.metafields.custom.enable_rtl == 'true' %}rtl{% else %}ltr{% endif %}"
   style="direction: {% if shop.metafields.custom.enable_rtl == true or shop.metafields.custom.enable_rtl == 'true' %}rtl{% else %}ltr{% endif %};"
 >
- 
+<!-- DEBUG: enable_rtl = {{ shop.metafields.custom.enable_rtl }} -->
+<!-- DEBUG: enable_rtl.value = {{ shop.metafields.custom.enable_rtl.value }} -->

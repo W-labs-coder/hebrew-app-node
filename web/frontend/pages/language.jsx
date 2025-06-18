@@ -221,6 +221,7 @@ const saveLanguage = async (e) => {
   }
   setIsLanguageLoading(true)
   try {
+    toast.info("אנא המתן בזמן שאנו מעבדים את התרגום");
     const response = await fetch("/api/settings/add-selected-language", {
       method: "POST",
       headers: {
@@ -228,7 +229,7 @@ const saveLanguage = async (e) => {
       },
       body: JSON.stringify({ language: selectedLanguage }),
     });
-          toast.info("אנא המתן בזמן שאנו מעבדים את התרגום");
+          
     if (response.ok) {
       const data = await response.json();
       const language = data.user.selectedLanguage;
