@@ -113,7 +113,7 @@ const handleSelectPlan = async (id) => {
                 boxShadow: "0px 1px 4px -2px #00000021",
                 borderRadius: "8px",
                 height: "37px",
-                width: "115px",
+                width: "150px",
                 cursor: "pointer",
               }}
               onClick={() => handlePlanChange("yearly")}

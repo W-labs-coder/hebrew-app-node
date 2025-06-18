@@ -101,7 +101,7 @@ const subscriptions = [
   {
     id: 4,
     name: "Pro",
-    amount: 145,
+    amount: 84,
     duration: "yearly",
     features: [
       "כל אפשרויות חבילת ה-Basic",
@@ -157,7 +157,7 @@ const subscriptions = [
   {
     id: 6,
     name: "Premium",
-    amount: 84,
+    amount: 145,
     duration: "yearly",
     features: [
       "כל אפשרויות חבילת ה-Basic",
