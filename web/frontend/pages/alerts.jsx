@@ -73,7 +73,7 @@ const AlertSection = ({ notificationTypes }) => {
   const [shop, setShop] = useState(user?.shop || "");
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  dispatch = useDispatch();
+
 
   // Prefill subject/body from notifications array when notification type changes
   const handleNotificationTypeChange = (e) => {
@@ -118,37 +118,38 @@ const AlertSection = ({ notificationTypes }) => {
     );
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/settings/update-notification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          notificationType: selectedNotificationType,
-          ...formData
-        }),
-      });
+  //   dispatch = useDispatch();
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await fetch("/api/settings/update-notification", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ 
+  //         notificationType: selectedNotificationType,
+  //         ...formData
+  //       }),
+  //     });
 
-      if (!response.ok) {
-        throw new Error('Failed to update notification');
-      }
+  //     if (!response.ok) {
+  //       throw new Error('Failed to update notification');
+  //     }
 
-      const data = await response.json();
-      dispatch(login({ user: data.user, subscription: data.subscription }));
-      setIsSubmitSuccessful(true);
-      toast.success('Notification template updated successfully');
+  //     const data = await response.json();
+  //     dispatch(login({ user: data.user, subscription: data.subscription }));
+  //     setIsSubmitSuccessful(true);
+  //     toast.success('Notification template updated successfully');
       
-    } catch (error) {
-      console.error("Error updating notification:", error);
-      toast.error(error.message || "Error updating notification");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //   } catch (error) {
+  //     console.error("Error updating notification:", error);
+  //     toast.error(error.message || "Error updating notification");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   return (
     <section className="rtl-section">
@@ -182,7 +183,7 @@ const AlertSection = ({ notificationTypes }) => {
         </div>
 
         <div className="d-flex jcb">
-          <form onSubmit={handleSubmit}>
+          <form>
             <p className="fw700 fs14">בחירת התראות:</p>
             <Input
               type="select"
