@@ -10,7 +10,8 @@ import RtlImage from "../components/svgs/RtlImage";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/slices/authSlice";
 import { toast } from "react-toastify";
-import notifications from "../components/notifications/index";
+import { notifications } from "../components/notifications";
+
 
 export default function Alerts() {
   const [notificationTypes, setNotificationTypes] = useState([

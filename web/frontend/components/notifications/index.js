@@ -1,4 +1,4 @@
-return [
+export const notifications = [
   {
     id: "order_confirmation",
     title: "אישור הזמנה",
