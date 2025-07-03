@@ -18,7 +18,7 @@ export default function Alerts() {
     {id: 'order_confirmation', name: 'Order Confirmation'},
     {id: 'draft_order_invoice', name: 'Draft Order Invoice'},
     {id: 'shipping_confirmation', name: 'Shipping Confirmation'},
-    // {id: 'ready_for_local_pickup', name: 'Ready for Local Pickup'},
+    {id: 'ready_for_local_pickup', name: 'Ready for Local Pickup'},
     // {id: 'picked_up_by_customer', name: 'Picked up by Customer'},
     // {id: 'order_out_for_local_delivery', name: 'Order Out for Local Delivery'},
     // {id: 'order_locally_delivered', name: 'Order Locally Delivered'},
