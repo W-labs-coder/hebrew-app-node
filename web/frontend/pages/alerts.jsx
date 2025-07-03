@@ -10,10 +10,11 @@ import RtlImage from "../components/svgs/RtlImage";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/slices/authSlice";
 import { toast } from "react-toastify";
+import notifications from "../components/notifications/index";
 
 export default function Alerts() {
   const [notificationTypes, setNotificationTypes] = useState([
-    {id: 'order_confirmation', name: 'Order Confirmatiiion'},
+    {id: 'order_confirmation', name: 'Order Confirmation'},
     {id: 'draft_order_invoice', name: 'Draft Order Invoice'},
     {id: 'shipping_confirmation', name: 'Shipping Confirmation'},
     {id: 'ready_for_local_pickup', name: 'Ready for Local Pickup'},
@@ -71,12 +72,20 @@ const AlertSection = ({ notificationTypes }) => {
   const [shop, setShop] = useState(user?.shop || "");
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const dispatch = useDispatch();
+  dispatch = useDispatch();
 
+  // Prefill subject/body from notifications array when notification type changes
   const handleNotificationTypeChange = (e) => {
-    setSelectedNotificationType(e.target.value);
+    const selectedType = e.target.value;
+    setSelectedNotificationType(selectedType);
     setIsSubmitSuccessful(false);
+
+    // Find notification template by id
+    const template = notifications.find((n) => n.id === selectedType);
+    setFormData({
+      emailSubject: template?.subject || "",
+      emailBody: template?.body || "",
+    });
   };
 
   const handleInputChange = (e) => {
@@ -85,47 +94,6 @@ const AlertSection = ({ notificationTypes }) => {
       ...prev,
       [name]: value
     }));
-  };
-
-  const generateTemplate = async () => {
-    if (!selectedNotificationType) {
-      toast.error('Please select a notification type first');
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      const response = await fetch("/api/settings/generate-notification", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          notificationType: selectedNotificationType,
-          emailSubject: formData.emailSubject,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate template');
-      }
-
-      const data = await response.json();
-      
-      setFormData(prev => ({
-        ...prev,
-        emailBody: data.data.template,
-        emailSubject: data.data.subject || prev.emailSubject
-      }));
-
-      toast.success('Template generated successfully');
-      
-    } catch (error) {
-      console.error("Error generating template:", error);
-      toast.error(error.message || "Error generating template");
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
   const copyToClipboard = async () => {
@@ -238,16 +206,6 @@ const AlertSection = ({ notificationTypes }) => {
                 onChange={handleInputChange}
                 style={{ width: "100%" }}
               />
-            </div>
-
-            <div className="d-flex gap-3 mt-4">
-              <Button 
-                type="button" 
-                onClick={generateTemplate}
-                loading={isGenerating}
-              >
-                צור תבנית חדשה
-              </Button>
             </div>
 
             <div className="mt-4">

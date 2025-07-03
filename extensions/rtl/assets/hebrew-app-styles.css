@@ -1,0 +1,1186 @@
+
+
+    .accessibility-widget-container {
+      display: block;
+      pointer-events: auto;
+      position: fixed !important; /* Ensure this stays fixed */
+    }
+
+    .accessibility-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .accessibility-button:hover {
+      transform: scale(1.1);
+    }
+
+    .accessibility-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .accessibility-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    
+
+    .accessibility-button:hover .accessibility-tooltip {
+      opacity: 1;
+    }
+
+    
+
+.accessibility-panel {
+  display: none;
+  position: absolute !important; /* Keep this absolute relative to the widget container */
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 999999 !important;
+}
+
+    .accessibility-panel.active {
+      display: block !important;
+      position: absolute !important; /* Maintain absolute positioning when active */
+    }
+
+    /* Prevent the panel from inheriting any transform or position changes */
+    .accessibility-panel * {
+      position: static !important;
+    }
+    
+    .accessibility-panel-content {
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-height: calc(80vh - 60px); /* Account for header */
+      overflow-y: auto;
+      position: relative !important;
+    }
+
+.accessibility-option .icon{
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .accessibility-option.active {
+      background-color: #e0e7ff;
+      border-color: #4f46e5;
+    }
+
+    .accessibility-option:hover {
+      background-color: #f0f0f0;
+    }
+
+    .accessibility-option .label {
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .accessibility-panel-footer {
+      padding: 16px;
+      text-align: center;
+}    
+
+    .accessibility-contact {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+
+    .accessibility-contact p {
+      margin: 0 0 8px 0;
+      font-weight: bold;
+    }
+
+    .accessibility-contact a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    .accessibility-contact a:hover {
+      text-decoration: underline;
+    }
+
+
+    .accessibility-widget-container {
+  display: block;
+  pointer-events: auto;
+  
+  text-align: right;
+  font-family: 'Rubik', 'Arial', sans-serif;
+}
+
+.accessibility-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 999999;
+}
+
+.accessibility-button:hover {
+  transform: scale(1.1);
+}
+
+.accessibility-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.accessibility-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
+.accessibility-panel-header {
+  padding: 16px;
+  background: #0D1117;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.accessibility-panel-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close-panel {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.accessibility-section {
+  border-bottom: 2px solid #0D0D0D;
+}
+
+.section-header {
+  font-weight: 600;
+  margin: 8px 0;
+  color: #800000;
+  font-size: 16px;
+  text-align: center;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.accessibility-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 2px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: center;
+  min-height: 80px;
+}
+
+.accessibility-option:hover {
+  background: #e8e8e8;
+}
+
+.accessibility-option.active {
+  background: #e0e7ff;
+  border-color: #4f46e5;
+}
+
+.icon-container {
+  margin-bottom: 4px;
+  height: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.accessibility-option:not(.options-grid .accessibility-option) {
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 12px;
+  min-height: unset;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.accessibility-option:not(.options-grid .accessibility-option) .icon-container {
+  margin-bottom: 0;
+  margin-left: 8px;
+}
+
+/* Custom cursor styles */
+.large-white-cursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path d="M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 18.78C7.39 18.95 7.05 18.94 6.82 18.77C6.6 18.59 6.5 18.3 6.5 18V3C6.5 2.73 6.63 2.5 6.82 2.33C7.05 2.17 7.36 2.15 7.61 2.29L7.65 2.32L18.43 11.68C18.6 11.84 18.68 12.06 18.68 12.28C18.67 12.52 18.57 12.73 18.39 12.88L16.3 14.5L18.89 19.85C19.12 20.35 18.89 20.93 18.39 21.17L13.64 21.97Z" fill="white" stroke="black" stroke-width="1"/></svg>') 16 16, auto !important;
+}
+
+.large-black-cursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path d="M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 18.78C7.39 18.95 7.05 18.94 6.82 18.77C6.6 18.59 6.5 18.3 6.5 18V3C6.5 2.73 6.63 2.5 6.82 2.33C7.05 2.17 7.36 2.15 7.61 2.29L7.65 2.32L18.43 11.68C18.6 11.84 18.68 12.06 18.68 12.28C18.67 12.52 18.57 12.73 18.39 12.88L16.3 14.5L18.89 19.85C19.12 20.35 18.89 20.93 18.39 21.17L13.64 21.97Z" fill="black"/></svg>') 16 16, auto !important;
+}
+
+/* High contrast mode */
+body.high-contrast {
+  filter: contrast(1.5);
+}
+
+body.inverted-colors {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+body.inverted-colors img,
+body.inverted-colors video {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Link highlighting */
+body.highlight-links a {
+  background-color: yellow !important;
+  color: black !important;
+  text-decoration: underline !important;
+  font-weight: bold !important;
+  border: 2px solid black !important;
+  padding: 2px !important;
+}
+
+/* Heading highlighting */
+body.highlight-headings h1,
+body.highlight-headings h2,
+body.highlight-headings h3,
+body.highlight-headings h4,
+body.highlight-headings h5,
+body.highlight-headings h6 {
+  background-color: #ffcccb !important;
+  color: black !important;
+  border: 2px dashed black !important;
+  padding: 5px !important;
+}
+
+/* Image highlighting */
+body.highlight-images img {
+  border: 3px solid red !important;
+  padding: 2px !important;
+}
+
+/* Animations blocking */
+body.no-animations *,
+body.no-animations *::before,
+body.no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Readable font */
+body.readable-font * {
+  font-family: Arial, sans-serif !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+  line-height: 1.5 !important;
+}
+
+/* Zoom lens */
+.zoom-lens {
+  position: fixed;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 2px solid black;
+  pointer-events: none;
+  z-index: 9999;
+  background-color: white;
+  display: none;
+  transform: scale(1.5);
+  background-repeat: no-repeat;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* Keyboard navigation focus */
+body.keyboard-nav :focus {
+  outline: 3px solid blue !important;
+  outline-offset: 3px !important;
+}
+
+/* Focus not visible when not in keyboard nav mode */
+body:not(.keyboard-nav) button:focus,
+body:not(.keyboard-nav) a:focus {
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 999999;
+    animation: floatButton 3s ease-in-out infinite;
+  }
+
+  @keyframes floatButton {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .accessibility-button:hover {
+    transform: scale(1.1);
+    animation-play-state: paused;
+  }
+
+  /* Ensure the panel appears above other elements */
+  .accessibility-panel.active {
+    z-index: 999998;
+    position: absolute;
+  }
+
+  /* Prevent panel from inheriting float animation */
+  .accessibility-panel {
+    animation: none;
+  }
+ 
+    
+
+    @keyframes floatButton {
+      0% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    .whatsapp-button:hover {
+      transform: scale(1.1);
+      animation-play-state: paused;
+    }
+
+    .whatsapp-button.text_and_icon {
+      min-width: 100px;
+    }
+
+    .whatsapp-button.icon {
+      width: 30px;
+      height: 30px;
+      padding: 10px;
+      border-radius: 50%;
+    }
+
+    .whatsapp-button span {
+      font-family: var(--custom-font, 'Rubik'), sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .whatsapp-button img {
+      filter: brightness(0) invert(1);
+    }
+
+  .whatsapp-widget {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+
+  .whatsapp-button.icon {
+    min-width: auto;
+    width: 30px;
+    height: 30px;
+    padding: 10px;
+    border-radius: 50%;
+  }
+
+  .whatsapp-button span {
+    font-family: var(--custom-font, 'Rubik'), sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .whatsapp-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+
+  .whatsapp-button.icon .whatsapp-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .whatsapp-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .whatsapp-button:hover {
+    transform: scale(1.05);
+  }
+
+  .whatsapp-widget {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .whatsapp-widget.icon {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  
+  .whatsapp-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  
+
+  .whatsapp-floating-widget {
+  position: fixed !important;
+  z-index: 999999 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: 200px;
+  max-width: 100%;
+}
+
+  .whatsapp-widget-container {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .whatsapp-widget {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .whatsapp-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .whatsapp-widget-container {
+    transition: height 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .whatsapp-widget-container.minimized {
+    height: 30px !important;
+  }
+
+  .whatsapp-widget-container.minimized .whatsapp-widget-body {
+    display: none !important;
+  }
+.whatsapp-widget-container.minimized .whatsapp-widget-header {
+  display: block !important;
+}
+  .whatsapp-minimize-button svg {
+    transition: transform 0.3s ease;
+  }
+
+  .whatsapp-widget-container.minimized .whatsapp-minimize-button svg {
+    transform: rotate(180deg);
+  }
+
+  .whatsapp-widget-container.hidden {
+    display: none !important;
+  }
+
+  /* Widget Styles */
+.whatsapp-widget-container {
+  width: 300px;
+  height: 300px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  /* overflow: hidden; */
+}
+
+.whatsapp-widget-header {
+  position: relative;
+  padding: 5px;
+  border-radius: 10px 10px 0 0;
+}
+
+.whatsapp-widget-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.whatsapp-widget-header p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.whatsapp-widget-body {
+  padding: 16px;
+  background: white;
+}
+
+.whatsapp-contact {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+  margin-bottom: 8px;
+  background: #f5f5f5;
+
+}
+
+.whatsapp-contact:hover {
+  background-color: #e5e5e5;
+}
+
+.whatsapp-contact-info{
+display:flex; 
+flex-direction: column;
+}
+
+.whatsapp-header-content {
+ display:block !important;
+  padding-right: 16px;
+}
+
+/* Ensure controls are visible against any background */
+.whatsapp-widget-controls {
+  display: flex;
+  gap: 8px;
+  left: 12px;
+  top: 12px;
+  z-index: 1;
+}
+
+.whatsapp-floating-widget {
+  max-height: 90vh !important;
+  display: flex !important;
+}
+
+
+
+.whatsapp-widget-header {
+  position: relative;
+  padding: 5px;
+  border-radius: 10px 10px 0 0;
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+
+.whatsapp-widget-body {
+  padding: 16px;
+  background: white;
+  overflow-y: auto; /* Make contacts scrollable */
+  flex-grow: 1; /* Allow body to take remaining space */
+  max-height: calc(90vh - 120px); /* Account for header height */
+}
+
+/* Add smooth scrolling to the contacts area */
+.whatsapp-widget-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.whatsapp-widget-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.whatsapp-widget-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.whatsapp-widget-body::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+.product-payment-icons .payment-processors h4 {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.product-payment-icons .image-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 5px 0;
+}
+.product-payment-icons .image-container img {
+  max-width: 50px;
+  height: auto;
+  margin: 5px;
+}
+
+  .sabbath-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #FBFBFB;
+    z-index: 999999;
+    overflow-y: auto;
+  }
+
+  .sabbath-header {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    padding: 39px 100px;
+  }
+
+  .store-logo h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    text-transform: capitalize;
+  }
+
+  .contact-us {
+    cursor: pointer;
+  }
+
+  .sabbath-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    gap: 10px;
+    width: 730px;
+    margin: 0 auto;
+  }
+
+  .sabbath-title {
+    text-align: center;
+  }
+
+  .sabbath-title h2 {
+    font-weight: 900;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .sabbath-title p {
+    font-size: 16px;
+    font-weight: 500;
+    color: #777;
+  }
+
+  .sabbath-banner {
+    width: 100%;
+    min-height: 282px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+  }
+
+  .countdown-wrapper {
+    margin-top: 32px;
+    box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 5px 10px -2px rgba(0, 0, 0, 0.15);
+    border: 1px solid #C6C6C6;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .countdown-wrapper h3 {
+    font-weight: 900;
+    font-size: 26px;
+  
+  }
+
+  .countdown {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+  }
+
+  .time-box {
+    width: 115px;
+    height: 115px;
+    background: #F2F2F2;
+    border: 1px solid #C6C6C6;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .time-box .number {
+    font-size: 56px;
+    font-weight: 500;
+    color: #0D0D0D;
+    margin-bottom :0
+  }
+
+  .time-box .label {
+    font-size: 14px;
+    color: #777777;
+  }
+
+  .social-links-container {
+    width: 450px;
+    padding: 16px;
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 16px 16px;
+    margin-top: -10px;
+  }
+
+  .social-links-grid {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #F5F5F5;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+    color: #333333;
+  }
+
+  .social-link:hover {
+    transform: scale(1.1);
+    background: #EEEEEE;
+  }
+
+  .social-link svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .remote-img[src^="http"] {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .accessibility-widget-container {
+      display: block;
+      pointer-events: auto;
+      position: fixed !important; /* Ensure this stays fixed */
+    }
+
+    .accessibility-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .accessibility-button:hover {
+      transform: scale(1.1);
+    }
+
+    .accessibility-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .accessibility-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    
+
+    .accessibility-button:hover .accessibility-tooltip {
+      opacity: 1;
+    }
+
+    
+
+.accessibility-panel {
+  display: none;
+  position: absolute !important; /* Keep this absolute relative to the widget container */
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 999999 !important;
+}
+
+    .accessibility-panel.active {
+      display: block !important;
+      position: absolute !important; /* Maintain absolute positioning when active */
+    }
+
+    /* Prevent the panel from inheriting any transform or position changes */
+    .accessibility-panel * {
+      position: static !important;
+    }
+    
+    .accessibility-panel-content {
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-height: calc(80vh - 60px); /* Account for header */
+      overflow-y: auto;
+      position: relative !important;
+    }
+
+.accessibility-option .icon{
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .accessibility-option.active {
+      background-color: #e0e7ff;
+      border-color: #4f46e5;
+    }
+
+    .accessibility-option:hover {
+      background-color: #f0f0f0;
+    }
+
+    .accessibility-option .label {
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .accessibility-panel-footer {
+      padding: 16px;
+      text-align: center;
+}    
+
+    .accessibility-contact {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+
+    .accessibility-contact p {
+      margin: 0 0 8px 0;
+      font-weight: bold;
+    }
+
+    .accessibility-contact a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    .accessibility-contact a:hover {
+      text-decoration: underline;
+    }
+
+
+    .accessibility-widget-container {
+  display: block;
+  pointer-events: auto;
+  
+  text-align: right;
+  font-family: 'Rubik', 'Arial', sans-serif;
+}
+
+.accessibility-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 999999;
+}
+
+.accessibility-button:hover {
+  transform: scale(1.1);
+}
+
+.accessibility-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.accessibility-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
+.accessibility-panel-header {
+  padding: 16px;
+  background: #0D1117;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.accessibility-panel-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close-panel {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.accessibility-section {
+  border-bottom: 2px solid #0D0D0D;
+}
+
+.section-header {
+  font-weight: 600;
+  margin: 8px 0;
+  color: #800000;
+  font-size: 16px;
+  text-align: center;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.accessibility-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 2px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: center;
+  min-height: 80px;
+}
+
+.accessibility-option:hover {
+  background: #e8e8e8;
+}
+
+.accessibility-option.active {
+  background: #e0e7ff;
+  border-color: #4f46e5;
+}
+
+.icon-container {
+  margin-bottom: 4px;
+  height: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.label {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.accessibility-option:not(.options-grid .accessibility-option) {
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 12px;
+  min-height: unset;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.accessibility-option:not(.options-grid .accessibility-option) .icon-container {
+  margin-bottom: 0;
+  margin-left: 8px;
+}
+
+/* Custom cursor styles */
+.large-white-cursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path d="M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 18.78C7.39 18.95 7.05 18.94 6.82 18.77C6.6 18.59 6.5 18.3 6.5 18V3C6.5 2.73 6.63 2.5 6.82 2.33C7.05 2.17 7.36 2.15 7.61 2.29L7.65 2.32L18.43 11.68C18.6 11.84 18.68 12.06 18.68 12.28C18.67 12.52 18.57 12.73 18.39 12.88L16.3 14.5L18.89 19.85C19.12 20.35 18.89 20.93 18.39 21.17L13.64 21.97Z" fill="white" stroke="black" stroke-width="1"/></svg>') 16 16, auto !important;
+}
+
+.large-black-cursor {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path d="M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 18.78C7.39 18.95 7.05 18.94 6.82 18.77C6.6 18.59 6.5 18.3 6.5 18V3C6.5 2.73 6.63 2.5 6.82 2.33C7.05 2.17 7.36 2.15 7.61 2.29L7.65 2.32L18.43 11.68C18.6 11.84 18.68 12.06 18.68 12.28C18.67 12.52 18.57 12.73 18.39 12.88L16.3 14.5L18.89 19.85C19.12 20.35 18.89 20.93 18.39 21.17L13.64 21.97Z" fill="black"/></svg>') 16 16, auto !important;
+}
+
+/* Update CSS to target content wrapper instead of body */
+.accessibility-content-wrapper.high-contrast {
+  filter: contrast(1.5);
+}
+
+.accessibility-content-wrapper.inverted-colors {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.accessibility-content-wrapper.inverted-colors img,
+.accessibility-content-wrapper.inverted-colors video {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.accessibility-content-wrapper.monochrome-contrast {
+  filter: grayscale(1);
+}
+
+/* Link highlighting */
+.accessibility-content-wrapper.highlight-links a {
+  background-color: yellow !important;
+  color: black !important;
+  text-decoration: underline !important;
+  font-weight: bold !important;
+  border: 2px solid black !important;
+  padding: 2px !important;
+}
+
+/* Heading highlighting */
+.accessibility-content-wrapper.highlight-headings h1,
+.accessibility-content-wrapper.highlight-headings h2,
+.accessibility-content-wrapper.highlight-headings h3,
+.accessibility-content-wrapper.highlight-headings h4,
+.accessibility-content-wrapper.highlight-headings h5,
+.accessibility-content-wrapper.highlight-headings h6 {
+  background-color: #ffcccb !important;
+  color: black !important;
+  border: 2px dashed black !important;
+  padding: 5px !important;
+}
+
+/* Animations blocking */
+.accessibility-content-wrapper.no-animations *,
+.accessibility-content-wrapper.no-animations *::before,
+.accessibility-content-wrapper.no-animations *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Ensure fixed elements stay fixed */
+.accessibility-widget-container,
+.whatsapp-button,
+.whatsapp-bubble-btn,
+.whatsapp-bubble-widget {
+    position: fixed !important;
+    z-index: 999999 !important;
+} 

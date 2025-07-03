@@ -28,52 +28,13 @@
   });
 </script>
 
-<!-- DEBUG : {{ shop.metafields.custom.enable_rtl.value }} -->
+<!-- External CSS for accessibility and widgets -->
+<link rel="stylesheet" href="{{ 'hebrew-app-styles.css' | asset_url }}">
 <style>
   body{
     direction: {% if shop.metafields.custom.enable_rtl.value %}rtl{% else %}ltr{% endif %} !important;
   }
-
-    .accessibility-widget-container {
-      display: block;
-      pointer-events: auto;
-    }
-
-    .accessibility-widget-container,
-.whatsapp-floating-widget {
-  position: fixed !important;
-  z-index: 999999 !important;
-}
-    .accessibility-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-      position: relative;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-
-    .accessibility-button:hover {
-      transform: scale(1.1);
-    }
-
-    .accessibility-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-    }
-
-    .accessibility-icon svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .accessibility-tooltip {
+  .accessibility-tooltip {
       position: absolute;
       background: rgba(0,0,0,0.8);
       padding: 4px 8px;
@@ -92,373 +53,6 @@
       {% endcase %}
     }
 
-    .accessibility-button:hover .accessibility-tooltip {
-      opacity: 1;
-    }
-
-    
-
-.accessibility-panel {
-  display: none;
-  position: absolute;
-  width: 400px;
-  max-height: 80vh;
-  overflow-y: auto;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 999999;
-  
-}
-
-
-
-
-    .accessibility-panel.active {
-      display: block;
-    }
-
-    
-
-    .accessibility-panel-header h2 {
-      margin: 0;
-      font-size: 18px;
-    }
-
-    .close-panel {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 0 8px;
-    }
-
-    .accessibility-panel-content {
-      padding: 16px;
-      font-size: 14px;
-      line-height: 1.5;
-      max-height: 100%;
-      overflow-y: auto;
-    }
-
-.accessibility-option .icon{
-      width: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .accessibility-option.active {
-      background-color: #e0e7ff;
-      border-color: #4f46e5;
-    }
-
-    .accessibility-option:hover {
-      background-color: #f0f0f0;
-    }
-
-    .accessibility-option .label {
-      font-size: 18px;
-      text-align: center;
-    }
-
-    .accessibility-panel-footer {
-      padding: 16px;
-      text-align: center;
-}    
-
-    .accessibility-contact {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #eee;
-    }
-
-    .accessibility-contact p {
-      margin: 0 0 8px 0;
-      font-weight: bold;
-    }
-
-    .accessibility-contact a {
-      color: #0066cc;
-      text-decoration: none;
-    }
-
-    .accessibility-contact a:hover {
-      text-decoration: underline;
-    }
-
-
-    .accessibility-widget-container {
-  display: block;
-  pointer-events: auto;
-  
-  text-align: right;
-  font-family: 'Rubik', 'Arial', sans-serif;
-}
-
-.accessibility-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  z-index: 999999;
-}
-
-.accessibility-button:hover {
-  transform: scale(1.1);
-}
-
-.accessibility-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-}
-
-.accessibility-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-
-
-
-.accessibility-panel-header {
-  padding: 16px;
-  background: #0D1117;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-.accessibility-panel-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.close-panel {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 0 8px;
-}
-
-.accessibility-section {
-  padding: 8px 16px;
-  border-bottom: 1px solid #eee;
-}
-
-.section-header {
-  font-weight: 600;
-  margin: 8px 0;
-  color: #800000;
-  font-size: 16px;
-}
-
-.options-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 8px 0;
-}
-
-.accessibility-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  text-align: center;
-  min-height: 80px;
-}
-
-.accessibility-option:hover {
-  background: #e8e8e8;
-}
-
-.accessibility-option.active {
-  background: #e0e7ff;
-  border-color: #4f46e5;
-}
-
-.icon-container {
-  margin-bottom: 4px;
-  height: 24px;
-  width: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.label {
-  font-size: 14px;
-  line-height: 1.2;
-}
-
-.accessibility-option:not(.options-grid .accessibility-option) {
-  flex-direction: row;
-  justify-content: flex-start;
-  padding: 12px;
-  min-height: unset;
-  margin: 8px 0;
-  width: 100%;
-}
-
-.accessibility-option:not(.options-grid .accessibility-option) .icon-container {
-  margin-bottom: 0;
-  margin-left: 8px;
-}
-
-/* Custom cursor styles */
-.large-white-cursor {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path d="M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 18.78C7.39 18.95 7.05 18.94 6.82 18.77C6.6 18.59 6.5 18.3 6.5 18V3C6.5 2.73 6.63 2.5 6.82 2.33C7.05 2.17 7.36 2.15 7.61 2.29L7.65 2.32L18.43 11.68C18.6 11.84 18.68 12.06 18.68 12.28C18.67 12.52 18.57 12.73 18.39 12.88L16.3 14.5L18.89 19.85C19.12 20.35 18.89 20.93 18.39 21.17L13.64 21.97Z" fill="white" stroke="black" stroke-width="1"/></svg>') 16 16, auto !important;
-}
-
-.large-black-cursor {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path d="M13.64 21.97C13.14 22.21 12.54 22 12.31 21.5L10.13 16.76L7.62 18.78C7.39 18.95 7.05 18.94 6.82 18.77C6.6 18.59 6.5 18.3 6.5 18V3C6.5 2.73 6.63 2.5 6.82 2.33C7.05 2.17 7.36 2.15 7.61 2.29L7.65 2.32L18.43 11.68C18.6 11.84 18.68 12.06 18.68 12.28C18.67 12.52 18.57 12.73 18.39 12.88L16.3 14.5L18.89 19.85C19.12 20.35 18.89 20.93 18.39 21.17L13.64 21.97Z" fill="black"/></svg>') 16 16, auto !important;
-}
-
-/* High contrast mode */
-body.high-contrast {
-  filter: contrast(1.5);
-}
-
-body.inverted-colors {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-body.inverted-colors img,
-body.inverted-colors video {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-/* Link highlighting */
-body.highlight-links a {
-  background-color: yellow !important;
-  color: black !important;
-  text-decoration: underline !important;
-  font-weight: bold !important;
-  border: 2px solid black !important;
-  padding: 2px !important;
-}
-
-/* Heading highlighting */
-body.highlight-headings h1,
-body.highlight-headings h2,
-body.highlight-headings h3,
-body.highlight-headings h4,
-body.highlight-headings h5,
-body.highlight-headings h6 {
-  background-color: #ffcccb !important;
-  color: black !important;
-  border: 2px dashed black !important;
-  padding: 5px !important;
-}
-
-/* Image highlighting */
-body.highlight-images img {
-  border: 3px solid red !important;
-  padding: 2px !important;
-}
-
-/* Animations blocking */
-body.no-animations *,
-body.no-animations *::before,
-body.no-animations *::after {
-  animation: none !important;
-  transition: none !important;
-}
-
-/* Readable font */
-body.readable-font * {
-  font-family: Arial, sans-serif !important;
-  letter-spacing: 0.12em !important;
-  word-spacing: 0.16em !important;
-  line-height: 1.5 !important;
-}
-
-/* Zoom lens */
-.zoom-lens {
-  position: fixed;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  border: 2px solid black;
-  pointer-events: none;
-  z-index: 9999;
-  background-color: white;
-  display: none;
-  transform: scale(1.5);
-  background-repeat: no-repeat;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-}
-
-/* Keyboard navigation focus */
-body.keyboard-nav :focus {
-  outline: 3px solid blue !important;
-  outline-offset: 3px !important;
-}
-
-/* Focus not visible when not in keyboard nav mode */
-body:not(.keyboard-nav) button:focus,
-body:not(.keyboard-nav) a:focus {
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 999999;
-    animation: floatButton 3s ease-in-out infinite;
-  }
-
-  @keyframes floatButton {
-    0% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-    100% {
-      transform: translateY(0);
-    }
-  }
-
-  .accessibility-button:hover {
-    transform: scale(1.1);
-    animation-play-state: paused;
-  }
-
-  /* Ensure the panel appears above other elements */
-  .accessibility-panel.active {
-    z-index: 999998;
-    position: absolute;
-  }
-
-  /* Prevent panel from inheriting float animation */
-  .accessibility-panel {
-    animation: none;
-  }
- 
     .whatsapp-button {
       display: flex;
       align-items: center;
@@ -479,484 +73,16 @@ body:not(.keyboard-nav) a:focus {
       animation: floatButton 3s ease-in-out infinite;
     }
 
-    @keyframes floatButton {
-      0% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-      100% {
-        transform: translateY(0);
-      }
-    }
-
-    .whatsapp-button:hover {
-      transform: scale(1.1);
-      animation-play-state: paused;
-    }
-
-    .whatsapp-button.text_and_icon {
-      min-width: 100px;
-    }
-
-    .whatsapp-button.icon {
-      width: 30px;
-      height: 30px;
-      padding: 10px;
-      border-radius: 50%;
-    }
-
-    .whatsapp-button span {
-      font-family: var(--custom-font, 'Rubik'), sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .whatsapp-button img {
-      filter: brightness(0) invert(1);
-    }
-
-  .whatsapp-widget {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  .whatsapp-button {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    border-radius: 10px;
-    padding: 8px 16px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-width: 100px;
-    text-decoration: none;
-  }
-
-  .whatsapp-button.icon {
-    min-width: auto;
-    width: 30px;
-    height: 30px;
-    padding: 10px;
-    border-radius: 50%;
-  }
-
-  .whatsapp-button span {
-    font-family: var(--custom-font, 'Rubik'), sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .whatsapp-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-  }
-
-  .whatsapp-button.icon .whatsapp-icon {
-    width: 32px;
-    height: 32px;
-  }
-
-  .whatsapp-icon svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .whatsapp-button:hover {
-    transform: scale(1.05);
-  }
-
-  .whatsapp-widget {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
-
-  .whatsapp-widget.icon {
-    width: 30px !important;
-    height: 30px !important;
-  }
-  
-  .whatsapp-button {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  /* Hide any duplicate payment feature sections */
-  .payment-section:not(.footer-banners .payment-section) {
-    display: none !important;
-  }
-  
-  
-
-  .whatsapp-floating-widget {
+    .accessibility-widget-container {
   position: fixed !important;
   z-index: 999999 !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  width: 200px;
-  max-width: 100%;
 }
-
-  .whatsapp-widget-container {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    overflow: hidden;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-
-  .whatsapp-widget {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
-
-  .whatsapp-button {
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
-
-  .whatsapp-widget-container {
-    transition: height 0.3s ease;
-    overflow: hidden;
-  }
-
-  .whatsapp-widget-container.minimized {
-    height: 30px !important;
-  }
-
-  .whatsapp-widget-container.minimized .whatsapp-widget-body {
-    display: none !important;
-  }
-.whatsapp-widget-container.minimized .whatsapp-widget-header {
-  display: block !important;
+.high-contrast .accessibility-widget-container,
+.inverted-colors .accessibility-widget-container,
+.monochrome-contrast .accessibility-widget-container {
+  position: fixed !important;
+  z-index: 999999 !important;
 }
-  .whatsapp-minimize-button svg {
-    transition: transform 0.3s ease;
-  }
-
-  .whatsapp-widget-container.minimized .whatsapp-minimize-button svg {
-    transform: rotate(180deg);
-  }
-
-  .whatsapp-widget-container.hidden {
-    display: none !important;
-  }
-
-  /* Widget Styles */
-.whatsapp-widget-container {
-  width: 200px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  overflow: hidden;
-}
-
-.whatsapp-widget-header {
-  position: relative;
-  padding: 5px;
-  border-radius: 10px 10px 0 0;
-}
-
-.whatsapp-widget-header h3 {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.whatsapp-widget-header p {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.whatsapp-widget-body {
-  padding: 16px;
-  background: white;
-}
-
-.whatsapp-contact {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  border-radius: 8px;
-  transition: background-color 0.3s;
-  margin-bottom: 8px;
-  background: white;
-}
-
-.whatsapp-contact:hover {
-  background-color: #f5f5f5;
-}
-
-.whatsapp-contact-info{
-display:flex; 
-flex-direction: column;
-}
-
-.whatsapp-header-content {
- display:block !important
-  padding-right: 16px;
-}
-
-/* Ensure controls are visible against any background */
-.whatsapp-widget-controls {
-  display: flex;
-  gap: 8px;
-  left: 12px;
-  top: 12px;
-  z-index: 1;
-}
-
-.whatsapp-floating-widget {
-  max-height: 90vh !important;
-  display: flex !important;
-}
-
-
-
-.whatsapp-widget-header {
-  position: relative;
-  padding: 5px;
-  border-radius: 10px 10px 0 0;
-  flex-shrink: 0; /* Prevent header from shrinking */
-}
-
-.whatsapp-widget-body {
-  padding: 16px;
-  background: white;
-  overflow-y: auto; /* Make contacts scrollable */
-  flex-grow: 1; /* Allow body to take remaining space */
-  max-height: calc(90vh - 120px); /* Account for header height */
-}
-
-/* Add smooth scrolling to the contacts area */
-.whatsapp-widget-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-.whatsapp-widget-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.whatsapp-widget-body::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 3px;
-}
-
-.whatsapp-widget-body::-webkit-scrollbar-thumb:hover {
-  background: #666;
-}
-
-.product-payment-icons .payment-processors h4 {
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-.product-payment-icons .image-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin: 5px 0;
-}
-.product-payment-icons .image-container img {
-  max-width: 50px;
-  height: auto;
-  margin: 5px;
-}
-
-  .sabbath-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #FBFBFB;
-    z-index: 999999;
-    overflow-y: auto;
-  }
-
-  .sabbath-header {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: space-between;
-    align-items: center;
-    padding: 39px 100px;
-  }
-
-  .store-logo h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #333;
-    text-transform: capitalize;
-  }
-
-  .contact-us {
-    cursor: pointer;
-  }
-
-  .sabbath-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0;
-    gap: 10px;
-    width: 730px;
-    margin: 0 auto;
-  }
-
-  .sabbath-title {
-    text-align: center;
-  }
-
-  .sabbath-title h2 {
-    font-weight: 900;
-    font-size: 22px;
-    margin-bottom: 8px;
-  }
-
-  .sabbath-title p {
-    font-size: 16px;
-    font-weight: 500;
-    color: #777;
-  }
-
-  .sabbath-banner {
-    width: 100%;
-    min-height: 282px;
-    border-radius: 16px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .banner-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  .banner-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 1;
-  }
-
-  .countdown-wrapper {
-    margin-top: 32px;
-    box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.08), 0px 5px 10px -2px rgba(0, 0, 0, 0.15);
-    border: 1px solid #C6C6C6;
-    border-radius: 16px;
-    padding: 24px;
-    text-align: center;
-  }
-
-  .countdown-wrapper h3 {
-    font-weight: 900;
-    font-size: 26px;
-  
-  }
-
-  .countdown {
-    display: flex;
-    gap: 32px;
-    justify-content: center;
-  }
-
-  .time-box {
-    width: 115px;
-    height: 115px;
-    background: #F2F2F2;
-    border: 1px solid #C6C6C6;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .time-box .number {
-    font-size: 56px;
-    font-weight: 500;
-    color: #0D0D0D;
-    margin-bottom :0
-  }
-
-  .time-box .label {
-    font-size: 14px;
-    color: #777777;
-  }
-
-  .social-links-container {
-    width: 450px;
-    padding: 16px;
-    background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.05);
-    border-radius: 0 0 16px 16px;
-    margin-top: -10px;
-  }
-
-  .social-links-grid {
-    display: flex;
-    gap: 24px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .social-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: #F5F5F5;
-    border-radius: 50%;
-    transition: transform 0.2s ease;
-    color: #333333;
-  }
-
-  .social-link:hover {
-    transform: scale(1.1);
-    background: #EEEEEE;
-  }
-
-  .social-link svg {
-    width: 24px;
-    height: 24px;
-  }
-
-  .remote-img[src^="http"] {
-    max-width: 100%;
-    height: auto;
-  }
 </style>
 
 
@@ -1097,52 +223,122 @@ flex-direction: column;
 {% assign accessibility_button_text_color = shop.metafields.custom.accessibility_button_text_color.value | default: '#FFFFFF' %}
 {% assign accessibility_button_icon_color = shop.metafields.custom.accessibility_button_icon_color.value | default: '#FFFFFF' %}
 
-{% if block.settings.enable_whatsapp %}
-  {% if whatsapp_widget_enabled and contacts.size > 0 %}
-    <div class="whatsapp-floating-widget" style="position: fixed; {{ whatsapp_position }}: 5px; bottom: 30px; z-index: 999999;">
-      <div class="whatsapp-widget-container" data-state="expanded">
-        <!-- Widget Header -->
-        <div class="whatsapp-widget-header" style="background-color: {{ whatsapp_title_bg_color }};">
-          <div class="whatsapp-widget-controls" style="display : flex; justify-content:space-between;">
-            <h3 style="color: {{ whatsapp_title_text_color }};">
-              צ'אט איתנו</h3>
-            <div class="whatsapp-minimize-button" aria-label="Minimize widget" style="color: {{ whatsapp_title_text_color }}; cursor:pointer">
-              <svg width="12" height="12" viewBox="0 0 12 12">
-                <path stroke="{{ whatsapp_title_text_color }}" d="M2 6l4 4 4-4" stroke-width="2" fill="none"/>
-              </svg>
+{%- comment -%} WhatsApp Widget Bubble {%- endcomment -%}
+{% if block.settings.enable_whatsapp and whatsapp_widget_enabled and contacts.size > 0 %}
+  <div class="whatsapp-bubble-widget" style="position: fixed; {{ whatsapp_position }}: 20px; bottom: 30px; z-index: 999999;">
+    <!-- Chat Bubble (hidden by default) -->
+    <div class="whatsapp-bubble-chat" style="display:none; background: {{ whatsapp_title_bg_color }}; border-radius: 16px 16px 8px 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); margin-bottom: 12px; min-width: 300px; max-width: 320px; height: 400px; 
+    {% case whatsapp_position %}
+           {% when 'left' %}
+             right: 0; bottom: 100%; margin-bottom: 12px;
+           {% when 'right' %}
+             left: 0; bottom: 100%; margin-bottom: 12px;
+           {% else %}
+             left: 0; bottom: 100%; margin-bottom: 12px;
+         {% endcase %}">
+      <div class="whatsapp-bubble-header" style="background: {{ whatsapp_title_bg_color }}; color: {{ whatsapp_title_text_color }}; padding: 10px 16px 10px 16px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; border-radius:16px 16px 0 0">
+        <div>
+          <p style="font-weight:600; margin:0">שלום רב 👋🏼</p>
+          <p style="font-weight:400; margin:0; font-size:12px">ברוכים הבאים לצ'אט החברתי ולשיתוף. שאלו אותנו כל דבר</p>
+        </div>
+        <button class="whatsapp-bubble-close" aria-label="סגור" style="background:none; border:none; color:{{ whatsapp_title_text_color }}; font-size:20px; cursor:pointer;">&times;</button>
+      </div>
+      <div class="whatsapp-bubble-body" style="padding: 12px; border-radius : 16px 16px 0 0; overflow-y: auto; max-height: calc(100vh - 200px); background-color: white; height: 100%">
+        {% for contact in contacts %}
+          <div class="whatsapp-contact" onclick="openWhatsApp('{{ contact.phone }}', '{{ contact.default_message }}')" style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom:10px;">
+            <img src="{{ contact.avatar_url | default: 'https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png' }}" alt="{{ contact.name }}" style="width:50px; height:50px; border-radius:50%; border: 2px solid {{whatsapp_title_bg_color}};">
+            <div>
+              <div style="font-weight:600; margin:0">{{ contact.name }}</div>
+              {% if contact.role %}
+                <div style="font-size:13px; color:#888;">{{ contact.role }}</div>
+              {% endif %}
             </div>
           </div>
-          <div class="whatsapp-header-content" style="color: {{ whatsapp_title_text_color }};">
-            
-            <p>.אנחנו כאן כדי לעזור. שוחח איתנו בווטסאפ לכל שאלה</p>
-          </div>
-        </div>
-        <div class="whatsapp-widget-body">
-          {% for contact in contacts %}
-            <div class="whatsapp-contact" 
-                 onclick="openWhatsApp('{{ contact.phone }}', '{{ contact.default_message }}')" 
-                 style="cursor: pointer; gap:10px">
-              <div class="whatsapp-avatar" style="width:30px; height:30px; border-radius:50%; overflow:hidden">
-                
-                <img src="{{ contact.avatar_url | default: 'https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/user-avatar.png' }}" alt="{{ contact.name }}" class="contact-avatar" />
-              </div>
-              <div class="whatsapp-contact-info">
-                <span class="contact-name" style="font-size: 16px; font-weight: 600">{{ contact.name }}</span>
-                {% if contact.role %}
-                  <span class="contact-role" style="font-size: 14px; font-weight: 400">{{ contact.role }}</span>
-                {% endif %}
-              </div>
-            </div>
-          {% endfor %}
-        </div>
+          {% comment %} {% unless forloop.last %}
+            <hr style="margin: 0" />
+          {% endunless %} {% endcomment %}
+        {% endfor %}
       </div>
     </div>
+    </div>
+    <!-- Floating Button -->
+    <div class="whatsapp-bubble-widget" style="position: fixed; {{ whatsapp_position }}: 20px; bottom: 30px; z-index: 999999;">
+      <button class="whatsapp-bubble-btn {{ whatsapp_style }}" style="display:flex; align-items:center; gap:8px; background:{{ whatsapp_bg_color }}; color:{{ whatsapp_text_color }}; border:none; border-radius:100%; box-shadow:0 4px 8px rgba(0,0,0,0.12); padding:10px 10px; cursor:pointer; font-family:var(--custom-font, 'Rubik'),sans-serif; font-size:15px; position:relative;">
+        <span class="whatsapp-icon" style="display:flex; align-items:center;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="{{ whatsapp_icon_color }}">
+            <path d="M20.4054 3.4875C18.1607 1.2375 15.1714 0 11.9946 0C5.4375 0 0.101786 5.33571 0.101786 11.8929C0.101786 13.9875 0.648214 16.0339 1.68214 17.8393L0 24L6.30536 22.3446C8.04107 23.2929 9.99643 23.7911 11.9893 23.7911H11.9946C18.5464 23.7911 24 18.4554 24 11.8982C24 8.72143 22.65 5.7375 20.4054 3.4875ZM11.9946 21.7875C10.2161 21.7875 8.475 21.3107 6.95357 20.4107L6.59464 20.1964L2.85536 21.1768L3.85179 17.5286L3.61607 17.1536C2.63036 15.5786 2.11071 13.7625 2.11071 11.8929C2.11071 6.44464 6.54643 2.00893 12 2.00893C14.6411 2.00893 17.1214 3.0375 19.0179 4.93929C20.9143 6.84107 21.9964 9.32143 21.9911 11.8982C21.9911 17.3518 17.4429 21.7875 11.9946 21.7875ZM17.4161 14.3839C17.1214 14.2339 15.6589 13.5161 15.3857 13.4143C15.1125 13.3179 14.9143 13.2696 14.7161 13.5589C14.5179 13.8482 13.95 14.5179 13.7732 14.7161C13.5964 14.9196 13.4143 14.9411 13.1196 14.7911C11.3946 13.9286 10.2589 13.2482 9.11786 11.3036C8.80714 10.7839 9.42321 10.8214 9.99643 9.67500C10.0982 9.47679 10.05 9.30536 9.97500 9.15536C9.90000 9.00536 9.30000 7.54286 9.05357 6.95357C8.81250 6.37500 8.56607 6.45536 8.38393 6.44464C8.20714 6.43393 8.00893 6.43393 7.81071 6.43393C7.61250 6.43393 7.29107 6.50893 7.01786 6.79286C6.74464 7.08214 5.97857 7.80000 5.97857 9.26250C5.97857 10.725 7.03393 12.1339 7.18393 12.3321C7.33393 12.5304 9.29464 15.5304 12.2786 16.8214C14.1214 17.6357 14.8607 17.7214 15.8036 17.5821C16.3768 17.4964 17.5607 16.8589 17.8071 16.1732C18.0536 15.4875 18.0536 14.8982 17.9786 14.7696C17.9089 14.6304 17.7107 14.5339 17.4161 14.3839Z"/>
+          </svg>
+        </span>
+        
+  <span class="whatsapp-bubble-tooltip chat-bubble-tooltip" style="background:{{ whatsapp_text_color  }}; color:{{ whatsapp_bg_color }};">
+    <p style="margin:0">
+      שלום! איך נוכל לעזור לך?
+    </p>
+    <p style="margin:0">
+     לחץ כאן כדי להתחיל צ'אט איתנו
+    </p>
+     
+    <span class="chat-bubble-tail" style="border-top-color: {{ whatsapp_text_color }};"></span>
+  </span>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-      });
-    </script>
+      </button>
+      <style>
+  .whatsapp-bubble-btn.text_and_icon:hover .whatsapp-bubble-tooltip,
+  .whatsapp-bubble-btn.text_and_icon:focus .whatsapp-bubble-tooltip {
+    opacity: 1 !important;
+    pointer-events: auto;
+  }
+  .whatsapp-bubble-btn.text_and_icon.opened .whatsapp-bubble-tooltip {
+    display: none !important;
+  }
+  /* Chat bubble style for tooltip */
+  .chat-bubble-tooltip {
+  position: absolute;
+  bottom: 120%;
+  /* Remove left: 50% and transform: translateX(-50%); */
+  {% if whatsapp_position == 'left' %}
+    left: 0;
+  {% else %}
+    right: 0;
   {% endif %}
+  padding: 12px 24px;
+   {% if whatsapp_position == 'left' %}
+    border-radius: 6px 16px 16px 6px;
+  {% else %}
+    border-radius: 16px 6px 6px 16px;
+  {% endif %}
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  z-index: 10;
+  min-width: 220px;
+  text-align: center;
+  margin-bottom: 0;
+}
+.chat-bubble-tail {
+  position: absolute;
+  top: 100%;
+  /* Remove left: 50% and transform: translateX(-50%); */
+  {% if whatsapp_position == 'left' %}
+    left: 5px;
+  {% else %}
+    right: 5px;
+  {% endif %}
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid;
+  border-top-color: inherit;
+  z-index: 11;
+  margin-bottom:20px;
+}
+</style>
+    </div>
 {% endif %}
 
   {% if show_simple_button and whatsapp_phone != blank and whatsapp_widget_enabled == false %}
@@ -1154,7 +350,7 @@ flex-direction: column;
       <div class="whatsapp-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="{{ whatsapp_icon_color }}">
           <path d="M20.4054 3.4875C18.1607 1.2375 15.1714 0 11.9946 0C5.4375 0 0.101786 5.33571 0.101786 11.8929C0.101786 13.9875 0.648214 16.0339 1.68214 17.8393L0 24L6.30536 22.3446C8.04107 23.2929 9.99643 23.7911 11.9893 23.7911H11.9946C18.5464 23.7911 24 18.4554 24 11.8982C24 8.72143 22.65 5.7375 20.4054 3.4875ZM11.9946 21.7875C10.2161 21.7875 8.475 21.3107 6.95357 20.4107L6.59464 20.1964L2.85536 21.1768L3.85179 17.5286L3.61607 17.1536C2.63036 15.5786 2.11071 13.7625 2.11071 11.8929C2.11071 6.44464 6.54643 2.00893 12 2.00893C14.6411 2.00893 17.1214 3.0375 19.0179 4.93929C20.9143 6.84107 21.9964 9.32143 21.9911 11.8982C21.9911 17.3518 17.4429 21.7875 11.9946 21.7875ZM17.4161 14.3839C17.1214 14.2339 15.6589 13.5161 15.3857 13.4143C15.1125 13.3179 14.9143 13.2696 14.7161 13.5589C14.5179 13.8482 13.95 14.5179 13.7732 14.7161C13.5964 14.9196 13.4143 14.9411 13.1196 14.7911C11.3946 13.9286 10.2589 13.2482 9.11786 11.3036C8.80714 10.7839 9.42321 10.8214 9.99643 9.67500C10.0982 9.47679 10.05 9.30536 9.97500 9.15536C9.90000 9.00536 9.30000 7.54286 9.05357 6.95357C8.81250 6.37500 8.56607 6.45536 8.38393 6.44464C8.20714 6.43393 8.00893 6.43393 7.81071 6.43393C7.61250 6.43393 7.29107 6.50893 7.01786 6.79286C6.74464 7.08214 5.97857 7.80000 5.97857 9.26250C5.97857 10.725 7.03393 12.1339 7.18393 12.3321C7.33393 12.5304 9.29464 15.5304 12.2786 16.8214C14.1214 17.6357 14.8607 17.7214 15.8036 17.5821C16.3768 17.4964 17.5607 16.8589 17.8071 16.1732C18.0536 15.4875 18.0536 14.8982 17.9786 14.7696C17.9089 14.6304 17.7107 14.5339 17.4161 14.3839Z"/>
-        </svg>
+          </svg>
       </div>
       {% if whatsapp_style == 'text_and_icon' %}
         <span style="color: {{ whatsapp_text_color }}; margin-right: 8px;">
@@ -1164,6 +360,42 @@ flex-direction: column;
     </a>
   </div>
 {% endif %}
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.querySelector('.whatsapp-bubble-btn');
+  var bubble = document.querySelector('.whatsapp-bubble-chat');
+  var close = document.querySelector('.whatsapp-bubble-close');
+  if (!btn || !bubble) return;
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isOpen = bubble.style.display === 'block';
+    bubble.style.display = isOpen ? 'none' : 'block';
+    // Toggle 'opened' class to hide tooltip when open
+    if (!isOpen) {
+      btn.classList.add('opened');
+    } else {
+      btn.classList.remove('opened');
+    }
+  });
+  if (close) {
+    close.addEventListener('click', function(e) {
+      e.stopPropagation();
+      bubble.style.display = 'none';
+      btn.classList.remove('opened');
+    });
+  }
+  // Hide bubble when clicking outside
+  document.addEventListener('mousedown', function(e) {
+    if (!bubble.contains(e.target) && !btn.contains(e.target)) {
+      bubble.style.display = 'none';
+      btn.classList.remove('opened');
+    }
+  });
+});
+</script>
+
 
   {% if show_simple_button or whatsapp_phone != blank %}
   <script>
@@ -1228,11 +460,6 @@ flex-direction: column;
 
   
 <!-- Fonts are loaded via schema.json externals -->
-
-
-<script>
-document.addEventListener('DOMContentLoaded',function(){window.buyNowText={{ buy_now_text | json }},window.alternativeFont={{ alternative_font | json }},window.enableBuyNowText={{ block.settings.enable_buy_now_text }},window.enableAlternativeFont={{ block.settings.enable_alternative_font }},window.enableFooterBanners={{ enable_footer_banners | json }},window.enableWhatsApp={{ block.settings.enable_whatsapp }},updateBuyNowText();const e=new MutationObserver(e=>{e.forEach(e=>{e.addedNodes.length&&updateBuyNowText()})});e.observe(document.body,{childList:!0,subtree:!0}),document.addEventListener("shopify:block:select",function(e){e.detail.blockId==={{ block.id | json }}&&(updateBuyNowText())})});
-</script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -1390,7 +617,8 @@ document.addEventListener('DOMContentLoaded',function(){window.buyNowText={{ buy
           visibility: visible !important;
           opacity: 1 !important;
           pointer-events: auto !important;
-          width: 200px;
+          width: 300px;
+          height:300px;
           max-width: 100%;
         `;
       }
@@ -1525,8 +753,7 @@ document.addEventListener('DOMContentLoaded',function(){window.buyNowText={{ buy
         {% endif %}
       </a>
     {% endfor %}
-  </div>
-</div>
+  </div</div>
 {% endif %}
 
   </div>
@@ -1553,6 +780,8 @@ function calculateTimeLeft(openingDay, openingTime) {
   
   target.setDate(target.getDate() + daysUntil);
   target.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+ 
 
   const difference = target - now;
   
@@ -1606,64 +835,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setInterval(updateCountdown, 1000);
 });
 </script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const countdownEl = document.querySelector('.countdown');
-  if (!countdownEl) return;
 
-  const openingDay = countdownEl.dataset.openingDay;
-  const openingTime = countdownEl.dataset.openingTime;
-
-  function calculateTimeLeft(openingDay, openingTime) {
-    const now = new Date();
-    const [hours, minutes] = openingTime.split(':');
-    const target = new Date();
-    
-    const days = {
-      'Saturday': 6,
-      'Sunday': 0
-    };
-    
-    let targetDay = days[openingDay];
-    let daysUntil = targetDay - now.getDay();
-    if (daysUntil <= 0) daysUntil += 7;
-    
-    target.setDate(target.getDate() + daysUntil);
-    target.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-    const difference = target - now;
-    
-    if (difference > 0) {
-      return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60)
-      };
-    }
-    
-    return null;
-  }
-
-  function updateCountdown() {
-    const timeLeft = calculateTimeLeft(openingDay, openingTime);
-    if (!timeLeft) return;
-
-    const boxes = countdownEl.querySelectorAll('.time-box');
-    const values = [timeLeft.days, timeLeft.hours, timeLeft.minutes, timeLeft.seconds];
-    
-    boxes.forEach((box, index) => {
-      const numberEl = box.querySelector('.number');
-      if (numberEl) {
-        numberEl.textContent = values[index];
-      }
-    });
-  }
-
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
-});
-</script>
 {% endif %}
 
 <script>
@@ -1725,154 +897,162 @@ function getCurrentTimeInShopTimeZone() {
       </span>
     </button>
 
+    
     <div id="accessibility-panel" class="accessibility-panel" aria-hidden="true" style="
-    height: 80vh !important; max-height: 80vh !important; z-index: 999999 !important;
+    position: absolute !important;
+    width: 400px !important;
+    max-width: 400px !important;
+    height: auto !important;
+    max-height: 80vh !important; 
+    z-index: 999999 !important;
     {% case accessibility_icon_location %}
     {% when 'top_left' %}
       top: 100% !important;
       left: 0 !important;
+      right: auto !important;
+      bottom: auto !important;
       margin-top: 8px !important;
+      margin-bottom: 0 !important;
     {% when 'top_right' %}
       top: 100% !important;
-      right: 0;
+      right: 0 !important;
+      left: auto !important;
+      bottom: auto !important;
       margin-top: 8px !important;
+      margin-bottom: 0 !important;
     {% when 'bottom_left' %}
       bottom: 100% !important;
       left: 0 !important;
-      margin-bottom: 8px !important;
+      right: auto !important;
       top: auto !important;
+      margin-bottom: 8px !important;
+      margin-top: 0 !important;
     {% when 'bottom_right' %}
       bottom: 100% !important;
       right: 0 !important;
-      margin-bottom: 8px !important;
+      left: auto !important;
       top: auto !important;
+      margin-bottom: 8px !important;
+      margin-top: 0 !important;
   {% endcase %}">
+
       <div class="accessibility-panel-header">
         <h2>{{ accessibility_help_title }}</h2>
         <button class="close-panel" aria-label="Close accessibility panel">&times;</button>
       </div>
       <div class="accessibility-panel-content">
         
-      
-  
-  
-  <!-- Keyboard Navigation -->
-  <div class="accessibility-section">
-    
-    <button class="accessibility-option" style="display:flex; justify-content:center; gap:2px align-items:center; background:transparent; border:none" data-action="keyboard-nav">
-      <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 11c0-2.828 0-4.243.879-5.121C3.757 5 5.172 5 8 5h8c2.828 0 4.243 0 5.121.879C22 6.757 22 8.172 22 11v2c0 2.828 0 4.243-.879 5.121C20.243 19 18.828 19 16 19H8c-2.828 0-4.243 0-5.121-.879C2 17.243 2 15.828 2 13zm5 5h10M5 9h3m3 0h3m3 0h2M5 12h2m3 0h3m3 0h3"/></svg></span>
-      <span class="label">ניווט מקלדת</span>
-    </button>
-  </div>
-  
-  <!-- Color Settings -->
-  <div class="accessibility-section">
+        <!-- Main Title -->
+        <div class="accessibility-section">
+          <div class="section-header" style="font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 16px;">
+            כלי נגישות<br>
+          </div>
+        </div>
+        
 
-    <button class="accessibility-option" style="display:flex; justify-content:center; gap:2px align-items:center; background:transparent; border:none" data-action="animations-block">
-      <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path fill="#0f0f0f" d="M8 12h22c2.2 0 4 1.8 4 4v16c0 2.2-1.8 4-4 4H8c-2.2 0-4-1.8-4-4V16c0-2.2 1.8-4 4-4"/><path fill="#202020" d="m44 35l-10-6V19l10-6z"/><path fill="none" stroke="#fff" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="4" d="m5 5l38 38"/></svg></span>
-      <span class="label">חסימת אנימציות</span>
-    </button>
-  </div>
   
-  <!-- Color Adjustments -->
-  <div class="accessibility-section">
-    <div class="section-header">ניגודיות צבעים</div>
-    <div class="options-grid">
-      <button class="accessibility-option" data-action="contrast-default">
-        <span class="icon">⚪</span>
-        <span class="label">תצוגת מוגברת</span>
-      </button>
-      <button class="accessibility-option" data-action="contrast-choice">
-        <span class="icon">⚫</span>
-        <span class="label">ניגודיות בהירה</span>
-      </button>
-      <button class="accessibility-option" data-action="contrast-invert">
-        <span class="icon">⚪</span>
-        <span class="label">ניגודיות הפוכה</span>
-      </button>
-    </div>
-  </div>
-  
-  <!-- Text Size -->
-  <div class="accessibility-section">
-    <div class="section-header">גודל טקסט</div>
-    <div class="options-grid">
-      <button class="accessibility-option" data-action="text-increase">
-        <span class="icon">↑</span>
-        <span class="label">הגדלת גופן</span>
-      </button>
-      <button class="accessibility-option" data-action="text-decrease">
-        <span class="icon">↓</span>
-        <span class="label">הקטנת גופן</span>
-      </button>
-      <button class="accessibility-option" data-action="text-readable">
-        <span class="icon">T</span>
-        <span class="label">גופן קריא</span>
-      </button>
-    </div>
-  </div>
-  
-  <!-- Content Highlighting -->
-  <div class="accessibility-section">
-    <div class="section-header">הדגשת תוכן</div>
-    <div class="options-grid">
-      <button class="accessibility-option" data-action="highlight-links">
-        <span class="icon">🔗</span>
-        <span class="label">הדגשת קישורים</span>
-      </button>
-      <button class="accessibility-option" data-action="highlight-headings">
-        <span class="icon">H</span>
-        <span class="label">הדגשת כותרות</span>
-      </button>
-      <button class="accessibility-option" data-action="highlight-images">
-        <span class="icon">🖼️</span>
-        <span class="label">תיאור לתמונות</span>
-      </button>
-    </div>
-  </div>
-  
-  <!-- Cursor Options -->
-  <div class="accessibility-section">
-    <div class="section-header">הגדלת תצוגה</div>
-    <div class="options-grid">
-      <button class="accessibility-option" data-action="cursor-large-white">
-        <span class="icon">⬜</span>
-        <span class="label">סמן לבן גדול</span>
-      </button>
-      <button class="accessibility-option" data-action="cursor-large-black">
-        <span class="icon">⬛</span>
-        <span class="label">סמן שחור גדול</span>
-      </button>
-      <button class="accessibility-option" data-action="zoom-enable">
-        <span class="icon">🔍</span>
-        <span class="label">הגדלת תצוגה</span>
-      </button>
-    </div>
-  </div>
-  
-  <!-- Declaration and Reporting -->
-  <div class="accessibility-section">
-    <button class="accessibility-option" data-action="declaration">
-      <span class="label">הצהרת נגישות</span>
-    </button>
-    <button class="accessibility-option" data-action="report-issue">
-      <span class="label">דווח על בעיית נגישות</span>
-    </button>
-    <button class="accessibility-option" data-action="reset-settings">
-      <span class="icon">↻</span>
-      <span class="label">איפוס נגישות</span>
-    </button>
-  </div>
+        
+        <!-- Reading and Animations -->
+        <div class="accessibility-section">
+          
+            <button class="accessibility-option" style="display:flex; justify-content:center; gap:2px align-items:center; background:transparent; border:none" data-action="reading-off">
+              <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 11c0-2.828 0-4.243.879-5.121C3.757 5 5.172 5 8 5h8c2.828 0 4.243 0 5.121.879C22 6.757 22 8.172 22 11v2c0 2.828 0 4.243-.879 5.121C20.243 19 18.828 19 16 19H8c-2.828 0-4.243 0-5.121-.879C2 17.243 2 15.828 2 13zm5 5h10M5 9h3m3 0h3m3 0h2M5 12h2m3 0h3m3 0h3"/></svg></span>
+              <span class="label">כיבוי הקראה</span>
+            </button>
+            <hr style="margin:0" />
+            <button class="accessibility-option" style="display:flex; justify-content:center; gap:2px align-items:center; background:transparent; border:none" data-action="animations-block">
+              <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48"><path fill="#0f0f0f" d="M8 12h22c2.2 0 4 1.8 4 4v16c0 2.2-1.8 4-4 4H8c-2.2 0-4-1.8-4-4V16c0-2.2 1.8-4 4-4"/><path fill="#202020" d="m44 35l-10-6V19l10-6z"/><path fill="none" stroke="#fff" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="4" d="m5 5l38 38"/></svg></span>
+              <span class="label">חסימת אנימציות</span>
+            </button>
+          
+        </div>
+        
+        <!-- Color Contrast -->
+        <div class="accessibility-section">
+          <div class="section-header">🎨 ניגודיות צבעים </div>
+          <div class="options-grid">
+            <button class="accessibility-option" data-action="contrast-invert">
+              <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M9.965 2.809a1.51 1.51 0 0 0-1.401-.203a10 10 0 0 0-2.982 1.725a1.51 1.51 0 0 0-.524 1.313c.075.753-.058 1.48-.42 2.106c-.361.627-.925 1.106-1.615 1.417a1.51 1.51 0 0 0-.875 1.113a10 10 0 0 0 0 3.44c.093.537.46.926.875 1.114c.69.31 1.254.79 1.616 1.416c.361.627.494 1.353.419 2.106c-.045.452.107.964.524 1.313a10 10 0 0 0 2.982 1.725a1.51 1.51 0 0 0 1.4-.203c.615-.442 1.312-.691 2.036-.691s1.42.249 2.035.691c.37.266.89.39 1.401.203a10 10 0 0 0 2.982-1.725c.417-.349.57-.86.524-1.313c-.075-.753.057-1.48.42-2.106c.361-.627.925-1.105 1.615-1.416c.414-.187.782-.577.875-1.114a10 10 0 0 0 0-3.44a1.51 1.51 0 0 0-.875-1.113c-.69-.311-1.254-.79-1.616-1.417c-.362-.626-.494-1.353-.419-2.106a1.51 1.51 0 0 0-.524-1.313a10 10 0 0 0-2.982-1.725a1.51 1.51 0 0 0-1.4.203C13.42 3.25 12.723 3.5 12 3.5s-1.42-.249-2.035-.691M9 12a3 3 0 1 1 6 0a3 3 0 0 1-6 0"/></g></svg></span>
+              <span class="label">ניגודיות הפוכה</span>
+            </button>
+            <button class="accessibility-option" data-action="contrast-high">
+              <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" fill-rule="evenodd"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M14.035 2.809c.37-.266.89-.39 1.401-.203a10 10 0 0 1 2.982 1.725c.417.35.57.861.524 1.313c-.075.753.057 1.48.42 2.106c.32.557.802.997 1.39 1.307l.225.11c.414.187.782.576.875 1.113a10 10 0 0 1 0 3.44c-.083.484-.39.847-.753 1.051l-.122.063c-.69.31-1.254.79-1.616 1.416c-.362.627-.494 1.353-.419 2.106c.045.452-.107.964-.524 1.313a10 10 0 0 1-2.982 1.725a1.51 1.51 0 0 1-1.4-.203C13.42 20.75 12.723 20.5 12 20.5s-1.42.249-2.035.691a1.51 1.51 0 0 1-1.401.203a10 10 0 0 1-2.982-1.725a1.51 1.51 0 0 1-.524-1.313c.075-.753-.058-1.48-.42-2.106a3.4 3.4 0 0 0-1.39-1.307l-.225-.11a1.51 1.51 0 0 1-.875-1.113a10 10 0 0 1 0-3.44c.083-.484.39-.847.753-1.051l.122-.062c.69-.311 1.254-.79 1.616-1.417c.361-.626.494-1.353.419-2.106a1.51 1.51 0 0 1 .524-1.313a10 10 0 0 1 2.982-1.725a1.51 1.51 0 0 1 1.4.203c.615.442 1.312.691 2.036.691s1.42-.249 2.035-.691m.957 1.769c-.866.57-1.887.922-2.992.922s-2.126-.353-2.992-.922A8 8 0 0 0 7.068 5.7c.06 1.033-.145 2.093-.697 3.05c-.553.956-1.368 1.663-2.293 2.128a8 8 0 0 0 0 2.242c.925.465 1.74 1.172 2.293 2.13c.552.955.757 2.015.697 3.048a8 8 0 0 0 1.94 1.123c.866-.57 1.887-.922 2.992-.922s2.126.353 2.992.922a8 8 0 0 0 1.94-1.122c-.06-1.034.145-2.094.697-3.05c.552-.957 1.368-1.664 2.293-2.13a8 8 0 0 0 0-2.24c-.925-.466-1.74-1.173-2.293-2.13c-.552-.956-.757-2.016-.697-3.05a8 8 0 0 0-1.94-1.122ZM12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8m0 2a2 2 0 1 0 0 4a2 2 0 0 0 0-4"/></g></svg></span>
+              <span class="label">ניגודיות גבוהה</span>
+            </button>
+            <button class="accessibility-option" data-action="contrast-mono">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32"><g fill="none"><path fill="url(#fluentColorSettings320)" d="M28.832 18.472a1.48 1.48 0 0 1 .537 1.634a14.3 14.3 0 0 1-3.156 5.443a1.48 1.48 0 0 1-1.671.347l-1.955-.858a1.5 1.5 0 0 0-.68-.128a1.5 1.5 0 0 0-.66.2a1.47 1.47 0 0 0-.727 1.124l-.235 2.13a1.48 1.48 0 0 1-1.13 1.276c-2.076.495-4.24.495-6.316 0a1.48 1.48 0 0 1-1.125-1.27l-.235-2.126a1.48 1.48 0 0 0-.485-.94a1.5 1.5 0 0 0-1.58-.255l-1.955.859a1.48 1.48 0 0 1-1.668-.343a14.3 14.3 0 0 1-3.16-5.45a1.48 1.48 0 0 1 .536-1.632l1.725-1.275a1.488 1.488 0 0 0 0-2.4l-1.725-1.273a1.48 1.48 0 0 1-.536-1.623A14.25 14.25 0 0 1 5.79 6.467c.14-.151.31-.271.5-.351a1.5 1.5 0 0 1 1.17 0l1.947.858a1.493 1.493 0 0 0 2.073-1.206l.236-2.122a1.48 1.48 0 0 1 1.148-1.281a15.5 15.5 0 0 1 3.146-.362c1.052.012 2.1.133 3.127.362a1.48 1.48 0 0 1 1.147 1.284l.236 2.12a1.483 1.483 0 0 0 2.067 1.2l1.946-.857a1.48 1.48 0 0 1 1.674.346a14.2 14.2 0 0 1 3.157 5.44a1.48 1.48 0 0 1-.537 1.63l-1.72 1.273a1.48 1.48 0 0 0-.004 2.395zM16 20a4 4 0 1 0 0-8a4 4 0 0 0 0 8"/><defs><linearGradient id="fluentColorSettings320" x1="22.717" x2="7.059" y1="28.927" y2="4.523" gradientUnits="userSpaceOnUse"><stop stop-color="#70777d"/><stop offset="1" stop-color="#b9c0c7"/></linearGradient></defs></g></svg>
+              <span class="label">ניגודיות מונוכרום</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Text Size -->
+        <div class="accessibility-section">
+          <div class="section-header">🔠 גודל טקסט </div>
+          <div class="options-grid" style="grid-template-columns: 1fr 1fr;">
+            <button class="accessibility-option" data-action="text-decrease">
+              <span class="icon">🔽</span>
+              <span class="label">הקטנת גופן</span>
+            </button>
+            <button class="accessibility-option" data-action="text-increase">
+              <span class="icon">🔼</span>
+              <span class="label">הגדלת גופן</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Content Adjustment -->
+        <div class="accessibility-section">
+          <div class="section-header">📝 התאמת תוכן </div>
+          <div class="options-grid" style="grid-template-columns: 1fr 1fr;">
+            <button class="accessibility-option" data-action="highlight-headings">
+              <span class="icon">📋</span>
+              <span class="label">הדגשת כותרות</span>
+            </button>
+            <button class="accessibility-option" data-action="highlight-links">
+              <span class="icon">🔗</span>
+              <span class="label">הדגשת קישורים</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Display Zoom -->
+        <div class="accessibility-section">
+          <div class="section-header">👀 הגדלת תצוגה </div>
+          <div class="options-grid" style="grid-template-columns: 1fr 1fr;">
+            <button class="accessibility-option" data-action="zoom-enable">
+              <span class="icon">🔍</span>
+              <span class="label">הגדלת תצוגה</span>
+            </button>
+            <button class="accessibility-option" data-action="cursor-large">
+              <span class="icon">🖱️</span>
+              <span class="label">סמן עכבר גדול</span>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="accessibility-section">
+          <div class="options-grid" style="grid-template-columns: 1fr 1fr;">
+            <button class="accessibility-option" data-action="report-issue" style="background-color: #f8f9fa;">
+              <span class="icon">🕊️</span>
+              <span class="label">דווח על בעיות נגישות</span>
+            </button>
+            <button class="accessibility-option" data-action="reset-settings" style="background-color: #f8f9fa;">
+              <span class="icon">🖤</span>
+              <span class="label">איפוס נגישות</span>
+            </button>
+          </div>
+        </div>
 
-  {{ accessibility_help_text }}
+        {{ accessibility_help_text }}
         {% if accessibility_owner_email != blank %}
           <div class="accessibility-contact">
             <p>Contact for accessibility issues:</p>
             <a href="mailto:{{ accessibility_owner_email }}">{{ accessibility_owner_email }}</a>
           </div>
         {% endif %}
-</div>
-
+      </div>
     </div>
   </div>
 
@@ -1946,37 +1126,41 @@ function getCurrentTimeInShopTimeZone() {
     document.body.appendChild(zoomLens);
   }
 
-  function handleAccessibilityAction(action, element) {
+  
+ function handleAccessibilityAction(action, element) {
     if (!element) return;
-    
+
     switch(action) {
-      case 'keyboard-nav':
-        toggleFeature('keyboard-nav', 'keyboard-nav');
+      case 'reading-off':
+        toggleFeature('reading-off', 'reading-off');
         break;
       
       case 'animations-block':
         toggleFeature('no-animations', 'animations-block');
         break;
       
-      case 'contrast-default':
+      case 'contrast-invert':
         removeFeature('high-contrast');
-        removeFeature('inverted-colors');
-        setActiveInGroup('contrast-default', element);
-        saveSettings('contrast', 'default');
+        removeFeature('monochrome-contrast');
+        toggleFeature('inverted-colors', 'contrast-invert');
+        setActiveInGroup('contrast-invert', element);
+        saveSettings('contrast', 'inverted');
         break;
       
-      case 'contrast-choice':
-        addFeature('high-contrast');
+      case 'contrast-high':
         removeFeature('inverted-colors');
-        setActiveInGroup('contrast-choice', element);
+        removeFeature('monochrome-contrast');
+        toggleFeature('high-contrast', 'contrast-high');
+        setActiveInGroup('contrast-high', element);
         saveSettings('contrast', 'high');
         break;
       
-      case 'contrast-invert':
-        addFeature('inverted-colors');
+      case 'contrast-mono':
+        removeFeature('inverted-colors');
         removeFeature('high-contrast');
-        setActiveInGroup('contrast-invert', element);
-        saveSettings('contrast', 'inverted');
+        toggleFeature('monochrome-contrast', 'contrast-mono');
+        setActiveInGroup('contrast-mono', element);
+        saveSettings('contrast', 'mono');
         break;
       
       case 'text-increase':
@@ -1987,38 +1171,20 @@ function getCurrentTimeInShopTimeZone() {
         changeFontSize(-1);
         break;
       
-      case 'text-readable':
-        toggleFeature('readable-font', 'text-readable');
+      case 'highlight-headings':
+        toggleFeature('highlight-headings', 'highlight-headings');
         break;
       
       case 'highlight-links':
         toggleFeature('highlight-links', 'highlight-links');
         break;
       
-      case 'highlight-headings':
-        toggleFeature('highlight-headings', 'highlight-headings');
-        break;
-      
-      case 'highlight-images':
-        toggleFeature('highlight-images', 'highlight-images');
-        break;
-      
-      case 'cursor-large-white':
-        removeFeature('large-black-cursor');
-        toggleFeature('large-white-cursor', 'cursor-large-white');
-        break;
-      
-      case 'cursor-large-black':
-        removeFeature('large-white-cursor');
-        toggleFeature('large-black-cursor', 'cursor-large-black');
-        break;
-      
       case 'zoom-enable':
         toggleZoomLens();
         break;
       
-      case 'declaration':
-        showAccessibilityDeclaration();
+      case 'cursor-large':
+        toggleFeature('large-cursor', 'cursor-large');
         break;
       
       case 'report-issue':
@@ -2029,25 +1195,44 @@ function getCurrentTimeInShopTimeZone() {
         resetAllSettings();
         break;
     }
-  }
+}
 
-  // Toggle a feature on or off
-  function toggleFeature(className, optionName) {
-    const body = document.body;
-    const option = document.querySelector(`.${optionName}`);
+// Remove the duplicate toggleFeature function and keep only this one:
+function toggleFeature(className, optionName) {
+  // Apply directly to body to avoid positioning issues
+  const body = document.body;
+  const option = document.querySelector(`[data-action="${optionName}"]`);
+  
+  if (body.classList.contains(className)) {
+    body.classList.remove(className);
+    if (option) option.classList.remove('active');
+    saveSettings(optionName, false);
+  } else {
+    body.classList.add(className);
+    if (option) option.classList.add('active');
+    saveSettings(optionName, true);
+  }
+  
+  // Force maintain positioning after any body class changes
+  setTimeout(() => {
+    const container = document.querySelector('.accessibility-widget-container');
+    const whatsappElements = document.querySelectorAll('.whatsapp-button, .whatsapp-bubble-btn, .whatsapp-bubble-widget, .whatsapp-widget');
     
-    if (body.classList.contains(className)) {
-      body.classList.remove(className);
-      option.classList.remove('active');
-      saveSettings(optionName, false);
-    } else {
-      body.classList.add(className);
-      option.classList.add('active');
-      saveSettings(optionName, true);
+    if (container) {
+      container.style.setProperty('position', 'fixed', 'important');
+      container.style.setProperty('z-index', '999999', 'important');
     }
-  }
+    
+    whatsappElements.forEach(element => {
+      if (element) {
+        element.style.setProperty('position', 'fixed', 'important');
+        element.style.setProperty('z-index', '999999', 'important');
+      }
+    });
+  }, 10);
+}
 
-  // Add a feature
+// Add a feature
   function addFeature(className) {
     document.body.classList.add(className);
   }
@@ -2661,7 +1846,9 @@ function getCurrentTimeInShopTimeZone() {
   });
 </script>
 
-
+<script>
+  window.enableFooterBanners = {{ enable_footer_banners | json }};
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   if (!window.enableFooterBanners) return;
