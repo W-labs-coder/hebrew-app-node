@@ -37,11 +37,8 @@ export default function Alerts() {
     {id: 'delivered', name: 'Delivered'},
     {id: 'return_created', name: 'Return Created'},
     {id: 'order_level_return_label_created', name: 'Order Level Return Label Created'},
-    // {id: 'customer_account_invite', name: 'Customer Account Invite'},
-    // {id: 'customer_account_welcome', name: 'Customer Account Welcome'},
-    // {id: 'customer_account_password_reset', name: 'Customer Account Password Reset'},
-    // {id: 'contact_customer', name: 'Contact Customer'},
-    // {id: 'customer_marketing_confirmation', name: 'Customer Marketing Confirmation'},
+    {id: 'customer_account_invite', name: 'Customer Account Invite'},
+    {id: 'contact_customer', name: 'Contact Customer'},
   ]);
   
 

@@ -35,7 +35,7 @@ export const notifications = [
           אנו מכינים את ההזמנה שלך למשלוח. נעדכן אותך כאשר תישלח.
       {% endcase %}{%  %}
         {% if delivery_instructions != blank  %}
-          <p><b>הור{%  %} משלוח:</b> {{ delivery_instructions }}</p>
+          <p><b>הור{%  %} %} משלוח:</b> {{ delivery_instructions }}</p>
         {% endif %}
        {% if consolidated_estimated_delivery_time %}
         {% if has_multiple_delivery_methods %}
@@ -13042,7 +13042,7 @@ export const notifications = [
     </html>
     `,
   },
-    {
+  {
     id: "return_created",
     title: "החזרה נוצרה",
     subject: `השלם את ההחזרה שלך עבור הזמנה {{ order.name }}`,
@@ -13615,14 +13615,14 @@ export const notifications = [
     </table>
   </body>
   </html>
-  `
+  `,
   },
 
   {
-      id: "order_level_return_label_created",
-      title: "תווית החזרה ברמת הזמנה נוצרה",
-      subject: `תווית החזרה עבור הזמנה {{ order.name }}`,
-      body: `<!DOCTYPE html>
+    id: "order_level_return_label_created",
+    title: "תווית החזרה ברמת הזמנה נוצרה",
+    subject: `תווית החזרה עבור הזמנה {{ order.name }}`,
+    body: `<!DOCTYPE html>
   <html lang="he" dir="rtl">
     <head>
     <title>{{ email_title }}</title>
@@ -13785,6 +13785,237 @@ export const notifications = [
       </table>
     </body>
   </html>
-  `},
+  `,
+  },
+    
+  {
+      id: "customer_account_invite",
+      title: "הזמנה לחשבון לקוח",
+      subject: `הפעלת חשבון לקוח`,
+      body: `{% capture email_title %}הפעל את החשבון שלך{% endcapture %}
+  {% capture email_body %}שלום, יצרת חשבון לקוח חדש ב<a href="{{shop.url}}">{{shop.name}}</a>. כל מה שנותר לך לעשות הוא להפעיל אותו.{% endcapture %}
+  
+  <!DOCTYPE html>
+  <html lang="he" dir="rtl">
+    <head>
+    <title>{{ email_title }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="/assets/notifications/styles.css">
+    <style>
+      .button__cell { background: {{ shop.email_accent_color }}; }
+      a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+      body, table { direction: rtl; }
+    </style>
+  </head>
+  
+    <body>
+      <table class="body">
+        <tr>
+          <td>
+            <table class="header row">
+    <tr>
+      <td class="header__cell">
+        <center>
+  
+          <table class="container">
+            <tr>
+              <td>
+  
+                <table class="row">
+                  <tr>
+                    <td class="shop-name__cell">
+                      {%- if shop.email_logo_url %}
+                        <img src="{{shop.email_logo_url}}" alt="{{ shop.name }}" width="{{ shop.email_logo_width }}">
+                      {%- else %}
+                        <h1 class="shop-name__text">
+                          <a href="{{shop.url}}">{{ shop.name }}</a>
+                        </h1>
+                      {%- endif %}
+                    </td>
+  
+                  </tr>
+                </table>
+  
+              </td>
+            </tr>
+          </table>
+  
+        </center>
+      </td>
+    </tr>
+  </table>
+  
+            <table class="row content">
+    <tr>
+      <td class="content__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+              <h2>{{ email_title }}</h2>
+              {% if custom_message != blank %}
+                <p>{{ custom_message }}</p>
+              {% else %}
+                <p>{{ email_body }}</p>
+              {% endif %}
+              <table class="row actions">
+    <tr>
+      <td class="empty-line">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="actions__cell">
+        <table class="button main-action-cell">
+          <tr>
+            <td class="button__cell"><a href="{{ customer.account_activation_url }}" class="button__text">הפעל את החשבון שלך</a></td>
+          </tr>
+        </table>
+        {% if shop.url %}
+      <table class="link secondary-action-cell">
+        <tr>
+          <td class="link__cell">או <a href="{{ shop.url }}">בקר בחנות שלנו</a></td>
+        </tr>
+      </table>
+  {% endif %}
+  
+      </td>
+    </tr>
+  </table>
+  
+  
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+            <table class="row footer">
+    <tr>
+      <td class="footer__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+                <p class="disclaimer__subtext">אם יש לך שאלות, השב למייל הזה או צור קשר איתנו ב <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+  
+  <img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
+  
+          </td>
+        </tr>
+      </table>
+    </body>
+  </html>
+  `,
+    },
+
+        
+    {
+          id: "contact_customer",
+          title: "יצירת קשר עם לקוח",
+          subject: `הודעה מ{{ shop.name }}`,
+          body: `<!DOCTYPE html>
+    <html lang="he" dir="rtl">
+      <head>
+      <title>{{ email_title }}</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width">
+      <link rel="stylesheet" type="text/css" href="/assets/notifications/styles.css">
+      <style>
+        .button__cell { background: {{ shop.email_accent_color }}; }
+        a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+        body, table { direction: rtl; }
+      </style>
+    </head>
+    
+      <body>
+        <table class="body">
+          <tr>
+            <td>
+              <table class="header row">
+      <tr>
+        <td class="header__cell">
+          <center>
+    
+            <table class="container">
+              <tr>
+                <td>
+    
+                  <table class="row">
+                    <tr>
+                      <td class="shop-name__cell">
+                        {%- if shop.email_logo_url %}
+                          <img src="{{shop.email_logo_url}}" alt="{{ shop.name }}" width="{{ shop.email_logo_width }}">
+                        {%- else %}
+                          <h1 class="shop-name__text">
+                            <a href="{{shop.url}}">{{ shop.name }}</a>
+                          </h1>
+                        {%- endif %}
+                      </td>
+    
+                    </tr>
+                  </table>
+    
+                </td>
+              </tr>
+            </table>
+    
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row content">
+      <tr>
+        <td class="content__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                <p>{{ custom_message }}</p>
+    
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+              <table class="row footer">
+      <tr>
+        <td class="footer__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                  <p class="disclaimer__subtext">אם יש לך שאלות, השב למייל הזה או צור קשר איתנו ב <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+    <img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
+    
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+    `}
+    
   
 ];
