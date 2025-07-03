@@ -101,10 +101,10 @@ const AlertSection = ({ notificationTypes }) => {
     try {
       const textToCopy = formData.emailBody;
       await navigator.clipboard.writeText(textToCopy);
-      toast.success('Text copied to clipboard!');
+      toast.success("טקסט הועתק ללוח!");
     } catch (err) {
-      toast.error('Failed to copy text');
-      console.error('Failed to copy text: ', err);
+      toast.error('העתקת הטקסט נכשלה');
+      console.error('העתקת הטקסט נכשלה: ', err);
     }
   };
 
