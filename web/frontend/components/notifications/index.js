@@ -33,7 +33,7 @@ export const notifications = [
           שלום {{ customer.first_name }}, אנו מכינים את ההזמנה שלך למשלוח.
         {% else %}
           אנו מכינים את ההזמנה שלך למשלוח. נעדכן אותך כאשר תישלח.
-      {% endcase %}
+      {% endcase %}{%  %}
         {% if delivery_instructions != blank  %}
           <p><b>הור{%  %} משלוח:</b> {{ delivery_instructions }}</p>
         {% endif %}
@@ -9888,10 +9888,10 @@ export const notifications = [
   },
 
   {
-      id: "pending_payment_error",
-      title: "שגיאת תשלום ממתין",
-      subject: `[{{shop.name}}] לא ניתן היה לעבד את התשלום עבור הזמנה {{ name }}`,
-      body: `{% capture email_title %} לא ניתן היה לעבד את התשלום עבור הזמנה {{ order_name }} {% endcapture %}
+    id: "pending_payment_error",
+    title: "שגיאת תשלום ממתין",
+    subject: `[{{shop.name}}] לא ניתן היה לעבד את התשלום עבור הזמנה {{ name }}`,
+    body: `{% capture email_title %} לא ניתן היה לעבד את התשלום עבור הזמנה {{ order_name }} {% endcapture %}
   {% capture email_body %}
     לא חויבת, אנא נסה לשלם עבור ההזמנה שוב.
   {% endcapture %}
@@ -10789,15 +10789,14 @@ export const notifications = [
   </table>
   </body>
   </html>
-  `
-    },
-  
-        
-    {
-      id: "pending_payment_success",
-      title: "הצלחת תשלום ממתין",
-      subject: `[{{ shop.name }}] התשלום עבור {{ name }} התקבל`,
-      body: `{% capture email_title %}התשלום שלך עבור {{ order.name }} התקבל{% endcapture %}
+  `,
+  },
+
+  {
+    id: "pending_payment_success",
+    title: "הצלחת תשלום ממתין",
+    subject: `[{{ shop.name }}] התשלום עבור {{ name }} התקבל`,
+    body: `{% capture email_title %}התשלום שלך עבור {{ order.name }} התקבל{% endcapture %}
     
     <!DOCTYPE html>
     <html lang="he" dir="rtl">
@@ -11974,7 +11973,1818 @@ export const notifications = [
       </body>
     </html>
     
-    `
-    }
+    `,
+  },
+
+  {
+    id: "shipping_update",
+    title: "עדכון משלוח",
+    subject: `עדכון משלוח עבור הזמנה {{ name }}`,
+    body: `{% capture email_title %}סטטוס המשלוח שלך עודכן{% endcapture %}
+    {% capture email_body %}הפריטים הבאים עודכנו עם מידע משלוח חדש.{% endcapture %}
     
+    <!DOCTYPE html>
+    <html lang="he" dir="rtl">
+      <head>
+      <title>{{ email_title }}</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width">
+      <link rel="stylesheet" type="text/css" href="/assets/notifications/styles.css">
+      <style>
+        .button__cell { background: {{ shop.email_accent_color }}; }
+        a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+        body, table { direction: rtl; }
+      </style>
+    </head>
+    
+      <body>
+        <table class="body">
+          <tr>
+            <td>
+              <table class="header row">
+      <tr>
+        <td class="header__cell">
+          <center>
+    
+            <table class="container">
+              <tr>
+                <td>
+    
+                  <table class="row">
+                    <tr>
+                      <td class="shop-name__cell">
+                        {%- if shop.email_logo_url %}
+                          <img src="{{shop.email_logo_url}}" alt="{{ shop.name }}" width="{{ shop.email_logo_width }}">
+                        {%- else %}
+                          <h1 class="shop-name__text">
+                            <a href="{{shop.url}}">{{ shop.name }}</a>
+                          </h1>
+                        {%- endif %}
+                      </td>
+    
+                        <td>
+                          <table class="order-po-number__container">
+                            <tr>
+                              <td class="order-number__cell">
+                                <span class="order-number__text">
+                                  הזמנה {{ order_name }}
+                                </span>
+                              </td>
+                            </tr>
+                            {%- if po_number %}
+                                <tr>
+                                  <td class="po-number__cell">
+                                    <span class="po-number__text">
+                                      מספר הזמנת רכש #{{ po_number }}
+                                    </span>
+                                  </td>
+                                </tr>
+                            {%- endif %}
+                          </table>
+                        </td>
+                    </tr>
+                  </table>
+    
+                </td>
+              </tr>
+            </table>
+    
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row content">
+      <tr>
+        <td class="content__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                <h2>{{ email_title }}</h2>
+                <p>{{ email_body }}</p>
+                <p>{{ email_emphasis }}</p>
+                {% if order_status_url %}
+                  <table class="row actions">
+      <tr>
+        <td class="empty-line">&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="actions__cell">
+          <table class="button main-action-cell">
+            <tr>
+              <td class="button__cell"><a href="{{ order_status_url }}" class="button__text">צפה בהזמנה שלך</a></td>
+            </tr>
+          </table>
+          {% if shop.url %}
+        <table class="link secondary-action-cell">
+          <tr>
+            <td class="link__cell">או <a href="{{ shop.url }}">בקר בחנות שלנו</a></td>
+          </tr>
+        </table>
+    {% endif %}
+    
+        </td>
+      </tr>
+    </table>
+    
+                {% else %}
+                  {% if shop.url %}
+        <table class="row actions">
+          <tr>
+            <td class="actions__cell">
+              <table class="button main-action-cell">
+                <tr>
+                  <td class="button__cell"><a href="{{ shop.url }}" class="button__text">בקר בחנות שלנו</a></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+    {% endif %}
+    
+                {% endif %}
+                {% if fulfillment.tracking_numbers.size > 0 %}
+      <p class="disclaimer__subtext">
+        <br/>
+        {% if fulfillment.tracking_numbers.size == 1 and fulfillment.tracking_company and fulfillment.tracking_url %}
+          מספר מעקב {{ fulfillment.tracking_company }}: <a href="{{ fulfillment.tracking_url }}">{{ fulfillment.tracking_numbers.first }}</a>
+        {% elsif fulfillment.tracking_numbers.size == 1 %}
+          מספר מעקב: {{ fulfillment.tracking_numbers.first }}
+        {% else %}
+          מספרי מעקב {{ fulfillment.tracking_company }}:<br />
+          {% for tracking_number in fulfillment.tracking_numbers %}
+            {% if fulfillment.tracking_urls[forloop.index0] %}
+              <a href="{{ fulfillment.tracking_urls[forloop.index0] }}">
+                {{ tracking_number }}
+              </a>
+            {% else %}
+                {{ tracking_number }}
+            {% endif %}
+            <br/>
+          {% endfor %}
+        {% endif %}
+      </p>
+    {% endif %}
+    
+    
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row section">
+      <tr>
+        <td class="section__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  <h3>פריטים במשלוח הזה</h3>
+                </td>
+              </tr>
+            </table>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                
+      <table class="row">
+        {% for line in fulfillment.fulfillment_line_items %}
+          
+    <tr class="order-list__item">
+      <td class="order-list__item__cell">
+        <table>
+            {% assign expand_bundles = false %}
+    
+          {% if expand_bundles and line.line_item.bundle_parent? %}
+            <td class="order-list__parent-image-cell">
+              {% if line.line_item.image %}
+                <img src="{{ line.line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+              {% else %}
+                <div class="order-list__no-image-cell">
+                  <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
+                </div>
+              {% endif %}
+            </td>
+          {% else %}
+            <td class="order-list__image-cell">
+              {% if line.line_item.image %}
+                <img src="{{ line.line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+              {% else %}
+                <div class="order-list__no-image-cell">
+                  <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
+                </div>
+              {% endif %}
+            </td>
+          {% endif %}
+          <td class="order-list__product-description-cell">
+            {% if line.line_item.presentment_title %}
+              {% assign line_title = line.line_item.presentment_title %}
+            {% elsif line.line_item.title %}
+              {% assign line_title = line.line_item.title %}
+            {% else %}
+              {% assign line_title = line.line_item.product.title %}
+            {% endif %}
+            {% if line.quantity < line.line_item.quantity %}
+              {% capture line_display %}
+                {{ line.quantity }} מתוך {{ line.line_item.quantity }}
+              {% endcapture %}
+            {% else %}
+              {% assign line_display = line.line_item.quantity %}
+            {% endif %}
+    
+            <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
+    
+            {% if line.line_item.variant.title != 'Default Title' and line.line_item.bundle_parent? == false %}
+              <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
+            {% elsif line.line_item.variant.title != 'Default Title' and line.line_item.bundle_parent? and expand_bundles == false %}
+              <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
+            {% endif %}
+    
+            {% if expand_bundles %}
+              {% for component in line.line_item.bundle_components %}
+                <table>
+                  <tr class="order-list__item">
+                    <td class="order-list__bundle-item">
+                      <table>
+                        <td class="order-list__image-cell">
+                          {% if component.image %}
+                            <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
+                          {% else %}
+                            <div class="order-list__no-image-cell small">
+                              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
+                            </div>
+                          {% endif %}
+                        </td>
+    
+                        <td class="order-list__product-description-cell">
+                          {% if component.product.title %}
+                            {% assign component_title = component.product.title %}
+                          {% else %}
+                            {% assign component_title = component.title %}
+                          {% endif %}
+    
+                          {% assign component_display = component.quantity %}
+    
+                          <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
+    
+                          {% if component.variant.title != 'Default Title'%}
+                            <span class="order-list__item-variant">{{ component.variant.title }}</span>
+                          {% endif %}
+                        </td>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              {% endfor %}
+            {% else %}
+              {% for group in line.line_item.groups %}
+                <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
+              {% endfor %}
+            {% endif %}
+    
+    
+            {% if line.line_item.selling_plan_allocation %}
+              <span class="order-list__item-variant">{{ line.line_item.selling_plan_allocation.selling_plan.name }}</span><br/>
+            {% endif %}
+    
+            {% if line.line_item.refunded_quantity > 0 %}
+              <span class="order-list__item-refunded">הוחזר</span>
+            {% endif %}
+    
+            {% if line.line_item.discount_allocations %}
+              {% for discount_allocation in line.line_item.discount_allocations %}
+                {% if discount_allocation.discount_application.target_selection != 'all' %}
+                <p>
+                  <span class="order-list__item-discount-allocation">
+                    <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+                    <span>
+                      {{ discount_allocation.discount_application.title | upcase }}
+                      (-{{ discount_allocation.amount | money }})
+                    </span>
+                  </span>
+                </p>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </td>
+        </table>
+      </td>
+    </tr>
+    
+        {% endfor %}
+      </table>
+    
+    
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row footer">
+      <tr>
+        <td class="footer__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                  <p class="disclaimer__subtext">אם יש לך שאלות, השב למייל הזה או צור קשר איתנו ב <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+    <img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
+    
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+    `,
+  },
+
+  {
+    id: "out_for_delivery",
+    title: "יצא למשלוח",
+    subject: `משלוח מהזמנה {{ name }} יצא למשלוח`,
+    body: `{% if fulfillment.item_count == item_count %} 
+      {% capture email_title %}ההזמנה שלך יצאה למשלוח{% endcapture %}
+      {% capture email_body %}ההזמנה שלך יצאה למשלוח. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+    {% elsif fulfillment.item_count > 1 %} 
+      {% if fulfillment_status == 'fulfilled' %}
+        {% capture email_title %}הפריטים האחרונים בהזמנה שלך יצאו למשלוח{% endcapture %}
+        {% capture email_body %}הפריטים האחרונים בהזמנה שלך יצאו למשלוח. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+      {% else %}
+        {% capture email_title %}חלק מהפריטים בהזמנה שלך יצאו למשלוח{% endcapture %}
+        {% capture email_body %}חלק מהפריטים בהזמנה שלך יצאו למשלוח. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+      {% endif %}
+    {% else %} 
+      {% if fulfillment_status == 'fulfilled' %}
+        {% capture email_title %}הפריט האחרון בהזמנה שלך יצא למשלוח{% endcapture %}
+        {% capture email_body %}הפריט האחרון בהזמנה שלך יצא למשלוח. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+      {% else %}
+        {% capture email_title %}פריט אחד מההזמנה שלך יצא למשלוח{% endcapture %}
+        {% capture email_body %}פריט אחד מההזמנה שלך יצא למשלוח. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+      {% endif %}
+    {% endif %}
+    
+    
+    {% capture email_emphasis %}תאריך אספקה משוער: <strong>{{fulfillment.estimated_delivery_at | date: format: 'date'}}</strong>{% endcapture %}
+    
+    <!DOCTYPE html>
+    <html lang="he" dir="rtl">
+      <head>
+      <title>{{ email_title }}</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width">
+      <link rel="stylesheet" type="text/css" href="/assets/notifications/styles.css">
+      <style>
+        .button__cell { background: {{ shop.email_accent_color }}; }
+        a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+        body, table { direction: rtl; }
+      </style>
+    </head>
+    
+      <body>
+        <table class="body">
+          <tr>
+            <td>
+              <table class="header row">
+      <tr>
+        <td class="header__cell">
+          <center>
+    
+            <table class="container">
+              <tr>
+                <td>
+    
+                  <table class="row">
+                    <tr>
+                      <td class="shop-name__cell">
+                        {%- if shop.email_logo_url %}
+                          <img src="{{shop.email_logo_url}}" alt="{{ shop.name }}" width="{{ shop.email_logo_width }}">
+                        {%- else %}
+                          <h1 class="shop-name__text">
+                            <a href="{{shop.url}}">{{ shop.name }}</a>
+                          </h1>
+                        {%- endif %}
+                      </td>
+    
+                        <td>
+                          <table class="order-po-number__container">
+                            <tr>
+                              <td class="order-number__cell">
+                                <span class="order-number__text">
+                                  הזמנה {{ order_name }}
+                                </span>
+                              </td>
+                            </tr>
+                            {%- if po_number %}
+                                <tr>
+                                  <td class="po-number__cell">
+                                    <span class="po-number__text">
+                                      מספר הזמנת רכש #{{ po_number }}
+                                    </span>
+                                  </td>
+                                </tr>
+                            {%- endif %}
+                          </table>
+                        </td>
+                    </tr>
+                  </table>
+    
+                </td>
+              </tr>
+            </table>
+    
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row content">
+      <tr>
+        <td class="content__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                <h2>{{ email_title }}</h2>
+                <p>{{ email_body }}</p>
+                {% if fulfillment.estimated_delivery_at %}
+                  <p>{{ email_emphasis }}</p>
+                {% endif %}
+                {% if order_status_url %}
+                  <table class="row actions">
+      <tr>
+        <td class="empty-line">&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="actions__cell">
+          <table class="button main-action-cell">
+            <tr>
+              <td class="button__cell"><a href="{{ order_status_url }}" class="button__text">עקוב אחר המשלוח</a></td>
+            </tr>
+          </table>
+          {% if shop.url %}
+        <table class="link secondary-action-cell">
+          <tr>
+            <td class="link__cell">או <a href="{{ shop.url }}">בקר בחנות שלנו</a></td>
+          </tr>
+        </table>
+    {% endif %}
+    
+        </td>
+      </tr>
+    </table>
+    
+                {% else %}
+                  {% if shop.url %}
+        <table class="row actions">
+          <tr>
+            <td class="actions__cell">
+              <table class="button main-action-cell">
+                <tr>
+                  <td class="button__cell"><a href="{{ shop.url }}" class="button__text">בקר בחנות שלנו</a></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+    {% endif %}
+    
+                {% endif %}
+                {% if fulfillment.tracking_numbers.size > 0 %}
+      <p class="disclaimer__subtext">
+        <br/>
+        {% if fulfillment.tracking_numbers.size == 1 and fulfillment.tracking_company and fulfillment.tracking_url %}
+          מספר מעקב {{ fulfillment.tracking_company }}: <a href="{{ fulfillment.tracking_url }}">{{ fulfillment.tracking_numbers.first }}</a>
+        {% elsif fulfillment.tracking_numbers.size == 1 %}
+          מספר מעקב: {{ fulfillment.tracking_numbers.first }}
+        {% else %}
+          מספרי מעקב {{ fulfillment.tracking_company }}:<br />
+          {% for tracking_number in fulfillment.tracking_numbers %}
+            {% if fulfillment.tracking_urls[forloop.index0] %}
+              <a href="{{ fulfillment.tracking_urls[forloop.index0] }}">
+                {{ tracking_number }}
+              </a>
+            {% else %}
+                {{ tracking_number }}
+            {% endif %}
+            <br/>
+          {% endfor %}
+        {% endif %}
+      </p>
+    {% endif %}
+    
+    
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row section">
+      <tr>
+        <td class="section__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  <h3>פריטים במשלוח הזה</h3>
+                </td>
+              </tr>
+            </table>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                
+      <table class="row">
+        {% for line in fulfillment.fulfillment_line_items %}
+          
+    <tr class="order-list__item">
+      <td class="order-list__item__cell">
+        <table>
+            {% assign expand_bundles = false %}
+    
+          {% if expand_bundles and line.line_item.bundle_parent? %}
+            <td class="order-list__parent-image-cell">
+              {% if line.line_item.image %}
+                <img src="{{ line.line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+              {% else %}
+                <div class="order-list__no-image-cell">
+                  <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
+                </div>
+              {% endif %}
+            </td>
+          {% else %}
+            <td class="order-list__image-cell">
+              {% if line.line_item.image %}
+                <img src="{{ line.line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+              {% else %}
+                <div class="order-list__no-image-cell">
+                  <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
+                </div>
+              {% endif %}
+            </td>
+          {% endif %}
+          <td class="order-list__product-description-cell">
+            {% if line.line_item.presentment_title %}
+              {% assign line_title = line.line_item.presentment_title %}
+            {% elsif line.line_item.title %}
+              {% assign line_title = line.line_item.title %}
+            {% else %}
+              {% assign line_title = line.line_item.product.title %}
+            {% endif %}
+            {% if line.quantity < line.line_item.quantity %}
+              {% capture line_display %}
+                {{ line.quantity }} מתוך {{ line.line_item.quantity }}
+              {% endcapture %}
+            {% else %}
+              {% assign line_display = line.line_item.quantity %}
+            {% endif %}
+    
+            <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
+    
+            {% if line.line_item.variant.title != 'Default Title' and line.line_item.bundle_parent? == false %}
+              <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
+            {% elsif line.line_item.variant.title != 'Default Title' and line.line_item.bundle_parent? and expand_bundles == false %}
+              <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
+            {% endif %}
+    
+            {% if expand_bundles %}
+              {% for component in line.line_item.bundle_components %}
+                <table>
+                  <tr class="order-list__item">
+                    <td class="order-list__bundle-item">
+                      <table>
+                        <td class="order-list__image-cell">
+                          {% if component.image %}
+                            <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
+                          {% else %}
+                            <div class="order-list__no-image-cell small">
+                              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
+                            </div>
+                          {% endif %}
+                        </td>
+    
+                        <td class="order-list__product-description-cell">
+                          {% if component.product.title %}
+                            {% assign component_title = component.product.title %}
+                          {% else %}
+                            {% assign component_title = component.title %}
+                          {% endif %}
+    
+                          {% assign component_display = component.quantity %}
+    
+                          <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
+    
+                          {% if component.variant.title != 'Default Title'%}
+                            <span class="order-list__item-variant">{{ component.variant.title }}</span>
+                          {% endif %}
+                        </td>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              {% endfor %}
+            {% else %}
+              {% for group in line.line_item.groups %}
+                <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
+              {% endfor %}
+            {% endif %}
+    
+    
+            {% if line.line_item.selling_plan_allocation %}
+              <span class="order-list__item-variant">{{ line.line_item.selling_plan_allocation.selling_plan.name }}</span><br/>
+            {% endif %}
+    
+            {% if line.line_item.refunded_quantity > 0 %}
+              <span class="order-list__item-refunded">הוחזר</span>
+            {% endif %}
+    
+            {% if line.line_item.discount_allocations %}
+              {% for discount_allocation in line.line_item.discount_allocations %}
+                {% if discount_allocation.discount_application.target_selection != 'all' %}
+                <p>
+                  <span class="order-list__item-discount-allocation">
+                    <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+                    <span>
+                      {{ discount_allocation.discount_application.title | upcase }}
+                      (-{{ discount_allocation.amount | money }})
+                    </span>
+                  </span>
+                </p>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </td>
+        </table>
+      </td>
+    </tr>
+    
+        {% endfor %}
+      </table>
+    
+    
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row footer">
+      <tr>
+        <td class="footer__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                  <p class="disclaimer__subtext">אם יש לך שאלות, השב למייל הזה או צור קשר איתנו ב <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+    <img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
+    
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+    `,
+  },
+
+  {
+    id: "delivered",
+    title: "נמסר",
+    subject: `משלוח מהזמנה {{ name }} נמסר`,
+    body: `{% if fulfillment.item_count == item_count %} 
+      {% capture email_title %}ההזמנה שלך נמסרה{% endcapture %}
+      {% capture email_body %}ההזמנה שלך נמסרה. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+    {% elsif fulfillment.item_count > 1 %} 
+      {% if fulfillment_status == 'fulfilled' %}
+        {% capture email_title %}הפריטים האחרונים בהזמנה שלך נמסרו{% endcapture %}
+        {% capture email_body %}הפריטים האחרונים בהזמנה שלך נמסרו. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+      {% else %}
+        {% capture email_title %}חלק מהפריטים בהזמנה שלך נמסרו{% endcapture %}
+        {% capture email_body %}חלק מהפריטים בהזמנה שלך נמסרו. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+      {% endif %}
+    {% else %} 
+      {% if fulfillment_status == 'fulfilled' %}
+        {% capture email_title %}הפריט האחרון בהזמנה שלך נמסר{% endcapture %}
+        {% capture email_body %}הפריט האחרון בהזמנה שלך נמסר. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+      {% else %}
+        {% capture email_title %}פריט אחד מההזמנה שלך נמסר{% endcapture %}
+        {% capture email_body %}פריט אחד מההזמנה שלך נמסר. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+      {% endif %}
+    {% endif %}
+    
+    <!DOCTYPE html>
+    <html lang="he" dir="rtl">
+      <head>
+      <title>{{ email_title }}</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <meta name="viewport" content="width=device-width">
+      <link rel="stylesheet" type="text/css" href="/assets/notifications/styles.css">
+      <style>
+        .button__cell { background: {{ shop.email_accent_color }}; }
+        a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+        body, table { direction: rtl; }
+      </style>
+    </head>
+    
+      <body>
+        <table class="body">
+          <tr>
+            <td>
+              <table class="header row">
+      <tr>
+        <td class="header__cell">
+          <center>
+    
+            <table class="container">
+              <tr>
+                <td>
+    
+                  <table class="row">
+                    <tr>
+                      <td class="shop-name__cell">
+                        {%- if shop.email_logo_url %}
+                          <img src="{{shop.email_logo_url}}" alt="{{ shop.name }}" width="{{ shop.email_logo_width }}">
+                        {%- else %}
+                          <h1 class="shop-name__text">
+                            <a href="{{shop.url}}">{{ shop.name }}</a>
+                          </h1>
+                        {%- endif %}
+                      </td>
+    
+                        <td>
+                          <table class="order-po-number__container">
+                            <tr>
+                              <td class="order-number__cell">
+                                <span class="order-number__text">
+                                  הזמנה {{ order_name }}
+                                </span>
+                              </td>
+                            </tr>
+                            {%- if po_number %}
+                                <tr>
+                                  <td class="po-number__cell">
+                                    <span class="po-number__text">
+                                      מספר הזמנת רכש #{{ po_number }}
+                                    </span>
+                                  </td>
+                                </tr>
+                            {%- endif %}
+                          </table>
+                        </td>
+                    </tr>
+                  </table>
+    
+                </td>
+              </tr>
+            </table>
+    
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row content">
+      <tr>
+        <td class="content__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                <h2>{{ email_title }}</h2>
+                <table class="text-icon-container">
+                  <tr class="text-icon-row">
+                    <td class="text-icon"><img src="{{ 'notifications/question.png' | shopify_asset_url }}" class="text-icon__image"></td>
+                    <td class="text">
+                      <p>לא קיבלת את החבילה עדיין? <a href="mailto:{{ shop.email }}">דווח לנו</a></p>
+                    </td>
+                  </tr>
+                </table>
+                {% if order_status_url %}
+                  <table class="row actions">
+      <tr>
+        <td class="empty-line">&nbsp;</td>
+      </tr>
+      <tr>
+        <td class="actions__cell">
+          <table class="button main-action-cell">
+            <tr>
+              <td class="button__cell"><a href="{{ order_status_url }}" class="button__text">צפה בהזמנה שלך</a></td>
+            </tr>
+          </table>
+          {% if shop.url %}
+        <table class="link secondary-action-cell">
+          <tr>
+            <td class="link__cell">או <a href="{{ shop.url }}">בקר בחנות שלנו</a></td>
+          </tr>
+        </table>
+    {% endif %}
+    
+        </td>
+      </tr>
+    </table>
+    
+                {% else %}
+                  {% if shop.url %}
+        <table class="row actions">
+          <tr>
+            <td class="actions__cell">
+              <table class="button main-action-cell">
+                <tr>
+                  <td class="button__cell"><a href="{{ shop.url }}" class="button__text">בקר בחנות שלנו</a></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+    {% endif %}
+    
+                {% endif %}
+                {% if fulfillment.tracking_numbers.size > 0 %}
+      <p class="disclaimer__subtext">
+        <br/>
+        {% if fulfillment.tracking_numbers.size == 1 and fulfillment.tracking_company and fulfillment.tracking_url %}
+          מספר מעקב {{ fulfillment.tracking_company }}: <a href="{{ fulfillment.tracking_url }}">{{ fulfillment.tracking_numbers.first }}</a>
+        {% elsif fulfillment.tracking_numbers.size == 1 %}
+          מספר מעקב: {{ fulfillment.tracking_numbers.first }}
+        {% else %}
+          מספרי מעקב {{ fulfillment.tracking_company }}:<br />
+          {% for tracking_number in fulfillment.tracking_numbers %}
+            {% if fulfillment.tracking_urls[forloop.index0] %}
+              <a href="{{ fulfillment.tracking_urls[forloop.index0] }}">
+                {{ tracking_number }}
+              </a>
+            {% else %}
+                {{ tracking_number }}
+            {% endif %}
+            <br/>
+          {% endfor %}
+        {% endif %}
+      </p>
+    {% endif %}
+    
+    
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row section">
+      <tr>
+        <td class="section__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  <h3>פריטים במשלוח הזה</h3>
+                </td>
+              </tr>
+            </table>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                
+      <table class="row">
+        {% for line in fulfillment.fulfillment_line_items %}
+          
+    <tr class="order-list__item">
+      <td class="order-list__item__cell">
+        <table>
+            {% assign expand_bundles = false %}
+    
+          {% if expand_bundles and line.line_item.bundle_parent? %}
+            <td class="order-list__parent-image-cell">
+              {% if line.line_item.image %}
+                <img src="{{ line.line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+              {% else %}
+                <div class="order-list__no-image-cell">
+                  <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
+                </div>
+              {% endif %}
+            </td>
+          {% else %}
+            <td class="order-list__image-cell">
+              {% if line.line_item.image %}
+                <img src="{{ line.line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+              {% else %}
+                <div class="order-list__no-image-cell">
+                  <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
+                </div>
+              {% endif %}
+            </td>
+          {% endif %}
+          <td class="order-list__product-description-cell">
+            {% if line.line_item.presentment_title %}
+              {% assign line_title = line.line_item.presentment_title %}
+            {% elsif line.line_item.title %}
+              {% assign line_title = line.line_item.title %}
+            {% else %}
+              {% assign line_title = line.line_item.product.title %}
+            {% endif %}
+            {% if line.quantity < line.line_item.quantity %}
+              {% capture line_display %}
+                {{ line.quantity }} מתוך {{ line.line_item.quantity }}
+              {% endcapture %}
+            {% else %}
+              {% assign line_display = line.line_item.quantity %}
+            {% endif %}
+    
+            <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
+    
+            {% if line.line_item.variant.title != 'Default Title' and line.line_item.bundle_parent? == false %}
+              <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
+            {% elsif line.line_item.variant.title != 'Default Title' and line.line_item.bundle_parent? and expand_bundles == false %}
+              <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
+            {% endif %}
+    
+            {% if expand_bundles %}
+              {% for component in line.line_item.bundle_components %}
+                <table>
+                  <tr class="order-list__item">
+                    <td class="order-list__bundle-item">
+                      <table>
+                        <td class="order-list__image-cell">
+                          {% if component.image %}
+                            <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
+                          {% else %}
+                            <div class="order-list__no-image-cell small">
+                              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
+                            </div>
+                          {% endif %}
+                        </td>
+    
+                        <td class="order-list__product-description-cell">
+                          {% if component.product.title %}
+                            {% assign component_title = component.product.title %}
+                          {% else %}
+                            {% assign component_title = component.title %}
+                          {% endif %}
+    
+                          {% assign component_display = component.quantity %}
+    
+                          <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
+    
+                          {% if component.variant.title != 'Default Title'%}
+                            <span class="order-list__item-variant">{{ component.variant.title }}</span>
+                          {% endif %}
+                        </td>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              {% endfor %}
+            {% else %}
+              {% for group in line.line_item.groups %}
+                <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
+              {% endfor %}
+            {% endif %}
+    
+    
+            {% if line.line_item.selling_plan_allocation %}
+              <span class="order-list__item-variant">{{ line.line_item.selling_plan_allocation.selling_plan.name }}</span><br/>
+            {% endif %}
+    
+            {% if line.line_item.refunded_quantity > 0 %}
+              <span class="order-list__item-refunded">הוחזר</span>
+            {% endif %}
+    
+            {% if line.line_item.discount_allocations %}
+              {% for discount_allocation in line.line_item.discount_allocations %}
+                {% if discount_allocation.discount_application.target_selection != 'all' %}
+                <p>
+                  <span class="order-list__item-discount-allocation">
+                    <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+                    <span>
+                      {{ discount_allocation.discount_application.title | upcase }}
+                      (-{{ discount_allocation.amount | money }})
+                    </span>
+                  </span>
+                </p>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </td>
+        </table>
+      </td>
+    </tr>
+    
+        {% endfor %}
+      </table>
+    
+    
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+              <table class="row footer">
+      <tr>
+        <td class="footer__cell">
+          <center>
+            <table class="container">
+              <tr>
+                <td>
+                  
+                  <p class="disclaimer__subtext">אם יש לך שאלות, השב למייל הזה או צור קשר איתנו ב <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+                </td>
+              </tr>
+            </table>
+          </center>
+        </td>
+      </tr>
+    </table>
+    
+    <img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
+    
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+    `,
+  },
+    {
+    id: "return_created",
+    title: "החזרה נוצרה",
+    subject: `השלם את ההחזרה שלך עבור הזמנה {{ order.name }}`,
+    body: `<!DOCTYPE html>
+  <html lang="he" dir="rtl">
+  <head>
+    <title>{{ email_title }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="/assets/notifications/styles.css">
+    <style>
+      .button__cell { background: {{ shop.email_accent_color }}; }
+      a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+      body, table { direction: rtl; }
+    </style>
+  </head>
+  
+  <body>
+    <table class="body">
+      <tr>
+        <td>
+          <table class="header row">
+    <tr>
+      <td class="header__cell">
+        <center>
+  
+          <table class="container">
+            <tr>
+              <td>
+  
+                <table class="row">
+                  <tr>
+                    <td class="shop-name__cell">
+                      {%- if shop.email_logo_url %}
+                        <img src="{{shop.email_logo_url}}" alt="{{ shop.name }}" width="{{ shop.email_logo_width }}">
+                      {%- else %}
+                        <h1 class="shop-name__text">
+                          <a href="{{shop.url}}">{{ shop.name }}</a>
+                        </h1>
+                      {%- endif %}
+                    </td>
+  
+                      <td>
+                        <table class="order-po-number__container">
+                          <tr>
+                            <td class="order-number__cell">
+                              <span class="order-number__text">
+                                הזמנה {{ order.name }}
+                              </span>
+                            </td>
+                          </tr>
+                          {%- if po_number %}
+                              <tr>
+                                <td class="po-number__cell">
+                                  <span class="po-number__text">
+                                    מספר הזמנת רכש #{{ po_number }}
+                                  </span>
+                                </td>
+                              </tr>
+                          {%- endif %}
+                        </table>
+                      </td>
+                  </tr>
+                </table>
+  
+              </td>
+            </tr>
+          </table>
+  
+        </center>
+      </td>
+    </tr>
+  </table>
+  
+          <table class="row content">
+    <tr>
+      <td class="content__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+            {% for return_delivery in return.deliveries %}
+              {% if return_delivery.type == 'shopify_label' %}
+                <h2>תווית המשלוח להחזרה שלך מוכנה</h2>
+                <p class="return-creation__subtitle">הדפס את תווית המשלוח להחזרה והדבק אותה על החבילה המכילה את הפריטים המוחזרים</p>
+  
+                <div class="return-label-beta__instructions">
+                  <h2>הוראות</h2>
+  
+                  <ol>
+                    <li>ארוז את הפריטים שאתה מחזיר.</li>
+                    {% if return.checkout_payment_collection_url %}
+                      <li>שלם את היתרה הפתוחה.</li>
+                    {% endif %}
+                    <li>הדפס את תווית המשלוח להחזרה והדבק אותה על החבילה. כסה או הסר תוויות משלוח ישנות.</li>
+                    <li>
+                      {% if return_delivery.carrier_name %}
+                        מסור את החבילה ל{{ return_delivery.carrier_name }}.
+                      {% else %}
+                        מסור את החבילה לחברת המשלוחים המצוינת על התווית.
+                      {% endif %}
+                    </li>
+                  </ol>
+                </div>
+  
+                {% capture url_primary %}{{ return_delivery.return_label.public_file_url }}{% endcapture %}
+  {% capture text_primary %}הדפס תווית החזרה{% endcapture %}
+  {% capture url_secondary %}{{ return.checkout_payment_collection_url }}{% endcapture %}
+  {% capture text_secondary %}שלם עכשיו{% endcapture %}
+  
+  <table class="row actions">
+    <tr>
+      <td class="empty-line">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="actions__cell">
+        {% if url_primary != blank or url_secondary != blank %}
+          {% if url_primary != blank %}
+        <table class="button main-action-cell">
+          <tr>
+            <td class="button__cell">
+              <a href="{{ url_primary }}" class="button__text">{{ text_primary }}</a>
+            </td>
+          </tr>
+        </table>
+          {% endif %}
+          {% if url_secondary != blank %}
+        <table class="button return__mobile-padding main-action-cell">
+          <tr>
+            <td class="button__cell">
+              <a href="{{ url_secondary }}" class="button__text return__main-button">{{ text_secondary }}</a>
+            </td>
+          </tr>
+        </table>
+          {% endif %}
+        <table class="link secondary-action-cell">
+          <tr>
+            <td class="link__cell">או <a target="_blank" href="{{ order.order_status_url }}">צפה בהזמנה שלך</a></td>
+          </tr>
+        </table>
+        {% else %}
+        <table class="button main-action-cell">
+          <tr>
+            <td class="button__cell"><a href="{{ order.order_status_url }}" class="button__text">צפה בהזמנה שלך</a></td>
+          </tr>
+        </table>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+  
+              {% elsif return_delivery.type == 'manual' %}
+                <h2>השלם את ההחזרה שלך</h2>
+                <p class="return-creation__subtitle">
+                  <b class="return-creation__subtitle-bold">שלחנו לך תווית משלוח להחזרה, או שתקבל אחת בקרוב.</b>
+                  לאחר שתקבל את תווית המשלוח להחזרה, קח את הפריטים המוחזרים ופעל לפי ההוראות כדי להשלים את ההחזרה.
+                </p>
+  
+                <div class="return-label-beta__instructions">
+                  <h2>הוראות</h2>
+  
+                  <ol>
+                    <li>ארוז את הפריטים שאתה מחזיר.</li>
+                    {% if return.checkout_payment_collection_url %}
+                      <li>שלם את היתרה הפתוחה.</li>
+                    {% endif %}
+                    <li>הדפס את תווית המשלוח להחזרה. אם עדיין לא קיבלת אותה, נשלח לך בקרוב.</li>
+                    <li>הדבק את התווית על החבילה. כסה או הסר תוויות משלוח ישנות.</li>
+                    <li>
+                      {% if return_delivery.carrier_name %}
+                        מסור את החבילה ל{{ return_delivery.carrier_name }}.
+                      {% else %}
+                        מסור את החבילה לחברת המשלוחים המצוינת על התווית.
+                      {% endif %}
+                    </li>
+                    <li>
+                      {% if return_delivery.tracking_url != blank %}
+                        עקוב אחר ההחזרה שלך באמצעות <a target="_blank" style="text-decoration: underline" href="{{ return_delivery.tracking_url }}">מספר המעקב שלך</a> כדי לוודא שאנחנו מקבלים אותה.
+                      {% else %}
+                        עקוב אחר ההחזרה שלך באמצעות מספר המעקב שלך כדי לוודא שאנחנו מקבלים אותה.
+                      {% endif %}
+                    </li>
+                  </ol>
+                </div>
+  
+                {% capture url_primary %}{{ return.checkout_payment_collection_url }}{% endcapture %}
+  {% capture text_primary %}שלם עכשיו{% endcapture %}
+  {% capture url_secondary %}{% endcapture %}
+  {% capture text_secondary %}{% endcapture %}
+  
+  <table class="row actions">
+    <tr>
+      <td class="empty-line">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="actions__cell">
+        {% if url_primary != blank or url_secondary != blank %}
+          {% if url_primary != blank %}
+        <table class="button main-action-cell">
+          <tr>
+            <td class="button__cell">
+              <a href="{{ url_primary }}" class="button__text">{{ text_primary }}</a>
+            </td>
+          </tr>
+        </table>
+          {% endif %}
+          {% if url_secondary != blank %}
+        <table class="button return__mobile-padding main-action-cell">
+          <tr>
+            <td class="button__cell">
+              <a href="{{ url_secondary }}" class="button__text return__main-button">{{ text_secondary }}</a>
+            </td>
+          </tr>
+        </table>
+          {% endif %}
+        <table class="link secondary-action-cell">
+          <tr>
+            <td class="link__cell">או <a target="_blank" href="{{ order.order_status_url }}">צפה בהזמנה שלך</a></td>
+          </tr>
+        </table>
+        {% else %}
+        <table class="button main-action-cell">
+          <tr>
+            <td class="button__cell"><a href="{{ order.order_status_url }}" class="button__text">צפה בהזמנה שלך</a></td>
+          </tr>
+        </table>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+  
+              {% endif %}
+            {% endfor %}
+  
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+  
+          {% if return.line_items.size > 0 %}
+            <table class="row content">
+    <tr>
+      <td class="content__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+              <h2>פריטים להחזרה</h2>
+              
+  <table class="row">
+    {% for line_item in return.line_items %}
+    <tr class="order-list__item">
+      <td class="order-list__item__cell">
+        <table>
+          <td>
+            {% if line_item.image %}
+              <img src="{{ line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+            {% endif %}
+          </td>
+          <td class="order-list__product-description-cell">
+            {% assign line_display = line_item.quantity  %}
+  
+            <span class="order-list__item-title">{{ line_item.title_without_variant }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
+  
+            {% if line_item.variant.present? and line_item.variant.title != 'Default Title' %}
+              <span class="order-list__item-variant">{{ line_item.variant.title }}</span><br/>
+            {% endif %}
+  
+            {% for group in line_item.groups %}
+              <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span>
+              <br/>
+            {% endfor %}
+  
+            {% if line_item.discount_allocations %}
+              {% for discount_allocation in line_item.discount_allocations %}
+                {% if discount_allocation.amount > 0 %}
+                <p>
+                  <span class="order-list__item-discount-allocation">
+                    <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+                    <span>
+                      {{ discount_allocation.discount_application.title | upcase }}
+                      (-{{ discount_allocation.amount | money }})
+                    </span>
+                  </span>
+                </p>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </td>
+  
+          <td class="order-list__price-cell">
+            {% if line_item.original_line_price != line_item.final_line_price %}
+              <del class="order-list__item-original-price">{{ line_item.original_line_price | money }}</del>
+            {% endif %}
+            <p class="order-list__item-price">
+              {% if line_item.final_line_price > 0 %}
+                {% capture final_line_price %}
+                    -{{ line_item.final_line_price | money }}
+                {% endcapture %}
+                {{ final_line_price }}
+                {% if line_item.unit_price_measurement %}
+    <div class="order-list__unit-price">
+      {{- line_item.unit_price | unit_price_with_measurement: line_item.unit_price_measurement -}}
+    </div>
+  {% endif %}
+              {% else %}
+                חינם
+              {% endif %}
+            </p>
+          </td>
+        </table>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+          {% endif %}
+  
+          {% if return.exchange_line_items.size > 0 %}
+            <table class="row content">
+    <tr>
+      <td class="content__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+              <h2>פריטים שתקבל</h2>
+              
+  <table class="row">
+    {% for line_item in return.exchange_line_items %}
+    <tr class="order-list__item">
+      <td class="order-list__item__cell">
+        <table>
+          <td>
+            {% if line_item.image %}
+              <img src="{{ line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+            {% endif %}
+          </td>
+          <td class="order-list__product-description-cell">
+            {% assign line_display = line_item.quantity  %}
+  
+            <span class="order-list__item-title">{{ line_item.title_without_variant }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
+  
+            {% if line_item.variant.present? and line_item.variant.title != 'Default Title' %}
+              <span class="order-list__item-variant">{{ line_item.variant.title }}</span><br/>
+            {% endif %}
+  
+            {% for group in line_item.groups %}
+              <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span>
+              <br/>
+            {% endfor %}
+  
+            {% if line_item.discount_allocations %}
+              {% for discount_allocation in line_item.discount_allocations %}
+                {% if discount_allocation.amount > 0 %}
+                <p>
+                  <span class="order-list__item-discount-allocation">
+                    <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
+                    <span>
+                      {{ discount_allocation.discount_application.title | upcase }}
+                      (-{{ discount_allocation.amount | money }})
+                    </span>
+                  </span>
+                </p>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </td>
+  
+          <td class="order-list__price-cell">
+            {% if line_item.original_line_price != line_item.final_line_price %}
+              <del class="order-list__item-original-price">{{ line_item.original_line_price | money }}</del>
+            {% endif %}
+            <p class="order-list__item-price">
+              {% if line_item.final_line_price > 0 %}
+                {% capture final_line_price %}
+                    {{ line_item.final_line_price | money }}
+                {% endcapture %}
+                {{ final_line_price }}
+                {% if line_item.unit_price_measurement %}
+    <div class="order-list__unit-price">
+      {{- line_item.unit_price | unit_price_with_measurement: line_item.unit_price_measurement -}}
+    </div>
+  {% endif %}
+              {% else %}
+                חינם
+              {% endif %}
+            </p>
+          </td>
+        </table>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+          {% endif %}
+  
+          <table class="row content">
+    <tr>
+      <td class="content__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+            <table class="row subtotal-lines">
+    <tr>
+      <td class="subtotal-spacer"></td>
+      <td>
+        <table class="row subtotal-table">
+  
+          {% capture line_items_subtotal_price %}
+            {% if return.line_items_subtotal_price < 0 %}
+              -{{ return.line_items_subtotal_price  | abs | money }}
+            {% else %}
+              {{ return.line_items_subtotal_price | money }}
+            {% endif %}
+          {% endcapture %}
+  
+          
+  <tr class="subtotal-line">
+    <td class="subtotal-line__title">
+      <p>
+        <span>סכום ביניים</span>
+      </p>
+    </td>
+    <td class="subtotal-line__value">
+        <strong>{{ line_items_subtotal_price }}</strong>
+    </td>
+  </tr>
+  
+          {% assign fees = return.fees %}
+          {% for fee in fees %}
+    
+  <tr class="subtotal-line">
+    <td class="subtotal-line__title">
+      <p>
+        <span>{{ fee.title }}</span>
+      </p>
+    </td>
+    <td class="subtotal-line__value">
+        <strong>{{ fee.subtotal | money }}</strong>
+    </td>
+  </tr>
+  
+  {% endfor %}
+  
+          {% if return.total_tax_price %}
+            {% capture total_tax_price %}
+              {% if return.total_tax_price < 0 %}
+                -{{ return.total_tax_price | abs | money }}
+              {% else %}
+                {{ return.total_tax_price | money }}
+              {% endif %}
+            {% endcapture %}
+            
+  <tr class="subtotal-line">
+    <td class="subtotal-line__title">
+      <p>
+        <span>מסים משוערים</span>
+      </p>
+    </td>
+    <td class="subtotal-line__value">
+        <strong>{{ total_tax_price }}</strong>
+    </td>
+  </tr>
+  
+          {% endif %}
+  
+          {%  if return.pre_return_order_total_outstanding and return.pre_return_order_total_outstanding != 0 %}
+            
+  <tr class="subtotal-line">
+    <td class="subtotal-line__title">
+      <p>
+        <span>יתרה פתוחה</span>
+      </p>
+    </td>
+    <td class="subtotal-line__value">
+        <strong>{{ return.pre_return_order_total_outstanding | money_with_currency }}</strong>
+    </td>
+  </tr>
+  
+          {% endif %}
+  
+          {% if return.order_total_outstanding > 0 %}
+          <table class="row subtotal-table subtotal-table--total">
+            
+  <tr class="subtotal-line">
+    <td class="subtotal-line__title">
+      <p>
+        <span>סכום משוער לתשלום</span>
+      </p>
+    </td>
+    <td class="subtotal-line__value">
+        <strong>{{ return.order_total_outstanding | money_with_currency }}</strong>
+    </td>
+  </tr>
+  
+          </table>
+          {% elsif return.order_total_outstanding <= 0 %}
+          <table class="row subtotal-table subtotal-table--total">
+            
+  <tr class="subtotal-line">
+    <td class="subtotal-line__title">
+      <p>
+        <span>החזר משוער</span>
+      </p>
+    </td>
+    <td class="subtotal-line__value">
+        <strong>{{ return.order_total_outstanding | abs | money_with_currency }}</strong>
+    </td>
+  </tr>
+  
+          </table>
+          {% endif %}
+        </table>
+      </td>
+    </tr>
+  </table>
+  
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+  
+          <table class="row footer">
+    <tr>
+      <td class="footer__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+                <p class="disclaimer__subtext">אם יש לך שאלות, השב למייל הזה או צור קשר איתנו ב <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+  
+  <img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
+  
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+  `
+  },
+
+  {
+      id: "order_level_return_label_created",
+      title: "תווית החזרה ברמת הזמנה נוצרה",
+      subject: `תווית החזרה עבור הזמנה {{ order.name }}`,
+      body: `<!DOCTYPE html>
+  <html lang="he" dir="rtl">
+    <head>
+    <title>{{ email_title }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="/assets/notifications/styles.css">
+    <style>
+      .button__cell { background: {{ shop.email_accent_color }}; }
+      a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+      body, table { direction: rtl; }
+    </style>
+  </head>
+  
+    <body>
+      <table class="body">
+        <tr>
+          <td>
+            <table class="header row">
+    <tr>
+      <td class="header__cell">
+        <center>
+  
+          <table class="container">
+            <tr>
+              <td>
+  
+                <table class="row">
+                  <tr>
+                    <td class="shop-name__cell">
+                      {%- if shop.email_logo_url %}
+                        <img src="{{shop.email_logo_url}}" alt="{{ shop.name }}" width="{{ shop.email_logo_width }}">
+                      {%- else %}
+                        <h1 class="shop-name__text">
+                          <a href="{{shop.url}}">{{ shop.name }}</a>
+                        </h1>
+                      {%- endif %}
+                    </td>
+  
+                      <td>
+                        <table class="order-po-number__container">
+                          <tr>
+                            <td class="order-number__cell">
+                              <span class="order-number__text">
+                                הזמנה {{ order.name }}
+                              </span>
+                            </td>
+                          </tr>
+                          {%- if po_number %}
+                              <tr>
+                                <td class="po-number__cell">
+                                  <span class="po-number__text">
+                                    מספר הזמנת רכש #{{ po_number }}
+                                  </span>
+                                </td>
+                              </tr>
+                          {%- endif %}
+                        </table>
+                      </td>
+                  </tr>
+                </table>
+  
+              </td>
+            </tr>
+          </table>
+  
+        </center>
+      </td>
+    </tr>
+  </table>
+  
+            <table class="row content">
+    <tr>
+      <td class="content__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+              <h2>תווית ההחזרה שלך מוכנה</h2>
+              <table class="row actions">
+    <tr>
+      <td class="empty-line">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="actions__cell">
+        <table class="button main-action-cell">
+          <tr>
+            <td class="button__cell"><a href="{{ return_label.public_file_url }}" class="button__text">הדפס תווית החזרה</a></td>
+          </tr>
+        </table>
+        {% if shop.url %}
+      <table class="link secondary-action-cell">
+        <tr>
+          <td class="link__cell">או <a href="{{ shop.url }}">בקר בחנות שלנו</a></td>
+        </tr>
+      </table>
+  {% endif %}
+  
+      </td>
+    </tr>
+  </table>
+  
+  
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+            <table class="row section">
+    <tr>
+      <td class="section__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                <h3>הוראות</h3>
+              </td>
+            </tr>
+          </table>
+          <table class="container">
+            <tr>
+              <td>
+                
+              <ol>
+                <li class="return-label__instruction-step">ארוז את הפריטים שאתה מחזיר.</li>
+                <li class="return-label__instruction-step">הדפס את תווית ההחזרה והדבק אותה על החבילה. כסה תוויות משלוח קיימות.</li>
+                <li class="return-label__instruction-step">מסור את החבילה לחברת המשלוחים המצוינת על התווית.</li>
+              </ol>
+  
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+            <table class="row footer">
+    <tr>
+      <td class="footer__cell">
+        <center>
+          <table class="container">
+            <tr>
+              <td>
+                
+                <p class="disclaimer__subtext">אם יש לך שאלות, השב למייל הזה או צור קשר איתנו ב <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+              </td>
+            </tr>
+          </table>
+        </center>
+      </td>
+    </tr>
+  </table>
+  
+  <img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
+  
+          </td>
+        </tr>
+      </table>
+    </body>
+  </html>
+  `},
+  
 ];
