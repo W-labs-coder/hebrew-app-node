@@ -57,7 +57,7 @@ export const notifications = [
       {% break %}
     {% endif %}
   {% endfor %}
-  {% if found_gift_card_with_recipient_email %}
+  {% if found_gift_{%  %}d_with_recipient_email %}
     <p>המקבל של כרטיס המתנה יקבל מייל עם קוד הכרטיס.</p>
   {% elsif gift_card_line_items.first %}
     <p>תקבל/י מיילים נפרדים עבור כרטיסי מתנה.</p>
@@ -1171,27 +1171,28 @@ export const notifications = [
 {%- endif -%}
 `,
   },
+
   {
     id: "draft_order_invoice",
-    title: "חשבונית טיוטה",
+    title: "חשבונית טיוטת הזמנה",
     subject: `חשבונית {{name}}`,
     body: `{% capture email_title %}
   {% if payment_terms %}
-    Review and confirm to complete your order
+    סקור ואשר להשלמת ההזמנה
   {% else %}
-    Complete your purchase
+    השלם את הרכישה שלך
   {% endif %}
 {% endcapture %}
 {% capture email_body %}
   {% if item_count > 1 %}
-    These items will be reserved for you until {{ reserve_inventory_until | date: format: 'date_at_time' }}.
+    הפריטים האלה יישמרו עבורך עד {{ reserve_inventory_until | date: format: 'date_at_time' }}.
   {% else %}
-    This item will be reserved for you until {{ reserve_inventory_until | date: format: 'date_at_time' }}.
+    הפריט הזה יישמר עבורך עד {{ reserve_inventory_until | date: format: 'date_at_time' }}.
   {% endif %}
 {% endcapture %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
   <head>
   <title>{{ email_title }}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -1200,6 +1201,7 @@ export const notifications = [
   <style>
     .button__cell { background: {{ shop.email_accent_color }}; }
     a, a:hover, a:active, a:visited { color: {{ shop.email_accent_color }}; }
+    body, table { direction: rtl; }
   </style>
 </head>
 
@@ -1233,7 +1235,7 @@ export const notifications = [
                         <tr>
                           <td class="order-number__cell">
                             <span class="order-number__text">
-                              Invoice {{ name }}
+                              חשבונית {{ name }}
                             </span>
                           </td>
                         </tr>
@@ -1241,7 +1243,7 @@ export const notifications = [
                             <tr>
                               <td class="po-number__cell">
                                 <span class="po-number__text">
-                                  PO number #{{ po_number }}
+                                  מספר הזמנת רכש #{{ po_number }}
                                 </span>
                               </td>
                             </tr>
@@ -1283,13 +1285,13 @@ export const notifications = [
     <td class="actions__cell">
       <table class="button main-action-cell">
         <tr>
-          <td class="button__cell"><a href="{{ invoice_url }}" class="button__text">Confirm order</a></td>
+          <td class="button__cell"><a href="{{ invoice_url }}" class="button__text">אשר הזמנה</a></td>
         </tr>
       </table>
       {% if shop.url %}
     <table class="link secondary-action-cell">
       <tr>
-        <td class="link__cell">or <a href="{{ shop.url }}">Visit our store</a></td>
+        <td class="link__cell">או <a href="{{ shop.url }}">בקר בחנות שלנו</a></td>
       </tr>
     </table>
 {% endif %}
@@ -1307,13 +1309,13 @@ export const notifications = [
     <td class="actions__cell">
       <table class="button main-action-cell">
         <tr>
-          <td class="button__cell"><a href="{{ invoice_url }}" class="button__text">Complete your purchase</a></td>
+          <td class="button__cell"><a href="{{ invoice_url }}" class="button__text">השלם את הרכישה שלך</a></td>
         </tr>
       </table>
       {% if shop.url %}
     <table class="link secondary-action-cell">
       <tr>
-        <td class="link__cell">or <a href="{{ shop.url }}">Visit our store</a></td>
+        <td class="link__cell">או <a href="{{ shop.url }}">בקר בחנות שלנו</a></td>
       </tr>
     </table>
 {% endif %}
@@ -1339,7 +1341,7 @@ export const notifications = [
         <table class="container">
           <tr>
             <td>
-              <h3>Order summary</h3>
+              <h3>סיכום הזמנה</h3>
             </td>
           </tr>
         </table>
@@ -1439,7 +1441,7 @@ export const notifications = [
           {% endfor %}
         {% else %}
           {% for group in line.groups %}
-            <span class="order-list__item-variant">Part of: {{ group.display_title }}</span><br/>
+            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
           {% endfor %}
         {% endif %}
 
@@ -1469,7 +1471,7 @@ export const notifications = [
         {% endif %}
 
         {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">Refunded</span>
+          <span class="order-list__item-refunded">הוחזר</span>
         {% endif %}
 
         {% if line.discount_allocations %}
@@ -1505,7 +1507,7 @@ export const notifications = [
   </div>
 {% endif %}
             {% else %}
-              Free
+              חינם
             {% endif %}
           </p>
         </td>
@@ -1759,7 +1761,7 @@ export const notifications = [
 <tr class="subtotal-line">
   <td class="subtotal-line__title">
     <p>
-      <span>סה"כ עם קבלה</span>
+      <span>סכום לתשלום עם הקבלה</span>
     </p>
   </td>
   <td class="subtotal-line__value">
@@ -1772,7 +1774,7 @@ export const notifications = [
 <tr class="subtotal-line">
   <td class="subtotal-line__title">
     <p>
-      <span>סה"כ עם המילוי</span>
+      <span>סכום לתשלום עם המילוי</span>
     </p>
   </td>
   <td class="subtotal-line__value">
@@ -1785,7 +1787,7 @@ export const notifications = [
 <tr class="subtotal-line">
   <td class="subtotal-line__title">
     <p>
-      <span>סה"כ לתשלום {{ due_at_date }}</span>
+      <span>סכום לתשלום {{ due_at_date }}</span>
     </p>
   </td>
   <td class="subtotal-line__value">
@@ -1946,24 +1948,33 @@ export const notifications = [
 </html>
 `,
   },
+
   {
-    id: "draft_order_invoice",
-    title: "חשבונית טיוטת הזמנה",
-    subject: `חשבונית {{name}}`,
-    body: `{% capture email_title %}
-  {% if payment_terms %}
-    סקור ואשר להשלמת ההזמנה
+    id: "shipping_confirmation",
+    title: "אישור משלוח",
+    subject: `משלוח מהזמנה {{ name }} בדרך`,
+    body: `{% if fulfillment.item_count == item_count %} 
+  {% capture email_title %}ההזמנה שלך בדרך{% endcapture %}
+  {% capture email_body %}ההזמנה שלך בדרך. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
+{% elsif fulfillment.item_count > 1 %} 
+  {% if fulfillment_status == 'fulfilled' %}
+    {% capture email_title %}הפריטים האחרונים בהזמנה שלך בדרך{% endcapture %}
+    {% capture email_body %}הפריטים האחרונים בהזמנה שלך בדרך. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
   {% else %}
-    השלם את הרכישה שלך
+    {% capture email_title %}חלק מהפריטים בהזמנה שלך בדרך{% endcapture %}
+    {% capture email_body %}חלק מהפריטים בהזמנה שלך בדרך. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
   {% endif %}
-{% endcapture %}
-{% capture email_body %}
-  {% if item_count > 1 %}
-    הפריטים האלה יישמרו עבורך עד {{ reserve_inventory_until | date: format: 'date_at_time' }}.
+{% else %} 
+  {% if fulfillment_status == 'fulfilled' %}
+    {% capture email_title %}הפריט האחרון בהזמנה שלך בדרך{% endcapture %}
+    {% capture email_body %}הפריט האחרון בהזמנה שלך בדרך. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
   {% else %}
-    הפריט הזה יישמר עבורך עד {{ reserve_inventory_until | date: format: 'date_at_time' }}.
+    {% capture email_title %}פריט אחד מההזמנה שלך בדרך{% endcapture %}
+    {% capture email_body %}פריט אחד מההזמנה שלך בדרך. עקוב אחר המשלוח כדי לראות את סטטוס המשלוח.{% endcapture %}
   {% endif %}
-{% endcapture %}
+{% endif %}
+
+{% capture email_emphasis %}תאריך אספקה משוער: <strong>{{fulfillment.estimated_delivery_at | date: format: 'date'}}</strong>{% endcapture %}
 
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -1980,6 +1991,7 @@ export const notifications = [
 </head>
 
   <body>
+
     <table class="body">
       <tr>
         <td>
@@ -2009,7 +2021,7 @@ export const notifications = [
                         <tr>
                           <td class="order-number__cell">
                             <span class="order-number__text">
-                              חשבונית {{ name }}
+                              הזמנה {{ order_name }}
                             </span>
                           </td>
                         </tr>
@@ -2045,12 +2057,11 @@ export const notifications = [
             <td>
               
             <h2>{{ email_title }}</h2>
-            {% if custom_message != blank %}
-              <p>{{ custom_message }}</p>
-            {% elsif reserve_inventory_until %}
-              <p>{{ email_body }}</p>
+            <p>{{ email_body }}</p>
+            {% if fulfillment.estimated_delivery_at %}
+              <p>{{ email_emphasis }}</p>
             {% endif %}
-            {% if payment_terms %}
+            {% if order_status_url %}
               <table class="row actions">
   <tr>
     <td class="empty-line">&nbsp;</td>
@@ -2059,7 +2070,7 @@ export const notifications = [
     <td class="actions__cell">
       <table class="button main-action-cell">
         <tr>
-          <td class="button__cell"><a href="{{ invoice_url }}" class="button__text">אשר הזמנה</a></td>
+          <td class="button__cell"><a href="{{ order_status_url }}" class="button__text">צפה בהזמנה שלך</a></td>
         </tr>
       </table>
       {% if shop.url %}
@@ -2075,30 +2086,44 @@ export const notifications = [
 </table>
 
             {% else %}
-              <table class="row actions">
-  <tr>
-    <td class="empty-line">&nbsp;</td>
-  </tr>
-  <tr>
-    <td class="actions__cell">
-      <table class="button main-action-cell">
-        <tr>
-          <td class="button__cell"><a href="{{ invoice_url }}" class="button__text">השלם את הרכישה שלך</a></td>
-        </tr>
-      </table>
-      {% if shop.url %}
-    <table class="link secondary-action-cell">
+              {% if shop.url %}
+    <table class="row actions">
       <tr>
-        <td class="link__cell">או <a href="{{ shop.url }}">בקר בחנות שלנו</a></td>
+        <td class="actions__cell">
+          <table class="button main-action-cell">
+            <tr>
+              <td class="button__cell"><a href="{{ shop.url }}" class="button__text">בקר בחנות שלנו</a></td>
+            </tr>
+          </table>
+        </td>
       </tr>
     </table>
 {% endif %}
 
-    </td>
-  </tr>
-</table>
-
             {% endif %}
+            {% if fulfillment.tracking_numbers.size > 0 %}
+  <p class="disclaimer__subtext">
+    <br/>
+    {% if fulfillment.tracking_numbers.size == 1 and fulfillment.tracking_company and fulfillment.tracking_url %}
+      מספר מעקב {{ fulfillment.tracking_company }}: <a href="{{ fulfillment.tracking_url }}">{{ fulfillment.tracking_numbers.first }}</a>
+    {% elsif fulfillment.tracking_numbers.size == 1 %}
+      מספר מעקב: {{ fulfillment.tracking_numbers.first }}
+    {% else %}
+      מספרי מעקב {{ fulfillment.tracking_company }}:<br />
+      {% for tracking_number in fulfillment.tracking_numbers %}
+        {% if fulfillment.tracking_urls[forloop.index0] %}
+          <a href="{{ fulfillment.tracking_urls[forloop.index0] }}">
+            {{ tracking_number }}
+          </a>
+        {% else %}
+            {{ tracking_number }}
+        {% endif %}
+        <br/>
+      {% endfor %}
+    {% endif %}
+  </p>
+{% endif %}
+
 
             </td>
           </tr>
@@ -2115,7 +2140,7 @@ export const notifications = [
         <table class="container">
           <tr>
             <td>
-              <h3>סיכום הזמנה</h3>
+              <h3>פריטים במשלוח הזה</h3>
             </td>
           </tr>
         </table>
@@ -2124,19 +2149,18 @@ export const notifications = [
             <td>
               
             
-               
   <table class="row">
-    {% for line in subtotal_line_items %}
+    {% for line in fulfillment.fulfillment_line_items %}
       
 <tr class="order-list__item">
   <td class="order-list__item__cell">
     <table>
-        {% assign expand_bundles = true %}
+        {% assign expand_bundles = false %}
 
-      {% if expand_bundles and line.bundle_parent? %}
+      {% if expand_bundles and line.line_item.bundle_parent? %}
         <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+          {% if line.line_item.image %}
+            <img src="{{ line.line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
           {% else %}
             <div class="order-list__no-image-cell">
               <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
@@ -2145,8 +2169,8 @@ export const notifications = [
         </td>
       {% else %}
         <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
+          {% if line.line_item.image %}
+            <img src="{{ line.line_item | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
           {% else %}
             <div class="order-list__no-image-cell">
               <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
@@ -2155,31 +2179,31 @@ export const notifications = [
         </td>
       {% endif %}
       <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
+        {% if line.line_item.presentment_title %}
+          {% assign line_title = line.line_item.presentment_title %}
+        {% elsif line.line_item.title %}
+          {% assign line_title = line.line_item.title %}
         {% else %}
-          {% assign line_title = line.product.title %}
+          {% assign line_title = line.line_item.product.title %}
         {% endif %}
-        {% if line.quantity < line.quantity %}
+        {% if line.quantity < line.line_item.quantity %}
           {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
+            {{ line.quantity }} מתוך {{ line.line_item.quantity }}
           {% endcapture %}
         {% else %}
-          {% assign line_display = line.quantity %}
+          {% assign line_display = line.line_item.quantity %}
         {% endif %}
 
         <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
 
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
+        {% if line.line_item.variant.title != 'Default Title' and line.line_item.bundle_parent? == false %}
+          <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
+        {% elsif line.line_item.variant.title != 'Default Title' and line.line_item.bundle_parent? and expand_bundles == false %}
+          <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
         {% endif %}
 
         {% if expand_bundles %}
-          {% for component in line.bundle_components %}
+          {% for component in line.line_item.bundle_components %}
             <table>
               <tr class="order-list__item">
                 <td class="order-list__bundle-item">
@@ -2215,42 +2239,22 @@ export const notifications = [
             </table>
           {% endfor %}
         {% else %}
-          {% for group in line.groups %}
+          {% for group in line.line_item.groups %}
             <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
           {% endfor %}
         {% endif %}
 
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
 
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
+        {% if line.line_item.selling_plan_allocation %}
+          <span class="order-list__item-variant">{{ line.line_item.selling_plan_allocation.selling_plan.name }}</span><br/>
         {% endif %}
 
-        {% if line.refunded_quantity > 0 %}
+        {% if line.line_item.refunded_quantity > 0 %}
           <span class="order-list__item-refunded">הוחזר</span>
         {% endif %}
 
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
+        {% if line.line_item.discount_allocations %}
+          {% for discount_allocation in line.line_item.discount_allocations %}
             {% if discount_allocation.discount_application.target_selection != 'all' %}
             <p>
               <span class="order-list__item-discount-allocation">
@@ -2265,1723 +2269,47 @@ export const notifications = [
           {% endfor %}
         {% endif %}
       </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
     </table>
   </td>
 </tr>
-      {% endunless %}
+
     {% endfor %}
+  </table>
+
+
+            </td>
+          </tr>
+        </table>
+      </center>
+    </td>
+  </tr>
 </table>
 
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
+          <table class="row footer">
+  <tr>
+    <td class="footer__cell">
+      <center>
+        <table class="container">
+          <tr>
+            <td>
+              
+              <p class="disclaimer__subtext">אם יש לך שאלות, השב למייל הזה או צור קשר איתנו ב <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>
+            </td>
+          </tr>
+        </table>
+      </center>
+    </td>
+  </tr>
+</table>
 
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
+<img src="{{ 'notifications/spacer.png' | shopify_asset_url }}" class="spacer" height="1" />
 
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
         </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
+      </tr>
     </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
-    </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
-    </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
-    </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
-    </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
-    </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
-    </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
-    </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% endif %}
-
-        {% if expand_bundles %}
-          {% for component in line.bundle_components %}
-            <table>
-              <tr class="order-list__item">
-                <td class="order-list__bundle-item">
-                  <table>
-                    <td class="order-list__image-cell">
-                      {% if component.image %}
-                        <img src="{{ component | img_url: 'compact_cropped' }}" align="left" width="40" height="40" class="order-list__product-image small"/>
-                      {% else %}
-                        <div class="order-list__no-image-cell small">
-                          <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="40" height="40" class="order-list__no-product-image small"/>
-                        </div>
-                      {% endif %}
-                    </td>
-
-                    <td class="order-list__product-description-cell">
-                      {% if component.product.title %}
-                        {% assign component_title = component.product.title %}
-                      {% else %}
-                        {% assign component_title = component.title %}
-                      {% endif %}
-
-                      {% assign component_display = component.quantity %}
-
-                      <span class="order-list__item-title">{{ component_display }}&nbsp;&times;&nbsp;{{ component_title }}</span><br>
-
-                      {% if component.variant.title != 'Default Title'%}
-                        <span class="order-list__item-variant">{{ component.variant.title }}</span>
-                      {% endif %}
-                    </td>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          {% endfor %}
-        {% else %}
-          {% for group in line.groups %}
-            <span class="order-list__item-variant">חלק מ: {{ group.display_title }}</span><br/>
-          {% endfor %}
-        {% endif %}
-
-          {% if line.gift_card and line.properties["__shopify_send_gift_card_to_recipient"] %}
-            {% for property in line.properties %}
-  {% assign property_first_char = property.first | slice: 0 %}
-  {% if property.last != blank and property_first_char != '_' %}
-    <div class="order-list__item-property">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-      {% if property.last contains '/uploads/' %}
-        <a href="{{ property.last }}" class="link" target="_blank">
-        {{ property.last | split: '/' | last }}
-        </a>
-      {% else %}
-        {{ property.last }}
-      {% endif %}
-      </dd>
-    </div>
-  {% endif %}
-{% endfor %}
-
-          {% endif %}
-
-        {% if line.selling_plan_allocation %}
-          <span class="order-list__item-variant">{{ line.selling_plan_allocation.selling_plan.name }}</span><br/>
-        {% endif %}
-
-        {% if line.refunded_quantity > 0 %}
-          <span class="order-list__item-refunded">הוחזר</span>
-        {% endif %}
-
-        {% if line.discount_allocations %}
-          {% for discount_allocation in line.discount_allocations %}
-            {% if discount_allocation.discount_application.target_selection != 'all' %}
-            <p>
-              <span class="order-list__item-discount-allocation">
-                <img src="{{ 'notifications/discounttag.png' | shopify_asset_url }}" width="18" height="18" class="discount-tag-icon" />
-                <span>
-                  {{ discount_allocation.discount_application.title | upcase }}
-                  (-{{ discount_allocation.amount | money }})
-                </span>
-              </span>
-            </p>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      </td>
-        {% if expand_bundles and line.bundle_parent? %}
-          <td class="order-list__parent-price-cell">
-        {% else %}
-          <td class="order-list__price-cell">
-        {% endif %}
-        {% if line.original_line_price != line.final_line_price %}
-          <del class="order-list__item-original-price">{{ line.original_line_price | money }}</del>
-        {% endif %}
-          <p class="order-list__item-price">
-            {% if line.final_line_price > 0 %}
-              {{ line.final_line_price | money }}
-              {% if line.unit_price_measurement %}
-  <div class="order-list__unit-price">
-    {{- line.unit_price | unit_price_with_measurement: line.unit_price_measurement -}}
-  </div>
-{% endif %}
-            {% else %}
-              חינם
-            {% endif %}
-          </p>
-        </td>
-    </table>
-  </td>
-</tr>
-      {% endunless %}
-    {% endfor %}
-</table>
-
-{% if legacy_separator %}
-  <hr class="order-list__delivery-method-type-separator">
-{% endif %}
-
-{% for delivery_agreement in delivery_agreements %}
-  {% if delivery_agreement.line_items != blank %}
-    {% if delivery_agreements.size > 1 %}
-      <h4 class="order-list__delivery-method-type">
-        פריטי {{ delivery_agreement.delivery_method_name }}
-      </h4>
-    {% endif %}
-
-    <table class="row">
-      {% for line in delivery_agreement.line_items %}
-          {% if line.groups.size == 0 %}
-            
-<tr class="order-list__item">
-  <td class="order-list__item__cell">
-    <table>
-        {% assign expand_bundles = false %}
-
-      {% if expand_bundles and line.bundle_parent? %}
-        <td class="order-list__parent-image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% else %}
-        <td class="order-list__image-cell">
-          {% if line.image %}
-            <img src="{{ line | img_url: 'compact_cropped' }}" align="left" width="60" height="60" class="order-list__product-image"/>
-          {% else %}
-            <div class="order-list__no-image-cell">
-              <img src="{{ 'notifications/no-image.png' | shopify_asset_url }}" align="left" width="60" height="60" class="order-list__no-product-image"/>
-            </div>
-          {% endif %}
-        </td>
-      {% endif %}
-      <td class="order-list__product-description-cell">
-        {% if line.presentment_title %}
-          {% assign line_title = line.presentment_title %}
-        {% elsif line.title %}
-          {% assign line_title = line.title %}
-        {% else %}
-          {% assign line_title = line.product.title %}
-        {% endif %}
-        {% if line.quantity < line.quantity %}
-          {% capture line_display %}
-            {{ line.quantity }} of {{ line.quantity }}
-          {% endcapture %}
-        {% else %}
-          {% assign line_display = line.quantity %}
-        {% endif %}
-
-        <span class="order-list__item-title">{{ line_title }}&nbsp;&times;&nbsp;{{ line_display }}</span><br/>
-
-        {% if line.variant.title != 'Default Title' and line.bundle_parent? == false %}
-          <span class="order-list__item-variant">{{ line.variant.title }}</span><br/>
-        {% elsif line.variant.title != 'Default Title' and line.bundle_parent? and expand_bundles == false %}
+  </body>
+</html>
+`,
+  },
+  
+];
