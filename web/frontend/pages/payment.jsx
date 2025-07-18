@@ -297,7 +297,7 @@ const PaymentSection = () => {
               </div>
 
               <div>
-                <p className="fw700 fs14">בחירת אמצעי תשלום:</p>
+                {/* <p className="fw700 fs14">בחירת אמצעי תשלום:</p> */}
                 <div className="row">
                   {processors.map((processor) => (
                     <div className="col-4" key={processor.name}>
