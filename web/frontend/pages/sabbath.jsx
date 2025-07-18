@@ -331,7 +331,7 @@ const SabbathSection = ({ themes }) => {
           }}
           className="my-4"
         >
-          <div class="d-flex jcb aic">
+          <div class="d-flex jcb aic mb-2">
             <div class="d-flex aic gap-2">
               <AlertIcon3 />
               <div>
