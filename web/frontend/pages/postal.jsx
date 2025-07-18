@@ -103,11 +103,11 @@ const PostalSettings = () => {
   };
 
   const [autofocusDetections, setAutofocusDetections] = useState([
-    { id: "enabled", name: "לְאַפשֵׁר" },
+    // { id: "enabled", name: "לְאַפשֵׁר" },
     { id: "disabled", name: "נָכֶה" },
   ]);
   const [autofocusCorrections, setAutofocusCorrections] = useState([
-    { id: "enabled", name: "לְאַפשֵׁר" },
+    // { id: "enabled", name: "לְאַפשֵׁר" },
     { id: "disabled", name: "נָכֶה" },
   ]);
 
