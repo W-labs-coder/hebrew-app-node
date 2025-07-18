@@ -345,7 +345,7 @@ const SabbathSection = ({ themes }) => {
           <div class="d-flex jcb aic">
             <div class="d-flex aic gap-2">
               <AlertDangerIcon />
-              <p class="fs14 fw500" style={{ color: "#0D0D0D" }}>
+              <p class="fs14 fw500" style={{ color: "#ffffff" }}>
                 שימו לב שבמצב שבת, לקוחות לא יוכלו לגשת לחנות שלכם
               </p>
             </div>
