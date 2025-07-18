@@ -3,7 +3,7 @@
 client_id = "86154af1674159ac797f5767f244100c"
 name = "Hebrew App"
 handle = "hebrew-app-new"
-application_url = "https://hebrew-app-node.onrender.com"
+application_url = "https://ci-sega-announce-pb.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,29 +16,15 @@ api_version = "2025-01"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_orders,read_products,read_themes,write_content,write_orders,write_products,read_checkouts,read_translations,write_translations,read_locales,read_markets_home,write_locales"
+scopes = "read_checkouts,read_locales,read_markets_home,read_orders,read_products,read_themes,read_translations,write_content,write_locales,write_orders,write_products,write_translations"
 
 [auth]
-redirect_urls = [
-  "https://hebrew-app-node.onrender.com/auth/callback",
-  "https://hebrew-app-node.onrender.com/auth/shopify/callback",
-  "https://hebrew-app-node.onrender.com/api/auth/callback"
-]
+redirect_urls = ["https://ci-sega-announce-pb.trycloudflare.com/auth/callback", "https://ci-sega-announce-pb.trycloudflare.com/auth/shopify/callback", "https://ci-sega-announce-pb.trycloudflare.com/api/auth/callback"]
 
 [app_proxy]
-url = "https://hebrew-app-node.onrender.com/proxy"
+url = "https://ci-sega-announce-pb.trycloudflare.com/proxy"
 subpath = "order-cancellation"
 prefix = "apps"
-include_host = true
 
 [pos]
 embedded = false
-
-[extensions.theme]
-type = "theme_app_extension"
-build_dir = ".shopify/bundle"
-
-  [[extensions.theme.blocks]]
-  name = "Order Cancellation Form"
-  type = "order-cancellation-block"
-  target = "section"
