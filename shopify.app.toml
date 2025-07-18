@@ -3,7 +3,7 @@
 client_id = "86154af1674159ac797f5767f244100c"
 name = "Hebrew App"
 handle = "hebrew-app-new"
-application_url = "https://ci-sega-announce-pb.trycloudflare.com"
+application_url = "https://hebrew-app-node.onrender.com"
 embedded = true
 
 [build]
@@ -19,12 +19,17 @@ api_version = "2025-01"
 scopes = "read_checkouts,read_locales,read_markets_home,read_orders,read_products,read_themes,read_translations,write_content,write_locales,write_orders,write_products,write_translations"
 
 [auth]
-redirect_urls = ["https://ci-sega-announce-pb.trycloudflare.com/auth/callback", "https://ci-sega-announce-pb.trycloudflare.com/auth/shopify/callback", "https://ci-sega-announce-pb.trycloudflare.com/api/auth/callback"]
+redirect_urls = [
+  "https://hebrew-app-node.onrender.com/auth/callback",
+  "https://hebrew-app-node.onrender.com/auth/shopify/callback",
+  "https://hebrew-app-node.onrender.com/api/auth/callback"
+]
 
 [app_proxy]
-url = "https://ci-sega-announce-pb.trycloudflare.com/proxy"
+url = "https://hebrew-app-node.onrender.com/proxy"
 subpath = "order-cancellation"
 prefix = "apps"
 
 [pos]
 embedded = false
+
