@@ -186,6 +186,36 @@ const Subscription = ({ subscriptions }) => {
                 </div>
               )}
 
+              {/* Yellow Header for Premium */}
+              {subscription.name.toLowerCase() === "premium" && (
+                <div style={{
+                  background: "#FBB105",
+                  color: "white",
+                  textAlign: "center",
+                  padding: "10px",
+                  borderRadius: "12px 12px 0 0",
+                  fontSize: "14px",
+                  fontWeight: "bold"
+                }}>
+                  Premium
+                </div>
+              )}
+
+              {/* Yellow Header for Basic */}
+              {subscription.name.toLowerCase() === "basic" && (
+                <div style={{
+                  background: "#FBB105",
+                  color: "white",
+                  textAlign: "center",
+                  padding: "10px",
+                  borderRadius: "12px 12px 0 0",
+                  fontSize: "14px",
+                  fontWeight: "bold"
+                }}>
+                  Basic
+                </div>
+              )}
+
               {/* Card Content */}
               <div style={{
                 padding: "20px",
