@@ -4,7 +4,6 @@ import { getSessionToken } from "@shopify/app-bridge-utils";
 import { Redirect } from "@shopify/app-bridge/actions";
 import { useSelector } from "react-redux";
 
-
 const Subscription = ({ subscriptions }) => {
   const app = useAppBridge();
   const [planType, setPlanType] = useState("monthly");
@@ -13,13 +12,9 @@ const Subscription = ({ subscriptions }) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [selected, setSelected] = useState(null)
   
-  
-
   const userSubscription = useSelector(state => state.auth.subscription?.subscription); 
 
   console.log("userSubscription", userSubscription);
-
- 
 
   useEffect(() => {
     const updatedSubscriptions = subscriptions.filter(
@@ -59,9 +54,6 @@ const Subscription = ({ subscriptions }) => {
       setLoading(false);
     }
   };
-
-
-
 
   useEffect(() => {
     if (successMessage) {
@@ -108,7 +100,7 @@ const Subscription = ({ subscriptions }) => {
         background: 'white',
         borderRadius: '16px',
         padding: '40px',
-        maxWidth: '1200px',
+        maxWidth: '1400px',
         margin: '0 auto',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
@@ -178,23 +170,26 @@ const Subscription = ({ subscriptions }) => {
           </div>
         </div>
 
-        {/* Plan Cards Container */}
+        {/* Plan Cards Container - Fixed to ensure horizontal layout */}
         <div style={{
           display: 'flex',
           gap: '20px',
           justifyContent: 'center',
-          flexWrap: 'wrap'
+          flexDirection: 'row',
+          flexWrap: 'nowrap',
+          overflowX: 'auto'
         }}>
           
           {/* Premium Plan */}
           <div style={{
             flex: '1',
-            minWidth: '300px',
-            maxWidth: '350px',
+            minWidth: '320px',
+            maxWidth: '380px',
             border: '1px solid #e0e0e0',
             borderRadius: '12px',
             overflow: 'hidden',
-            background: 'white'
+            background: 'white',
+            flexShrink: 0
           }}>
             {/* Header */}
             <div style={{
@@ -276,12 +271,13 @@ const Subscription = ({ subscriptions }) => {
           {/* Pro Plan */}
           <div style={{
             flex: '1',
-            minWidth: '300px',
-            maxWidth: '350px',
+            minWidth: '320px',
+            maxWidth: '380px',
             border: '1px solid #e0e0e0',
             borderRadius: '12px',
             overflow: 'hidden',
-            background: 'white'
+            background: 'white',
+            flexShrink: 0
           }}>
             {/* Header */}
             <div style={{
@@ -363,12 +359,13 @@ const Subscription = ({ subscriptions }) => {
           {/* Basic Plan */}
           <div style={{
             flex: '1',
-            minWidth: '300px',
-            maxWidth: '350px',
+            minWidth: '320px',
+            maxWidth: '380px',
             border: '1px solid #e0e0e0',
             borderRadius: '12px',
             overflow: 'hidden',
-            background: 'white'
+            background: 'white',
+            flexShrink: 0
           }}>
             {/* Header */}
             <div style={{
