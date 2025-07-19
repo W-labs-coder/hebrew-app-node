@@ -416,8 +416,8 @@ body:not(.keyboard-nav) a:focus {
     }
 
     .whatsapp-button.icon {
-      width: 30px;
-      height: 30px;
+      width: 56px;
+      height: 56px;
       padding: 10px;
       border-radius: 50%;
     }
