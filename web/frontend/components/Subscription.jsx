@@ -197,7 +197,7 @@ const Subscription = ({ subscriptions }) => {
                   fontSize: "14px",
                   fontWeight: "bold"
                 }}>
-                  Premium
+                  פּרֶמיָה
                 </div>
               )}
 
@@ -212,7 +212,7 @@ const Subscription = ({ subscriptions }) => {
                   fontSize: "14px",
                   fontWeight: "bold"
                 }}>
-                  Basic
+                  בְּסִיסִי
                 </div>
               )}
 
@@ -226,14 +226,14 @@ const Subscription = ({ subscriptions }) => {
               }}>
                 {/* Header */}
                 <div>
-                  <h3 style={{
+                  {/* <h3 style={{
                     margin: "0 0 8px 0",
                     fontSize: "24px",
                     fontWeight: "bold",
                     color: "#0D0D0D"
                   }}>
                     {subscription.name}
-                  </h3>
+                  </h3> */}
                 </div>
 
                 {/* Price Section */}
@@ -311,7 +311,6 @@ const Subscription = ({ subscriptions }) => {
                       padding: "12px",
                       border: "1px solid #FBB105",
                       borderRadius: "36px",
-                      textAlign: "center",
                       background: subscription.name.toLowerCase() === "pro" ? "#FBB105" : "transparent",
                       color: subscription.name.toLowerCase() === "pro" ? "white" : "#0D0D0D",
                       fontSize: "14px",
