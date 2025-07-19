@@ -3,8 +3,8 @@ import React from 'react'
 export default function WhatsAppIcon() {
   return (
     <svg
-      width="20"
-      height="21"
+      width="46"
+      height="46"
       viewBox="0 0 20 21"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
