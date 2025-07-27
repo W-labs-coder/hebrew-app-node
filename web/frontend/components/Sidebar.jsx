@@ -42,7 +42,7 @@ export const mainMenu = [
     permissions: "language",
   },
   {
-    title: "אמצעי תשלום",
+    title: "סמלים ותווי אמון",
     slug: "payment",
     link: "/payment",
     icon: PaymentIcon,
