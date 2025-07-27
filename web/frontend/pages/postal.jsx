@@ -104,11 +104,11 @@ const PostalSettings = () => {
 
   const [autofocusDetections, setAutofocusDetections] = useState([
     // { id: "enabled", name: "לְאַפשֵׁר" },
-    { id: "disabled", name: "נָכֶה" },
+    { id: "disabled", name: "כבוי" }, //off
   ]);
   const [autofocusCorrections, setAutofocusCorrections] = useState([
     // { id: "enabled", name: "לְאַפשֵׁר" },
-    { id: "disabled", name: "נָכֶה" },
+    { id: "disabled", name: "כבוי" }, //off
   ]);
 
   return (
@@ -202,7 +202,7 @@ const PostalSettings = () => {
                         options={autofocusDetections}
                         value={formData.autofocusDetection}
                         onChange={handleInputChange}
-                        placeholder="מכובה"
+                        placeholder="דלוק"
                       />
                     </div>
                   </div>
@@ -324,7 +324,7 @@ const PostalSettings = () => {
                         options={autofocusCorrections}
                         value={formData.autofocusCorrection}
                         onChange={handleInputChange}
-                        placeholder="מכובה"
+                        placeholder="דלוק"
                       />
                     </div>
                   </div>
