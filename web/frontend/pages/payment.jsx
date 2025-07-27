@@ -334,7 +334,7 @@ const PaymentSection = () => {
                     disabled={isSubmittingProcessors}
                     onClick={handleProcessorsSave}
                   >
-                    {isSubmittingProcessors ? "שומר..." : "שמור אמצעי תשלום"}
+                    {isSubmittingProcessors ? "שומר..." : "שמור"}
                   </Button>
                   {isProcessorsSaveSuccess && (
                     <div
