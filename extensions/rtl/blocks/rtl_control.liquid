@@ -169,7 +169,7 @@
         {% when "Airplane" %}
           <img src="{% if feature == 'Airplane' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/paper-plane_.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Airplane" width="24" height="24">
           {% when "Sent" %}
-          <img src="{% if feature == 'Sent' %https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/planet_.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Sent" width="24" height="24">
+          <img src="{% if feature == 'Sent' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/planet_.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Sent" width="24" height="24">
         {% else %}
           <div class="feature-icon-fallback">{{ feature }}</div>
       {% endcase %}
