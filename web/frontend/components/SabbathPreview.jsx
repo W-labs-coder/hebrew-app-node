@@ -385,13 +385,19 @@ const SabbathPreview = ({
           צור קשר
         </a>
         {socialLinks?.map((link, idx) => (
-          <a href={link.url} key={idx} target="_blank" rel="noopener noreferrer">
-            <img
-              src={getSocialIcon(link.name)}
-              alt={link.name}
-              style={{ width: "24px", height: "24px" }}
-            />
-          </a>
+              <a
+              key={idx}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mx-2"
+            >
+              <img
+                src={`/icons/${iconName}.svg`}
+                alt={link.name}
+                className="w-6 h-6"
+              />
+            </a>
         ))}
       </div>
 
