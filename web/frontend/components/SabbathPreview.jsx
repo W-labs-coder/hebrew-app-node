@@ -42,16 +42,21 @@ const SabbathPreview = ({
 
   return (
     <div
-      style={{
-        background: "#fff",
-        padding: "2rem",
-        maxWidth: "500px",
-        width: "90%",
-        textAlign: "center",
-        borderRadius: "12px",
-        fontFamily: "'Arial', sans-serif",
-        position: "relative",
-      }}
+    style={{
+      background: "#fff",
+      padding: "2rem",
+      maxWidth: "500px",
+      width: "90%",
+      textAlign: "center",
+      borderRadius: "12px",
+      fontFamily: "'Arial', sans-serif",
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      zIndex: 1000,
+      boxShadow: "0 0 20px rgba(0,0,0,0.2)",
+    }}
     >
       {/* Close Button */}
       <button
