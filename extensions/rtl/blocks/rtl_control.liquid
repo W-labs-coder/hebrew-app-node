@@ -165,11 +165,11 @@
           <img src="{% if feature == 'Delivery' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/shield.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" 
      alt="Delivery" width="24" height="24">
         {% when "Package" %}
-          <img src="{% if feature == 'plane' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/plane.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Package" width="24" height="24">
+          <img src="{% if feature == 'Package' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/plane.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Package" width="24" height="24">
         {% when "Airplane" %}
-          <img src="{% if feature == 'return' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/return.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Airplane" width="24" height="24">
+          <img src="{% if feature == 'Airplane' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/return.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Airplane" width="24" height="24">
           {% when "Sent" %}
-          <img src="{% if feature == 'date' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/calander.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Sent" width="24" height="24">
+          <img src="{% if feature == 'Sent' %}https://pub-908d3c23ff9b422b9c37f1c68ed0ee9f.r2.dev/calander.png{% else %}{{ 'calendar-regular.png' | asset_url }}{% endif %}" alt="Sent" width="24" height="24">
         {% else %}
           <div class="feature-icon-fallback">{{ feature }}</div>
       {% endcase %}
