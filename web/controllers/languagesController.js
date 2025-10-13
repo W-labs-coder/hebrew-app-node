@@ -486,6 +486,35 @@ export const addSelectedLanguage = async (req, res) => {
             (totalKeysFound / translations.length) * 100
           )}%)`
         );
+
+        // Second pass: try to fill any missing keys without digest as a fallback
+        const appliedSet = new Set(appliedTranslations.map((t) => t.key));
+        const stillMissing = contentsToTranslate.filter((c) => !appliedSet.has(c.key));
+        console.log(`Second pass: ${stillMissing.length} keys still missing after first registration`);
+
+        if (stillMissing.length > 0) {
+          const secondPass = stillMissing.map((content) => {
+            let val = (flatTranslationData && Object.prototype.hasOwnProperty.call(flatTranslationData, content.key))
+              ? flatTranslationData[content.key]
+              : (content.value ?? " ");
+            if (val === null || val === undefined || val === "") val = " ";
+            return {
+              key: content.key,
+              locale: selectedLocaleCode,
+              value: val,
+              // no translatableContentDigest to avoid digest mismatch blocking
+            };
+          });
+
+          const secondResult = await registerTranslations(
+            client,
+            translatedResourceId,
+            secondPass,
+            selectedLocaleCode
+          );
+          console.log(`Second pass registered: ${secondResult.success}/${secondResult.total}`);
+          translationCount += secondResult.success;
+        }
       } catch (verifyError) {
         console.error(`Error verifying translations: ${verifyError.message}`);
       }
