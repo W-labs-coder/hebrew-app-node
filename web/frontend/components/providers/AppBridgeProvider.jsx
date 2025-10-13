@@ -1,6 +1,4 @@
-// Some versions of @shopify/app-bridge-react expose Provider as default rather than named export in ESM builds
-// Import default and alias for compatibility
-import AppBridgeProviderReact from '@shopify/app-bridge-react';
+import { useEffect, useState } from 'react';
 
 function getApiKey() {
   // Prefer Vite-injected env, fallback to meta tag
@@ -31,14 +29,30 @@ function getHost() {
 export function AppBridgeProvider({ children }) {
   const apiKey = getApiKey();
   const host = getHost();
+  const [ProviderComp, setProviderComp] = useState(null);
+
+  // Dynamically import to avoid build-time export shape issues
+  useEffect(() => {
+    let cancelled = false;
+    import('@shopify/app-bridge-react')
+      .then((mod) => {
+        if (cancelled) return;
+        const P = mod?.Provider || mod?.default || null;
+        if (P) setProviderComp(() => P);
+      })
+      .catch(() => {
+        // Silently skip; we will render children without provider
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   // If we cannot find required config, render children without provider to avoid crashes
-  if (!apiKey || !host) return children;
+  if (!apiKey || !host || !ProviderComp) return children;
 
   const config = { apiKey, host, forceRedirect: true };
   return (
-    <AppBridgeProviderReact config={config}>
+    <ProviderComp config={config}>
       {children}
-    </AppBridgeProviderReact>
+    </ProviderComp>
   );
 }

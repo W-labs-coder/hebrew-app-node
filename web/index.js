@@ -680,6 +680,11 @@ app.get('/healthz', (req, res) => {
   }
 });
 
+// Simpler plain-text marker
+app.get('/alive', (req, res) => {
+  res.type('text/plain').send('OK dev=ruler');
+});
+
 app.use(shopify.cspHeaders());
 // In development, let the Shopify CLI/Vite dev server handle frontend assets
 if (process.env.NODE_ENV === 'production') {
