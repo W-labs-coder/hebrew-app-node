@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
-import OpenAI from 'openai';
+import { createTranslationClient, getAIProvider } from "../services/aiProvider.js";
 
 // Add this function after the existing imports
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -385,11 +385,14 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 // Helper function to update checkout with new address
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyB13R3UWtrNb4qmYJphR8IfwZ0XsWTrBEI";
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY
-});
+// Unified AI client (Grok by default; falls back to OpenAI if configured)
+let aiClient;
+try {
+  aiClient = createTranslationClient();
+  console.log(`[Postal] AI provider: ${getAIProvider()}`);
+} catch (e) {
+  console.warn('[Postal] AI not configured:', e.message);
+}
 
 export const validateIsraeliPostalCode = async (address, city) => {
   try {
@@ -413,9 +416,14 @@ export const validateIsraeliPostalCode = async (address, city) => {
       console.log("⚠️ No postal code found in Google Maps, trying OpenAI...");
     }
 
-    // If Google Maps fails, try OpenAI with updated prompt
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+    // If Google Maps fails, try AI model with updated prompt
+    if (!aiClient) {
+      console.warn('AI client not available; skipping AI postal code lookup');
+      return null;
+    }
+    const model = process.env.AI_MODEL_POSTAL || process.env.AI_MODEL_BULK || 'grok-2-mini';
+    const completion = await aiClient.chat.completions.create({
+      model,
       messages: [
         {
           role: "system",
@@ -448,7 +456,6 @@ export const validateIsraeliPostalCode = async (address, city) => {
     return null;
   }
 };
-
 
 
 

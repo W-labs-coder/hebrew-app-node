@@ -1,6 +1,6 @@
 import shopify from "../shopify.js";
 import User from "../models/User.js";
-import OpenAI from "openai";
+import { createTranslationClient } from "../services/aiProvider.js";
 import UserSubscription from "../models/UserSubscription.js";
 
 // Simple concurrency limiter
@@ -52,9 +52,9 @@ export const addSelectedLanguage = async (req, res) => {
     console.log("Final themeId being used in Admin API:", themeId);
 
     let openai = null;
-    if (openaiApiKey) {
-      openai = new OpenAI({ apiKey: openaiApiKey });
-    }
+    try {
+      openai = createTranslationClient();
+    } catch (_) {}
 
     const client = new shopify.api.clients.Graphql({ session });
 
@@ -196,7 +196,7 @@ export const addSelectedLanguage = async (req, res) => {
           const values = chunk.map((c) => c.value);
           try {
             const translationResponse = await openai.chat.completions.create({
-              model: "gpt-4.1",
+              model: process.env.AI_MODEL_BULK || 'grok-2-mini',
               messages: [
                 {
                   role: "system",

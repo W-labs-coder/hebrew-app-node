@@ -52,7 +52,8 @@ export const addSelectedLanguage = async (req, res) => {
     console.log("Theme found:", theme);
 
     // Extract theme name and clean it for file naming
-    const themeName = theme.name.toLowerCase().replace(/\s+/g, "_");
+    // IMPORTANT: Must match generator's cleaning (replace any non a-z0-9 with underscore)
+    const themeName = theme.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
 
     console.log("Theme name for file:", themeName);
 
@@ -144,10 +145,8 @@ export const addSelectedLanguage = async (req, res) => {
 
     let translationCount = 0;
 
-    // Collect all non-empty values for batch translation
-    const contentsToTranslate = translatableContent.filter(
-      (content) => content.value && content.value.trim() !== ""
-    );
+    // Include ALL keys (even those with empty source values) so Shopify doesn't mark them as missing
+    const contentsToTranslate = translatableContent;
 
     // Log ALL keys to inspect what Shopify expects
     console.log(
@@ -309,24 +308,19 @@ export const addSelectedLanguage = async (req, res) => {
 
       console.log(`Looking for translation file: ${translationFilePath}`);
 
-      // Check if file exists first
+      // Attempt to load pre-generated translations; if missing, continue with empty map
+      let flatTranslationData = {};
       try {
         await fs.access(translationFilePath);
+        const fileContent = await fs.readFile(translationFilePath, "utf8");
+        flatTranslationData = JSON.parse(fileContent);
+        console.log(`Loaded existing translation file with ${Object.keys(flatTranslationData).length} entries`);
       } catch (fileNotFound) {
-        console.error(`Translation file not found: ${translationFilePath}`);
-        return res.status(404).json({
-          success: false,
-          message: `No translation file found for theme "${theme.name}" and language "${language}"`,
-          details: `Expected file: ${themeName}_${selectedLocaleCode}.json in translations directory`,
-        });
+        console.warn(`Translation file not found: ${translationFilePath}. Proceeding with fallbacks (no 404).`);
       }
 
-      // Read and parse the JSON file
-      const fileContent = await fs.readFile(translationFilePath, "utf8");
-      const flatTranslationData = JSON.parse(fileContent);
-
       // Create translations from the flat JSON data
-      console.log(`Creating translations from flat JSON data...`);
+      console.log(`Preparing translations for registration...`);
       
 
       // Create a set of Shopify keys for faster lookup
@@ -344,15 +338,26 @@ let untranslatedKeys = [];
 
       // Add translations for all Shopify keys (even if missing in JSON)
       for (const content of contentsToTranslate) {
-        let value = flatTranslationData[content.key];
-        if (value === undefined || value === null || value === "") {
-          // Fallback: use original value if translation is missing
-          value = content.value;
+        // Prefer saved translation, fall back to source value, then to empty string
+        let value = (flatTranslationData && Object.prototype.hasOwnProperty.call(flatTranslationData, content.key))
+          ? flatTranslationData[content.key]
+          : (content.value ?? "");
+
+        // Track missing/untranslated cases
+        if (
+          flatTranslationData == null ||
+          !Object.prototype.hasOwnProperty.call(flatTranslationData, content.key)
+        ) {
           missingKeys.push(content.key);
         }
-        if (value === content.value) {
+        if (typeof content.value === 'string' && value === content.value) {
           untranslatedKeys.push(content.key);
         }
+
+        // Ensure we don't drop keys due to null/undefined; use a single space to avoid Shopify marking as missing
+        if (value === null || value === undefined) value = "";
+        if (value === "") value = " ";
+
         const validationResult = validateTranslation(content.key, value);
         if (validationResult.isValid) {
           translations.push({

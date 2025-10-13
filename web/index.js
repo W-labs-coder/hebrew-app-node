@@ -9,6 +9,7 @@ import shopify from "./shopify.js";
 import PrivacyWebhookHandlers from "./privacy.js";
 import billingRoutes from "./routes/billingRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
+import translationsRoutes from "./routes/translationsRoutes.js";
 import storeDetails from "./routes/store-details.js";
 import orderCancellationRoutes from "./routes/order-cancellation.js";
 import webhooks from "./webhooks/webhooks.js";
@@ -17,6 +18,7 @@ import cors from 'cors';
 import { validateIsraeliPostalCode } from './controllers/postalController.js'; // First, import the validateIsraeliPostalCode function at the top of the file
 import { Session } from "@shopify/shopify-api"; // Add this import at the top of your file
 import { generateAllThemeTranslations } from "./controllers/generateLanguage.js";
+import { startTranslationWorker } from "./workers/translationWorker.js";
 
 // Update the mutation at the top of the file
 const UPDATE_ORDER_ZIP_MUTATION = `
@@ -435,6 +437,7 @@ app.use((req, res, next) => {
 // Then add your billing routes
 app.use("/api/billing", shopify.validateAuthenticatedSession(),billingRoutes);
 app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
+app.use("/api/translations", shopify.validateAuthenticatedSession(), translationsRoutes);
 app.use("/api/store-details", storeDetails);
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
@@ -654,11 +657,23 @@ app.get('/webhooks/debug', async (req, res) => {
 });
 
 app.use(shopify.cspHeaders());
-app.use(serveStatic(STATIC_PATH, { index: false }));
+// In development, let the Shopify CLI/Vite dev server handle frontend assets
+if (process.env.NODE_ENV === 'production') {
+  app.use(serveStatic(STATIC_PATH, { index: false }));
+}
 
 app.use("/*", shopify.ensureInstalledOnShop(), async (req, res) => {
   const apiKey = process.env.SHOPIFY_API_KEY ?? "";
-  const host = req.query.host ?? ""; // Extract host from query parameters
+  // Host comes from Shopify; derive a fallback if absent
+  let host = req.query.host || "";
+  if (!host) {
+    try {
+      const shop = req.query.shop || res.locals?.shopify?.session?.shop;
+      if (shop) {
+        host = Buffer.from(`${shop}/admin`).toString('base64');
+      }
+    } catch (_) {}
+  }
 
   return res
     .status(200)
@@ -673,4 +688,5 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (req, res) => {
 
 app.listen(PORT);
 
-
+// Start background workers
+startTranslationWorker();

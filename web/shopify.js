@@ -1,15 +1,22 @@
 import { shopifyApp } from "@shopify/shopify-app-express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { MongoDBSessionStorage } from "@shopify/shopify-app-session-storage-mongodb";
 import { LATEST_API_VERSION } from "@shopify/shopify-api";
 import { restResources } from "@shopify/shopify-api/rest/admin/2024-10";
 import { DeliveryMethod } from "@shopify/shopify-api";
 
-dotenv.config();
+// Ensure we load env from this package's directory regardless of process CWD
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: join(__dirname, '.env') });
 
-if (!process.env.MONGO_URI) {
-  throw new Error("MONGO_URI environment variable is not set");
+// Support both MONGO_URI and MONGODB_URI for convenience
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
+if (!MONGO_URI) {
+  throw new Error("MONGO_URI (or MONGODB_URI) environment variable is not set");
 }
 
 if (!process.env.SHOPIFY_API_KEY) {
@@ -72,7 +79,7 @@ const shopify = shopifyApp({
   webhooks: {
     path: "/webhooks",
   },
-  sessionStorage: new MongoDBSessionStorage(process.env.MONGO_URI),
+  sessionStorage: new MongoDBSessionStorage(MONGO_URI),
 });
 
 // Middleware to attach Shopify session to res.locals
@@ -97,7 +104,7 @@ export const shopifyMiddleware = async (req, res, next) => {
 };
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => {
     console.error("Failed to connect to MongoDB:", err);

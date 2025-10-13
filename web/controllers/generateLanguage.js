@@ -1,101 +1,41 @@
 import shopify from "../shopify.js";
 import User from "../models/User.js";
-import OpenAI from "openai";
+import { createTranslationClient, getAIProvider } from "../services/aiProvider.js";
 import UserSubscription from "../models/UserSubscription.js";
 import fs from 'fs/promises';
 import path from 'path';
 import archiver from 'archiver';
 import { createReadStream, createWriteStream } from 'fs';
+import {
+  asyncPool,
+  chunkArray,
+  normalize,
+  translateBatchWithCache,
+  THEMES_CONCURRENCY,
+} from "../services/translationUtils.js";
 
-// Simple concurrency limiter
-async function asyncPool(poolLimit, array, iteratorFn) {
-  const ret = [];
-  const executing = [];
-  for (const item of array) {
-    const p = Promise.resolve().then(() => iteratorFn(item));
-    ret.push(p);
+// (flattenJSON/unflattenJSON were unused in this flow and removed)
 
-    if (poolLimit <= array.length) {
-      const e = p.then(() => executing.splice(executing.indexOf(e), 1));
-      executing.push(e);
-      if (executing.length >= poolLimit) {
-        await Promise.race(executing);
-      }
-    }
-  }
-  return Promise.all(ret);
-}
+// --- Performance helpers ---
 
-// Helper to chunk an array
-function chunkArray(array, size) {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
-}
-
-// Helper to convert nested object structure to flattened JSON with dot notation
-function flattenJSON(obj, prefix = '') {
-  const result = {};
-
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const newKey = prefix ? `${prefix}.${key}` : key;
-      
-      if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
-        Object.assign(result, flattenJSON(obj[key], newKey));
-      } else {
-        result[newKey] = obj[key];
-      }
-    }
-  }
-
-  return result;
-}
-
-// Helper to unflatten a JSON object back to nested structure
-function unflattenJSON(obj) {
-  const result = {};
-  
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const keys = key.split('.');
-      let current = result;
-      
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!current[keys[i]]) {
-          current[keys[i]] = {};
-        }
-        current = current[keys[i]];
-      }
-      
-      current[keys[keys.length - 1]] = obj[key];
-    }
-  }
-  
-  return result;
-}
 
 export const generateAllThemeTranslations = async (req, res) => {
   try {
     const targetLanguage = 'hebrew';
     const outputDir = path.join(process.cwd(), 'translations');
     const session = res.locals.shopify.session;
-    const openaiApiKey = process.env.OPENAI_API_KEY;
-
-    
-
     if (!session) {
       return res.status(401).json({ error: "Unauthorized: Session not found" });
     }
-
-    if (!openaiApiKey) {
-      return res.status(400).json({ error: "OpenAI API key not configured" });
+    
+    // Initialize AI client (Grok by default, falls back to OpenAI)
+    let openai;
+    try {
+      openai = createTranslationClient();
+      console.log(`[Translations] Provider: ${getAIProvider()}`);
+    } catch (e) {
+      return res.status(400).json({ error: e.message });
     }
-
-    // Initialize OpenAI
-    const openai = new OpenAI({ apiKey: openaiApiKey });
 
     // Create output directory if it doesn't exist
     try {
@@ -159,155 +99,117 @@ export const generateAllThemeTranslations = async (req, res) => {
     // Selected locale code (Hebrew)
     const selectedLocaleCode = targetLanguage.toLowerCase() === "hebrew" ? "he" : targetLanguage.toLowerCase();
     
-    // Process each theme
+    // Process themes with bounded concurrency
     const results = [];
-    for (const theme of freeThemes) {
-      try {
-        // Check if translation file already exists
-        const themeNameClean = theme.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-        const fileName = `${themeNameClean}_${selectedLocaleCode}.json`;
-        const filePath = path.join(outputDir, fileName);
-        
-        // Check if file exists
+
+    await asyncPool(
+      THEMES_CONCURRENCY,
+      freeThemes,
+      async (theme) => {
         try {
-          await fs.access(filePath);
-          console.log(`Translation file for ${theme.name} already exists at ${filePath}, skipping...`);
+          // Check if translation file already exists
+          const themeNameClean = theme.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          const fileName = `${themeNameClean}_${selectedLocaleCode}.json`;
+          const filePath = path.join(outputDir, fileName);
+          
+          // Check if file exists
+          try {
+            await fs.access(filePath);
+            console.log(`Translation file for ${theme.name} already exists at ${filePath}, skipping...`);
+            results.push({
+              theme: theme.name,
+              file: fileName,
+              status: 'skipped',
+              reason: 'file already exists'
+            });
+            return; // Skip this theme
+          } catch (fileNotFoundError) {
+            // File doesn't exist, proceed with translation
+            console.log(`Processing theme: ${theme.name} (${theme.id})`);
+          }
+          
+          // Step 2: Fetch translatable content for each theme
+          const translatableResourcesResponse = await client.query({
+            data: `query {
+              translatableResource(resourceId: "${theme.id}") {
+                resourceId
+                translatableContent {
+                  key
+                  value
+                  digest
+                }
+              }
+            }`
+          });
+
+          const translatableContent = 
+            translatableResourcesResponse?.body?.data?.translatableResource?.translatableContent || [];
+
+          console.log(`Found ${translatableContent.length} translatable items for ${theme.name}`);
+
+          // Filter out empty content
+          const contentsToTranslate = translatableContent.filter(
+            content => content.value && content.value.trim() !== ""
+          );
+
+          console.log(`${contentsToTranslate.length} non-empty items to translate for ${theme.name}`);
+
+          if (contentsToTranslate.length === 0) {
+            console.log(`Skipping ${theme.name} - no content to translate`);
+            results.push({ theme: theme.name, file: fileName, status: 'skipped', reason: 'no content' });
+            return;
+          }
+
+          // Step 3: Deduplicate values and translate using cache + OpenAI
+          const values = contentsToTranslate.map(c => c.value);
+          const keys = contentsToTranslate.map(c => c.key);
+
+          // Deduplicate to reduce token and request volume
+          const uniqueMap = new Map(); // value => index in uniques
+          const remap = []; // for each original index, points to unique index
+          const uniques = [];
+          values.forEach((v, i) => {
+            const n = normalize(v);
+            if (!uniqueMap.has(n)) {
+              uniqueMap.set(n, uniques.length);
+              uniques.push(v);
+            }
+            remap[i] = uniqueMap.get(n);
+          });
+
+          const uniqueTranslations = await translateBatchWithCache(openai, uniques, selectedLocaleCode);
+
+          // Reconstruct in original order
+          const translationsObject = {};
+          keys.forEach((key, i) => {
+            const t = uniqueTranslations[remap[i]] || "";
+            translationsObject[key] = t;
+          });
+
+          // Save the object to file (cleaned, parsed)
+          await fs.writeFile(
+            filePath,
+            JSON.stringify(translationsObject, null, 2),
+            'utf8'
+          );
+
+          console.log(`Saved cleaned translations for ${theme.name} to ${filePath}`);
           results.push({
             theme: theme.name,
             file: fileName,
-            status: 'skipped',
-            reason: 'file already exists'
+            uniqueItems: uniques.length,
+            totalItems: contentsToTranslate.length
           });
-          continue; // Skip to next theme
-        } catch (fileNotFoundError) {
-          // File doesn't exist, proceed with translation
-          console.log(`Processing theme: ${theme.name} (${theme.id})`);
-        }
-        
-        // Step 2: Fetch translatable content for each theme
-        const translatableResourcesResponse = await client.query({
-          data: `query {
-            translatableResource(resourceId: "${theme.id}") {
-              resourceId
-              translatableContent {
-                key
-                value
-                digest
-              }
-            }
-          }`
-        });
 
-        const translatableContent = 
-          translatableResourcesResponse?.body?.data?.translatableResource?.translatableContent || [];
-
-        console.log(`Found ${translatableContent.length} translatable items for ${theme.name}`);
-
-        // Filter out empty content
-        const contentsToTranslate = translatableContent.filter(
-          content => content.value && content.value.trim() !== ""
-        );
-
-        console.log(`${contentsToTranslate.length} non-empty items to translate for ${theme.name}`);
-
-        if (contentsToTranslate.length === 0) {
-          console.log(`Skipping ${theme.name} - no content to translate`);
-          continue;
-        }
-
-        // Step 3: Translate content using OpenAI in batches
-        const TRANSLATION_BATCH_SIZE = 30;
-        const TRANSLATION_CONCURRENCY = 5;
-        const contentChunks = chunkArray(contentsToTranslate, TRANSLATION_BATCH_SIZE);
-        
-        console.log(`Split into ${contentChunks.length} batches for translation`);
-
-        // Collect all raw OpenAI responses and keys
-        const rawTranslations = [];
-        const keyBatches = [];
-
-        let currentBatch = 0;
-        await asyncPool(
-          TRANSLATION_CONCURRENCY,
-          contentChunks,
-          async (chunk) => {
-            currentBatch++;
-            console.log(`Processing batch ${currentBatch}/${contentChunks.length} for ${theme.name}`);
-
-            const values = chunk.map(c => c.value);
-            const keys = chunk.map(c => c.key);
-
-            try {
-              const translationResponse = await openai.chat.completions.create({
-                model: "gpt-4.1",
-                messages: [
-                  {
-                    role: "system",
-                    content: `Translate the following texts from English to Hebrew. Maintain all HTML tags, interpolation variables like {{ variable }}, and formatting. Return ONLY a valid JSON array of translated strings in the same order as the input. Do not include any explanation or extra text.`
-                  },
-                  {
-                    role: "user",
-                    content: JSON.stringify(values)
-                  }
-                ],
-                temperature: 0.3
-              });
-
-              // Save the raw content and keys for this batch
-              rawTranslations.push(translationResponse.choices[0].message.content);
-              keyBatches.push(keys);
-
-              return { success: true, count: values.length };
-            } catch (err) {
-              console.error(`OpenAI translation failed for ${theme.name}, batch ${currentBatch}:`, err);
-              // Optionally, push the original values or error message
-              rawTranslations.push(values);
-              keyBatches.push(keys);
-              return { success: false, error: err.message };
-            }
-          }
-        );
-
-        // Step 4: Save the cleaned translations as a JSON object with Shopify keys
-        const translationsObject = {};
-        for (let i = 0; i < keyBatches.length; i++) {
-          const keys = keyBatches[i];
-          const raw = rawTranslations[i];
-          let translationsArray;
-          try {
-            translationsArray = JSON.parse(raw);
-          } catch (e) {
-            console.error("Failed to parse OpenAI response for batch", i, raw);
-            translationsArray = keys.map(() => ""); // fallback: empty strings
-          }
-          keys.forEach((key, idx) => {
-            translationsObject[key] = translationsArray[idx] || "";
+        } catch (themeError) {
+          console.error(`Error processing theme ${theme.name}:`, themeError);
+          results.push({
+            theme: theme.name,
+            error: themeError.message
           });
         }
-
-        // Save the object to file (cleaned, parsed)
-        await fs.writeFile(
-          filePath,
-          JSON.stringify(translationsObject, null, 2),
-          'utf8'
-        );
-
-        console.log(`Saved cleaned translations for ${theme.name} to ${filePath}`);
-        results.push({
-          theme: theme.name,
-          file: fileName,
-          translatedBatches: rawTranslations.length,
-          totalItems: contentsToTranslate.length
-        });
-        
-      } catch (themeError) {
-        console.error(`Error processing theme ${theme.name}:`, themeError);
-        results.push({
-          theme: theme.name,
-          error: themeError.message
-        });
       }
-    }
+    );
 
     return res.status(200).json({
       success: true,
@@ -356,9 +258,9 @@ export const addSelectedLanguage = async (req, res) => {
     console.log("Final themeId being used in Admin API:", themeId);
 
     let openai = null;
-    if (openaiApiKey) {
-      openai = new OpenAI({ apiKey: openaiApiKey });
-    }
+    try {
+      openai = createTranslationClient();
+    } catch (_) {}
 
     const client = new shopify.api.clients.Graphql({ session });
 

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { NavMenu } from "@shopify/app-bridge-react";
 import Routes from "./Routes";
 import { QueryProvider, PolarisProvider } from "./components";
+import { AppBridgeProvider } from "./components/providers/AppBridgeProvider";
 import { Provider } from "react-redux";
 import store, { persistor } from "./store/store";
 import { PersistGate } from "redux-persist/integration/react";
@@ -13,6 +14,7 @@ import { useState, useEffect } from 'react';
 import { mainMenu } from './components/Sidebar';
 
 export default function App() {
+  console.log("VITE_SHOPIFY_API_KEY:", import.meta.env.VITE_SHOPIFY_API_KEY);
   const pages = import.meta.glob("./pages/**/!(*.test.[jt]sx)*.([jt]sx)", {
     eager: true,
   });
@@ -32,8 +34,9 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <PolarisProvider>
-          <BrowserRouter>
-            <QueryProvider>
+          <AppBridgeProvider>
+            <BrowserRouter>
+              <QueryProvider>
               <ToastContainer
                 position="top-right"
                 autoClose={5000}
@@ -48,15 +51,16 @@ export default function App() {
               <NavMenu>
                 {isMobile
                   ? mainMenu.map((item) => (
-                      <a href={item.link}  rel={item.title}>
-                        {item.title}
-                      </a>
-                    ))
+                    <a href={item.link} rel={item.title}>
+                      {item.title}
+                    </a>
+                  ))
                   : []}
               </NavMenu>
-              <Routes pages={pages} />
-            </QueryProvider>
-          </BrowserRouter>
+                <Routes pages={pages} />
+              </QueryProvider>
+            </BrowserRouter>
+          </AppBridgeProvider>
         </PolarisProvider>
       </PersistGate>
     </Provider>

@@ -2,11 +2,7 @@ import User from "../models/User.js";
 import UserSubscription from "../models/UserSubscription.js";
 import shopify from "../shopify.js";
 import OpenAI from 'openai';
-
-// Initialize OpenAI with your API key
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+import { createTranslationClient, getAIProvider } from "../services/aiProvider.js";
 
 export const generateNotificationContent = async (req, res) => {
   try {
@@ -22,7 +18,7 @@ export const generateNotificationContent = async (req, res) => {
       return res.status(400).json({ error: "Notification type is required" });
     }
 
-    // Enhanced prompt for GPT-3.5-turbo
+    // Enhanced prompt for HTML email generation
     const prompt = `Create a professional e-commerce email notification template in Hebrew (RTL).
     
 Type: ${notificationType}
@@ -55,9 +51,26 @@ The template should follow this structure:
 </body>
 </html>`;
 
-    // Use GPT-3.5-turbo instead of GPT-4
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+    // Select AI provider (default Grok via AI_PROVIDER=grok)
+    let ai;
+    let provider = 'grok';
+    try {
+      provider = getAIProvider();
+      ai = createTranslationClient();
+    } catch (e) {
+      // Fallback to OpenAI if configured
+      if (process.env.OPENAI_API_KEY) {
+        ai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        provider = 'openai';
+      } else {
+        return res.status(400).json({ error: e.message });
+      }
+    }
+
+    const model = process.env.AI_MODEL_NOTIFICATIONS || (provider === 'grok' ? 'grok-2-mini' : 'gpt-4o-mini');
+
+    const completion = await ai.chat.completions.create({
+      model,
       messages: [
         {
           role: "system",
