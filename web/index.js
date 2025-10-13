@@ -130,6 +130,13 @@ const STATIC_PATH =
     
     const app = express();
 
+// Global build marker headers so you can detect a new deploy on any route
+app.use((req, res, next) => {
+  res.set('X-Dev', 'ruler');
+  res.set('X-Lang-Fix', '1');
+  next();
+});
+
 // Update the CORS configuration
 app.use(cors({
   origin: true,
