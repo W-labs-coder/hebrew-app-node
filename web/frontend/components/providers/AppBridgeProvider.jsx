@@ -1,4 +1,6 @@
-import { Provider as AppBridgeProviderReact } from '@shopify/app-bridge-react';
+// Some versions of @shopify/app-bridge-react expose Provider as default rather than named export in ESM builds
+// Import default and alias for compatibility
+import AppBridgeProviderReact from '@shopify/app-bridge-react';
 
 function getApiKey() {
   // Prefer Vite-injected env, fallback to meta tag
