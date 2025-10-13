@@ -298,6 +298,10 @@ export const addSelectedLanguage = async (req, res) => {
 
     // NEW APPROACH: Use JSON files directly for translations
     let translationData = {};
+    // Ensure stats variables are defined for final response
+    let placeholdersApplied = 0;
+    let missingKeys = [];
+    let untranslatedKeys = [];
     try {
       // Define file path for translation file
       const translationFilePath = path.join(
@@ -332,12 +336,10 @@ export const addSelectedLanguage = async (req, res) => {
       });
 
       let translations = [];
-let missingKeys = [];
-let untranslatedKeys = [];
 
 
       // Add translations for all Shopify keys (even if missing in JSON)
-      let placeholdersApplied = 0;
+      // Count placeholders when substituting empty strings
       for (const content of contentsToTranslate) {
         // Prefer saved translation, fall back to source value, then to empty string
         let value = (flatTranslationData && Object.prototype.hasOwnProperty.call(flatTranslationData, content.key))
