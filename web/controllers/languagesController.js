@@ -337,6 +337,7 @@ let untranslatedKeys = [];
 
 
       // Add translations for all Shopify keys (even if missing in JSON)
+      let placeholdersApplied = 0;
       for (const content of contentsToTranslate) {
         // Prefer saved translation, fall back to source value, then to empty string
         let value = (flatTranslationData && Object.prototype.hasOwnProperty.call(flatTranslationData, content.key))
@@ -356,7 +357,7 @@ let untranslatedKeys = [];
 
         // Ensure we don't drop keys due to null/undefined; use a single space to avoid Shopify marking as missing
         if (value === null || value === undefined) value = "";
-        if (value === "") value = " ";
+        if (value === "") { value = " "; placeholdersApplied++; }
 
         const validationResult = validateTranslation(content.key, value);
         if (validationResult.isValid) {
@@ -614,6 +615,9 @@ let untranslatedKeys = [];
       translationStats: {
         translatedItems: translationCount,
         totalTranslatableItems: translatableContent.length,
+        missingKeysCount: (typeof missingKeys !== 'undefined' ? missingKeys.length : undefined),
+        untranslatedKeysCount: (typeof untranslatedKeys !== 'undefined' ? untranslatedKeys.length : undefined),
+        placeholdersApplied,
       },
     });
   } catch (error) {

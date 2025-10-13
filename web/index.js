@@ -656,6 +656,23 @@ app.get('/webhooks/debug', async (req, res) => {
   }
 });
 
+// Lightweight health endpoint for deployment verification
+app.get('/healthz', (req, res) => {
+  try {
+    res.status(200).json({
+      status: 'ok',
+      env: process.env.NODE_ENV || 'development',
+      host: process.env.HOST || null,
+      hasLangCompletenessFix: true,
+      uptimeSec: Math.round(process.uptime()),
+      timestamp: new Date().toISOString(),
+      dev: 'ruler'
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', error: err?.message || 'unknown', dev: 'ruler' });
+  }
+});
+
 app.use(shopify.cspHeaders());
 // In development, let the Shopify CLI/Vite dev server handle frontend assets
 if (process.env.NODE_ENV === 'production') {
