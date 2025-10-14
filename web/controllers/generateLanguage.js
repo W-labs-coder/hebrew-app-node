@@ -1,6 +1,6 @@
 import shopify from "../shopify.js";
 import User from "../models/User.js";
-import { createTranslationClient, getAIProvider } from "../services/aiProvider.js";
+import { createTranslationClient, getAIProvider, getBulkTranslationModel } from "../services/aiProvider.js";
 import UserSubscription from "../models/UserSubscription.js";
 import fs from 'fs/promises';
 import path from 'path';
@@ -64,9 +64,6 @@ export const generateAllThemeTranslations = async (req, res) => {
     });
 
     const themes = themesResponse?.body?.data?.themes?.edges?.map(edge => edge.node) || [];
-    console.log(`Found ${themes.length} themes`);
-
-    console.log('the themes', themes)
 
     // const freeThemes = themes;
     
@@ -93,8 +90,6 @@ export const generateAllThemeTranslations = async (req, res) => {
         ].some((name) => theme.name.toLowerCase().includes(name)) ||
         theme.role === "main" // Include the main theme
     );
-    
-    console.log(`Identified ${freeThemes.length} free themes to process`);
 
     // Selected locale code (Hebrew)
     const selectedLocaleCode = targetLanguage.toLowerCase() === "hebrew" ? "he" : targetLanguage.toLowerCase();
@@ -145,17 +140,12 @@ export const generateAllThemeTranslations = async (req, res) => {
           const translatableContent = 
             translatableResourcesResponse?.body?.data?.translatableResource?.translatableContent || [];
 
-          console.log(`Found ${translatableContent.length} translatable items for ${theme.name}`);
-
           // Filter out empty content
           const contentsToTranslate = translatableContent.filter(
             content => content.value && content.value.trim() !== ""
           );
 
-          console.log(`${contentsToTranslate.length} non-empty items to translate for ${theme.name}`);
-
           if (contentsToTranslate.length === 0) {
-            console.log(`Skipping ${theme.name} - no content to translate`);
             results.push({ theme: theme.name, file: fileName, status: 'skipped', reason: 'no content' });
             return;
           }
@@ -393,7 +383,7 @@ export const addSelectedLanguage = async (req, res) => {
           const values = chunk.map((c) => c.value);
           try {
             const translationResponse = await openai.chat.completions.create({
-              model: "gpt-4.1",
+              model: getBulkTranslationModel(),
               messages: [
                 {
                   role: "system",
