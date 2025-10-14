@@ -180,6 +180,37 @@ export const addSelectedLanguage = async (req, res) => {
     }
 
     // Add better error handling and logging for registration
+    function unflattenToNested(flat) {
+      const out = {};
+      for (const [k, v] of Object.entries(flat || {})) {
+        const parts = k.split('.');
+        let node = out;
+        for (let i = 0; i < parts.length; i++) {
+          const p = parts[i];
+          if (i === parts.length - 1) {
+            node[p] = v;
+          } else {
+            if (!node[p] || typeof node[p] !== 'object') node[p] = {};
+            node = node[p];
+          }
+        }
+      }
+      return out;
+    }
+
+    function flattenNested(obj, prefix = '') {
+      const out = {};
+      if (!obj || typeof obj !== 'object') return out;
+      const recurse = (node, pref) => {
+        for (const [k, v] of Object.entries(node)) {
+          const key = pref ? `${pref}.${k}` : k;
+          if (v && typeof v === 'object' && !Array.isArray(v)) recurse(v, key);
+          else out[key] = v;
+        }
+      };
+      recurse(obj, prefix);
+      return out;
+    }
     async function registerTranslations(
       client,
       resourceId,
@@ -303,6 +334,7 @@ export const addSelectedLanguage = async (req, res) => {
     let placeholdersApplied = 0;
     let missingKeys = [];
     let untranslatedKeys = [];
+    let finalMissingCount = undefined;
     try {
       // Define file path for translation file
       const translationFilePath = path.join(
@@ -470,19 +502,21 @@ export const addSelectedLanguage = async (req, res) => {
         }
       }
 
-      // Optionally, add custom keys from JSON that are not in Shopify (not required for completeness)
-      // for (const [key, value] of Object.entries(flatTranslationData)) {
-      //   if (!shopifyKeys.has(key)) {
-      //     const validationResult = validateTranslation(key, value);
-      //     if (validationResult.isValid) {
-      //       translations.push({
-      //         key,
-      //         locale: selectedLocaleCode,
-      //         value: validationResult.value,
-      //       });
-      //     }
-      //   }
-      // }
+      // Include any keys present in the saved JSON but not returned by Shopify (no digest available)
+      for (const [key, raw] of Object.entries(flatTranslationData || {})) {
+        if (shopifyKeys.has(key)) continue;
+        let value = raw;
+        if (value === null || value === undefined) value = '';
+        if (value === '') value = ' ';
+        const validationResult = validateTranslation(key, value);
+        if (validationResult.isValid) {
+          translations.push({
+            key,
+            locale: selectedLocaleCode,
+            value: validationResult.value,
+          });
+        }
+      }
 
       console.log(
         `Prepared ${translations.length} translations (including ${missingKeys.length} missing and ${untranslatedKeys.length} untranslated keys)`
@@ -586,10 +620,16 @@ export const addSelectedLanguage = async (req, res) => {
 
         // Second pass: try to fill any missing keys without digest as a fallback
         const appliedSet = new Set(appliedTranslations.map((t) => t.key));
-        const stillMissing = contentsToTranslate.filter((c) => !appliedSet.has(c.key));
+        // Consider both Shopify-reported keys and any extra keys from the JSON file
+        const stillMissingShopify = contentsToTranslate.filter((c) => !appliedSet.has(c.key));
+        const extraJsonKeys = Object.keys(flatTranslationData || {}).filter(k => !shopifyKeys.has(k));
+        const stillMissingExtra = extraJsonKeys.filter(k => !appliedSet.has(k)).map(k => ({ key: k }));
+        const stillMissing = [...stillMissingShopify, ...stillMissingExtra];
+        const missingCount = stillMissing.length;
         console.log(`Second pass: ${stillMissing.length} keys still missing after first registration`);
 
-        if (stillMissing.length > 0) {
+        finalMissingCount = missingCount;
+        if (missingCount > 0) {
           const secondPass = stillMissing.map((content) => {
             let val = (flatTranslationData && Object.prototype.hasOwnProperty.call(flatTranslationData, content.key))
               ? flatTranslationData[content.key]
@@ -611,6 +651,69 @@ export const addSelectedLanguage = async (req, res) => {
           );
           console.log(`Second pass registered: ${secondResult.success}/${secondResult.total}`);
           translationCount += secondResult.success;
+        }
+
+        // If some keys are still missing after second pass, push the full locale file as a last resort
+        if (missingCount > 0) {
+          try {
+            const rest = new shopify.api.clients.Rest({ session });
+            const nested = unflattenToNested(flatTranslationData);
+            const themeNumericId = themeId.toString().includes('/') ? themeId.toString().split('/').pop() : themeId;
+            const assetKey = `locales/${selectedLocaleCode}.json`;
+            console.log(`Attempting asset upload for ${assetKey} with ${Object.keys(flatTranslationData || {}).length} keys...`);
+            await rest.put({
+              path: `themes/${themeNumericId}/assets`,
+              data: { asset: { key: assetKey, value: JSON.stringify(nested) } },
+              type: 'application/json',
+            });
+            console.log('Locale asset uploaded successfully via REST.');
+
+            // Verify by fetching the asset and computing remaining missing keys
+            const getRes = await rest.get({
+              path: `themes/${themeNumericId}/assets`,
+              query: { 'asset[key]': assetKey }
+            });
+            const assetVal = getRes?.body?.asset?.value || '';
+            let parsed = {};
+            try { parsed = JSON.parse(assetVal); } catch {}
+            const flatFromTheme = flattenNested(parsed);
+
+            // Compute remaining missing and patch the nested object if needed
+            const stillMissingAfterUpload = contentsToTranslate
+              .map(c => c.key)
+              .filter(k => flatFromTheme[k] === undefined);
+            finalMissingCount = stillMissingAfterUpload.length;
+            if (stillMissingAfterUpload.length > 0) {
+              console.log(`Asset verify: ${stillMissingAfterUpload.length} keys still missing, patching and re-uploading...`);
+              const nestedPatched = unflattenToNested({
+                ...flatFromTheme,
+                ...Object.fromEntries(stillMissingAfterUpload.map(k => [k, flatTranslationData[k] ?? ' ']))
+              });
+              await rest.put({
+                path: `themes/${themeNumericId}/assets`,
+                data: { asset: { key: assetKey, value: JSON.stringify(nestedPatched) } },
+                type: 'application/json',
+              });
+              console.log('Patched locale asset re-uploaded.');
+
+              // Recalculate after patch
+              const getRes2 = await rest.get({
+                path: `themes/${themeNumericId}/assets`,
+                query: { 'asset[key]': assetKey }
+              });
+              let parsed2 = {};
+              try { parsed2 = JSON.parse(getRes2?.body?.asset?.value || ''); } catch {}
+              const flat2 = flattenNested(parsed2);
+              finalMissingCount = contentsToTranslate
+                .map(c => c.key)
+                .filter(k => flat2[k] === undefined).length;
+              translationCount = contentsToTranslate.length - finalMissingCount;
+            } else {
+              translationCount = contentsToTranslate.length - finalMissingCount;
+            }
+          } catch (assetErr) {
+            console.error('Failed to upload full locale asset:', assetErr?.message || assetErr);
+          }
         }
       } catch (verifyError) {
         console.error(`Error verifying translations: ${verifyError.message}`);
@@ -743,7 +846,7 @@ export const addSelectedLanguage = async (req, res) => {
       translationStats: {
         translatedItems: translationCount,
         totalTranslatableItems: translatableContent.length,
-        missingKeysCount: (typeof missingKeys !== 'undefined' ? missingKeys.length : undefined),
+        missingKeysCount: (typeof finalMissingCount === 'number' ? finalMissingCount : (typeof missingKeys !== 'undefined' ? missingKeys.length : undefined)),
         untranslatedKeysCount: (typeof untranslatedKeys !== 'undefined' ? untranslatedKeys.length : undefined),
         placeholdersApplied,
       },
