@@ -1,6 +1,7 @@
 import shopify from "../shopify.js";
 import User from "../models/User.js";
-import OpenAI from "openai";
+import { createTranslationClient, getAIProvider } from "../services/aiProvider.js";
+import { translateBatchWithCache } from "../services/translationUtils.js";
 import UserSubscription from "../models/UserSubscription.js";
 import fs from "fs/promises";
 import path from "path";
@@ -323,7 +324,100 @@ export const addSelectedLanguage = async (req, res) => {
         console.warn(`Translation file not found: ${translationFilePath}. Proceeding with fallbacks (no 404).`);
       }
 
-      // Create translations from the flat JSON data
+      // Attempt to translate any missing or untranslated keys before registration
+      console.log(`Preparing translations (including filling missing/untranslated via AI if available)...`);
+
+      // Initialize AI client (OpenAI default; falls back if configured)
+      let openai = null;
+      try {
+        openai = createTranslationClient();
+        console.log(`[AddLanguage] Provider: ${getAIProvider()}`);
+      } catch (e) {
+        console.warn('[AddLanguage] AI not configured; proceeding without on-the-fly translation');
+      }
+
+      // Build list of items requiring translation
+      const toTranslateIdx = [];
+      const toTranslateValues = [];
+      contentsToTranslate.forEach((content, idx) => {
+        const src = (content.value || '').toString();
+        const existing = flatTranslationData && Object.prototype.hasOwnProperty.call(flatTranslationData, content.key)
+          ? (flatTranslationData[content.key] ?? '')
+          : undefined;
+        const needs = existing === undefined || existing === null || existing === '' || existing === src;
+        if (needs && src.trim() !== '') {
+          toTranslateIdx.push(idx);
+          toTranslateValues.push(src);
+        }
+      });
+
+      // Translate missing/untranslated values and merge back into flatTranslationData
+      if (openai && toTranslateValues.length > 0) {
+        try {
+          console.log(`[AddLanguage] Translating ${toTranslateValues.length} missing/untranslated strings...`);
+          const translated = await translateBatchWithCache(openai, toTranslateValues, selectedLocaleCode);
+          toTranslateIdx.forEach((origIdx, i) => {
+            const key = contentsToTranslate[origIdx].key;
+            const tval = translated[i];
+            if (tval !== undefined && tval !== null) {
+              flatTranslationData[key] = tval;
+            }
+          });
+          // Persist updated translation file for future runs
+          try {
+            await fs.mkdir(path.dirname(translationFilePath), { recursive: true });
+          } catch {}
+          await fs.writeFile(translationFilePath, JSON.stringify(flatTranslationData, null, 2), 'utf8');
+          console.log(`[AddLanguage] Updated translation file saved (${Object.keys(flatTranslationData).length} entries)`);
+        } catch (e) {
+          console.warn('[AddLanguage] Inline translation failed; continuing with fallbacks:', e?.message || e);
+        }
+      }
+
+      // Second pass: attempt to re-translate items that remained identical to source
+      if (openai) {
+        const unchangedIdx = [];
+        const unchangedValues = [];
+        contentsToTranslate.forEach((content, idx) => {
+          const src = (content.value || '').toString();
+          const cur = flatTranslationData && Object.prototype.hasOwnProperty.call(flatTranslationData, content.key)
+            ? (flatTranslationData[content.key] ?? '')
+            : '';
+          if (src.trim() !== '' && cur === src) {
+            unchangedIdx.push(idx);
+            unchangedValues.push(src);
+          }
+        });
+        if (unchangedValues.length > 0) {
+          try {
+            console.log(`[AddLanguage] Second-pass translating ${unchangedValues.length} unchanged strings...`);
+            const translated2 = await translateBatchWithCache(openai, unchangedValues, selectedLocaleCode);
+            unchangedIdx.forEach((origIdx, i) => {
+              const key = contentsToTranslate[origIdx].key;
+              const tval = translated2[i];
+              if (tval !== undefined && tval !== null) {
+                flatTranslationData[key] = tval;
+              }
+            });
+            await fs.writeFile(translationFilePath, JSON.stringify(flatTranslationData, null, 2), 'utf8');
+          } catch (e) {
+            console.warn('[AddLanguage] Second-pass translation failed; proceeding:', e?.message || e);
+          }
+        }
+      }
+
+      // Ensure every key has some value in the file to avoid "missing" status
+      contentsToTranslate.forEach((content) => {
+        if (!Object.prototype.hasOwnProperty.call(flatTranslationData || {}, content.key)) {
+          const src = (content.value ?? '').toString();
+          flatTranslationData[content.key] = src === '' ? ' ' : src;
+        }
+      });
+      try {
+        await fs.writeFile(translationFilePath, JSON.stringify(flatTranslationData, null, 2), 'utf8');
+      } catch {}
+
+      // Create translations from the (now updated) flat JSON data
       console.log(`Preparing translations for registration...`);
       
 
@@ -486,6 +580,9 @@ export const addSelectedLanguage = async (req, res) => {
             (totalKeysFound / translations.length) * 100
           )}%)`
         );
+
+        // Update translated count to reflect actually applied translations
+        translationCount = totalKeysFound;
 
         // Second pass: try to fill any missing keys without digest as a fallback
         const appliedSet = new Set(appliedTranslations.map((t) => t.key));
