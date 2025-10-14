@@ -167,7 +167,13 @@ export const generateAllThemeTranslations = async (req, res) => {
             remap[i] = uniqueMap.get(n);
           });
 
-          const uniqueTranslations = await translateBatchWithCache(openai, uniques, selectedLocaleCode);
+          let uniqueTranslations;
+          try {
+            uniqueTranslations = await translateBatchWithCache(openai, uniques, selectedLocaleCode);
+          } catch (e) {
+            console.warn(`Translation failed for ${theme.name}; using originals.`, e?.message || e);
+            uniqueTranslations = uniques; // Fallback to originals to continue
+          }
 
           // Reconstruct in original order
           const translationsObject = {};

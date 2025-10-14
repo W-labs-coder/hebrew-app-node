@@ -135,15 +135,21 @@ export async function translateBatchWithCache(openai, values, locale, metrics = 
           temperature: 0.2
         });
         const content = resp.choices?.[0]?.message?.content ?? "";
-        let arr;
-        try {
-          arr = JSON.parse(content);
-        } catch (e) {
-          const match = content.match(/\[[\s\S]*\]/);
-          if (match) arr = JSON.parse(match[0]);
-          else throw e;
+        // Robust parsing of JSON array from model output
+        const tryParseArray = (text) => {
+          try { return JSON.parse(text); } catch (_) {}
+          const match = text.match(/\[[\s\S]*\]/);
+          if (match) {
+            const inner = match[0].replace(/,\s*\]/g, "]");
+            try { return JSON.parse(inner); } catch (_) {}
+          }
+          return null;
+        };
+
+        const arr = tryParseArray(content);
+        if (!Array.isArray(arr)) {
+          throw new Error('Model did not return a valid JSON array');
         }
-        if (!Array.isArray(arr)) throw new Error('Expected array from model');
 
         const ops = [];
         arr.forEach((t, idx) => {
@@ -159,6 +165,12 @@ export async function translateBatchWithCache(openai, values, locale, metrics = 
             }
           });
         });
+        // Fill any missing items with originals to keep alignment
+        chunk.forEach((item, idx) => {
+          if (translated[item.idx] === undefined) {
+            translated[item.idx] = unmaskTokens(item.masked, item.masks);
+          }
+        });
         if (ops.length) await TranslationMemory.bulkWrite(ops, { ordered: false });
         return;
       } catch (err) {
@@ -167,7 +179,12 @@ export async function translateBatchWithCache(openai, values, locale, metrics = 
         await new Promise(r => setTimeout(r, delay));
       }
     }
-    throw lastErr;
+    // After retries, fallback gracefully to originals for this chunk
+    console.warn('Falling back to originals for a translation chunk due to parse/response errors:', lastErr?.message || lastErr);
+    chunk.forEach((item) => {
+      translated[item.idx] = unmaskTokens(item.masked, item.masks);
+    });
+    return;
   };
 
   await asyncPool(
