@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import TranslationMemory from "../models/TranslationMemory.js";
+import { getBulkTranslationModel } from './aiProvider.js';
 
 export const envInt = (name, fallback) => {
   const v = parseInt(process.env[name] || "", 10);
@@ -9,17 +10,8 @@ export const envInt = (name, fallback) => {
 export const TRANSLATION_BATCH_SIZE = envInt('TRANSLATION_BATCH_SIZE', 100);
 export const TRANSLATION_CONCURRENCY = envInt('TRANSLATION_CONCURRENCY', 10);
 export const THEMES_CONCURRENCY = envInt('THEMES_CONCURRENCY', 2);
-// Select model by provider (Grok default), overridable by AI_MODEL_BULK
-const ENV_PROVIDER = (process.env.AI_PROVIDER || 'grok').toLowerCase();
-const isGroqKey = /^gsk_/.test(process.env.GROK_API_KEY || process.env.XAI_API_KEY || '');
-const wantsGroq = isGroqKey || !!process.env.GROQ_API_KEY || /groq/i.test(process.env.GROK_BASE_URL || '') || /groq/i.test(process.env.XAI_BASE_URL || '') || /groq/i.test(process.env.GROQ_BASE_URL || '');
-export const AI_PROVIDER = wantsGroq ? 'groq' : ENV_PROVIDER;
-export const AI_MODEL_BULK = process.env.AI_MODEL_BULK
-  || (AI_PROVIDER === 'grok'
-      ? (process.env.GROK_MODEL_BULK || 'grok-2-mini')
-      : AI_PROVIDER === 'groq'
-        ? (process.env.GROQ_MODEL_BULK || 'llama-3.3-70b-versatile')
-        : (process.env.OPENAI_MODEL_BULK || 'gpt-4o-mini'));
+// Unified model resolution via aiProvider
+export const AI_MODEL_BULK = getBulkTranslationModel();
 
 export async function asyncPool(poolLimit, array, iteratorFn) {
   const ret = [];
