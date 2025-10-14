@@ -189,8 +189,8 @@ export const addSelectedLanguage = async (req, res) => {
         `Starting registration of ${translations.length} translations`
       );
 
-      // Group translations by batch size
-      const BATCH_SIZE = 250;
+      // Group translations by batch size (Shopify GraphQL limit ~100)
+      const BATCH_SIZE = 100;
       const batches = [];
       for (let i = 0; i < translations.length; i += BATCH_SIZE) {
         batches.push(translations.slice(i, i + BATCH_SIZE));
@@ -204,7 +204,7 @@ export const addSelectedLanguage = async (req, res) => {
       let errorCount = 0;
       let errorSamples = [];
 
-      const CONCURRENCY = 1; // Increased for better performance; adjust if Shopify API rate limits
+      const CONCURRENCY = 1; // Sequential: ensure one batch completes before the next
 
       // Define batch processor
       async function processBatch(batch, batchIndex) {
