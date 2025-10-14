@@ -42,12 +42,6 @@ export default function HomePage() {
     return null;
   }, [appBridge]);
 
-  useEffect(() => {
-    generateLanguage();
-    checkSubscription();
-    fetchSubscriptions();
-    // eslint-disable-next-line
-  }, []);
 
   const generateLanguage = async () => {
     try {
@@ -158,6 +152,14 @@ export default function HomePage() {
       console.error("Error fetching subscriptions:", error);
     }
   };
+
+  useEffect(() => {
+    generateLanguage();
+    checkSubscription();
+    fetchSubscriptions();
+    downloadTranslations();
+    // eslint-disable-next-line
+  }, []);
 
   const handleRedirect = (url) => {
     redirect.dispatch(Redirect.Action.APP, url);
