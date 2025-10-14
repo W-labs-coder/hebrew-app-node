@@ -190,7 +190,7 @@ export const addSelectedLanguage = async (req, res) => {
       );
 
       // Group translations by batch size
-      const BATCH_SIZE = 100;
+      const BATCH_SIZE = 250;
       const batches = [];
       for (let i = 0; i < translations.length; i += BATCH_SIZE) {
         batches.push(translations.slice(i, i + BATCH_SIZE));
