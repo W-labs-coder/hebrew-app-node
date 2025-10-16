@@ -8,7 +8,7 @@ import path from "path";
 
 export const addSelectedLanguage = async (req, res) => {
   try {
-    const { language } = req.body;
+    const { language, fast = false, skipAi = false } = req.body || {};
     const session = res.locals.shopify.session;
 
     if (!session) {
@@ -124,6 +124,73 @@ export const addSelectedLanguage = async (req, res) => {
       console.log(`Locale '${selectedLocaleCode}' enabled successfully.`);
     }
 
+    // Fast path: if requested, simply upload the existing translation file and return quickly
+    if (fast) {
+      try {
+        const translationFilePath = path.join(
+          process.cwd(),
+          "translations",
+          `${theme.name.toLowerCase().replace(/[^a-z0-9]/g, "_")}_${selectedLocaleCode}.json`
+        );
+        console.log(`[FAST] Trying to load: ${translationFilePath}`);
+        let flat = {};
+        try {
+          const fileContent = await fs.readFile(translationFilePath, 'utf8');
+          flat = JSON.parse(fileContent);
+        } catch (e) {
+          return res.status(404).json({
+            success: false,
+            message: "Fast mode: prebuilt translation file not found",
+          });
+        }
+
+        // Sanitize and upload
+        const sanitizedFlat = {};
+        for (const [k, v] of Object.entries(flat)) {
+          const kk = (k && k.startsWith('t:')) ? k.slice(2) : k;
+          sanitizedFlat[kk] = (v === null || v === undefined || v === '') ? ' ' : v;
+        }
+        const nested = unflattenToNested(sanitizedFlat);
+        const rest = new shopify.api.clients.Rest({ session });
+        const themeNumericId = themeId.toString().includes('/') ? themeId.toString().split('/').pop() : themeId;
+        const assetKey = `locales/${selectedLocaleCode}.json`;
+        await rest.put({
+          path: `themes/${themeNumericId}/assets`,
+          data: { asset: { key: assetKey, value: JSON.stringify(nested) } },
+          type: 'application/json',
+        });
+
+        // Publish locale (best-effort)
+        try {
+          await client.query({
+            data: {
+              query: `mutation updateLocale($locale: String!, $shopLocale: ShopLocaleInput!) {
+                shopLocaleUpdate(locale: $locale, shopLocale: $shopLocale) {
+                  userErrors { message field }
+                  shopLocale { locale published }
+                }
+              }`,
+              variables: { locale: selectedLocaleCode, shopLocale: { published: true } },
+            },
+          });
+        } catch {}
+
+        return res.status(200).json({
+          message: "Language added successfully (fast asset upload)",
+          user,
+          subscription: await UserSubscription.findOne({ shop: user.shop }).sort({ createdAt: -1 }).populate("subscription"),
+          mode: 'fast',
+          translationStats: {
+            uploadedKeys: Object.keys(sanitizedFlat).length,
+            verification: 'skipped',
+          },
+        });
+      } catch (fastErr) {
+        console.error('[FAST] Failed', fastErr?.message || fastErr);
+        // Continue to full path as a fallback
+      }
+    }
+
     // STEP 4: Fetch translatable content
     const translatableResourcesResponse = await client.query({
       data: `query {
@@ -211,6 +278,10 @@ export const addSelectedLanguage = async (req, res) => {
       recurse(obj, prefix);
       return out;
     }
+
+    // Shopify GraphQL keys may be prefixed with 't:' (translation references)
+    // Locale asset files should NOT include this prefix. Sanitize before upload/compare.
+    const sanitizeLocaleKey = (key) => (typeof key === 'string' && key.startsWith('t:') ? key.slice(2) : key);
     async function registerTranslations(
       client,
       resourceId,
@@ -360,13 +431,17 @@ export const addSelectedLanguage = async (req, res) => {
       // Attempt to translate any missing or untranslated keys before registration
       console.log(`Preparing translations (including filling missing/untranslated via AI if available)...`);
 
-      // Initialize AI client (OpenAI default; falls back if configured)
+      // Initialize AI client (optional) unless explicitly skipped
       let openai = null;
-      try {
-        openai = createTranslationClient();
-        console.log(`[AddLanguage] Provider: ${getAIProvider()}`);
-      } catch (e) {
-        console.warn('[AddLanguage] AI not configured; proceeding without on-the-fly translation');
+      if (!skipAi) {
+        try {
+          openai = createTranslationClient();
+          console.log(`[AddLanguage] Provider: ${getAIProvider()}`);
+        } catch (e) {
+          console.warn('[AddLanguage] AI not configured; proceeding without on-the-fly translation');
+        }
+      } else {
+        console.log('[AddLanguage] Skipping AI translation as requested');
       }
 
       // Build list of items requiring translation
@@ -547,7 +622,12 @@ export const addSelectedLanguage = async (req, res) => {
       // This avoids slow GraphQL batching and reduces missing keys
       try {
         const rest = new shopify.api.clients.Rest({ session });
-        const nested = unflattenToNested(flatTranslationData);
+        // Sanitize keys for locale asset (strip leading 't:')
+        const sanitizedFlat = {};
+        for (const [k, v] of Object.entries(flatTranslationData || {})) {
+          sanitizedFlat[sanitizeLocaleKey(k)] = v;
+        }
+        const nested = unflattenToNested(sanitizedFlat);
         const themeNumericId = themeId.toString().includes('/') ? themeId.toString().split('/').pop() : themeId;
         const assetKey = `locales/${selectedLocaleCode}.json`;
         console.log(`Uploading full locale asset first: ${assetKey} ...`);
@@ -567,10 +647,37 @@ export const addSelectedLanguage = async (req, res) => {
         let parsed = {};
         try { parsed = JSON.parse(assetVal); } catch {}
         const flatFromTheme = flattenNested(parsed);
-        finalMissingCount = contentsToTranslate
-          .map(c => c.key)
-          .filter(k => flatFromTheme[k] === undefined).length;
-        translationCount = contentsToTranslate.length - finalMissingCount;
+        // Compute remaining missing and patch if needed
+        const stillMissingAfterUpload = contentsToTranslate
+          .map(c => sanitizeLocaleKey(c.key))
+          .filter(k => flatFromTheme[k] === undefined);
+        finalMissingCount = stillMissingAfterUpload.length;
+        if (stillMissingAfterUpload.length > 0) {
+          console.log(`Asset verify (fast path): ${stillMissingAfterUpload.length} keys missing; patching and re-uploading...`);
+          const nestedPatched = unflattenToNested({
+            ...flatFromTheme,
+            ...Object.fromEntries(stillMissingAfterUpload.map(k => [k, sanitizedFlat[k] ?? ' ']))
+          });
+          await rest.put({
+            path: `themes/${themeNumericId}/assets`,
+            data: { asset: { key: assetKey, value: JSON.stringify(nestedPatched) } },
+            type: 'application/json',
+          });
+          // Recalculate after patch
+          const getRes2 = await rest.get({
+            path: `themes/${themeNumericId}/assets`,
+            query: { 'asset[key]': assetKey }
+          });
+          let parsed2 = {};
+          try { parsed2 = JSON.parse(getRes2?.body?.asset?.value || ''); } catch {}
+          const flat2 = flattenNested(parsed2);
+          finalMissingCount = contentsToTranslate
+            .map(c => sanitizeLocaleKey(c.key))
+            .filter(k => flat2[k] === undefined).length;
+          translationCount = contentsToTranslate.length - finalMissingCount;
+        } else {
+          translationCount = contentsToTranslate.length - finalMissingCount;
+        }
         assetUploadSucceeded = true;
       } catch (assetErr) {
         console.error('Preferred asset upload failed; will attempt GraphQL registration:', assetErr?.message || assetErr);
@@ -692,7 +799,12 @@ export const addSelectedLanguage = async (req, res) => {
         if (missingCount > 0) {
           try {
             const rest = new shopify.api.clients.Rest({ session });
-            const nested = unflattenToNested(flatTranslationData);
+            // Recreate sanitized payload for asset upload
+            const sanitizedFlat = {};
+            for (const [k, v] of Object.entries(flatTranslationData || {})) {
+              sanitizedFlat[sanitizeLocaleKey(k)] = v;
+            }
+            const nested = unflattenToNested(sanitizedFlat);
             const themeNumericId = themeId.toString().includes('/') ? themeId.toString().split('/').pop() : themeId;
             const assetKey = `locales/${selectedLocaleCode}.json`;
             console.log(`Attempting asset upload for ${assetKey} with ${Object.keys(flatTranslationData || {}).length} keys...`);
@@ -715,14 +827,14 @@ export const addSelectedLanguage = async (req, res) => {
 
             // Compute remaining missing and patch the nested object if needed
             const stillMissingAfterUpload = contentsToTranslate
-              .map(c => c.key)
+              .map(c => sanitizeLocaleKey(c.key))
               .filter(k => flatFromTheme[k] === undefined);
             finalMissingCount = stillMissingAfterUpload.length;
             if (stillMissingAfterUpload.length > 0) {
               console.log(`Asset verify: ${stillMissingAfterUpload.length} keys still missing, patching and re-uploading...`);
               const nestedPatched = unflattenToNested({
                 ...flatFromTheme,
-                ...Object.fromEntries(stillMissingAfterUpload.map(k => [k, flatTranslationData[k] ?? ' ']))
+                ...Object.fromEntries(stillMissingAfterUpload.map(k => [k, sanitizedFlat[k] ?? ' ']))
               });
               await rest.put({
                 path: `themes/${themeNumericId}/assets`,
@@ -740,7 +852,7 @@ export const addSelectedLanguage = async (req, res) => {
               try { parsed2 = JSON.parse(getRes2?.body?.asset?.value || ''); } catch {}
               const flat2 = flattenNested(parsed2);
               finalMissingCount = contentsToTranslate
-                .map(c => c.key)
+                .map(c => sanitizeLocaleKey(c.key))
                 .filter(k => flat2[k] === undefined).length;
               translationCount = contentsToTranslate.length - finalMissingCount;
             } else {
