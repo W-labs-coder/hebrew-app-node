@@ -335,6 +335,7 @@ export const addSelectedLanguage = async (req, res) => {
     let missingKeys = [];
     let untranslatedKeys = [];
     let finalMissingCount = undefined;
+    let assetUploadSucceeded = false;
     try {
       // Define file path for translation file
       const translationFilePath = path.join(
@@ -542,7 +543,41 @@ export const addSelectedLanguage = async (req, res) => {
         `Prepared ${translations.length} translations for keys in use (including ${missingKeys.length} missing and ${untranslatedKeys.length} untranslated)`
       );
 
-      // Register all translations
+      // Fast path: upload the full locale JSON as a single asset first
+      // This avoids slow GraphQL batching and reduces missing keys
+      try {
+        const rest = new shopify.api.clients.Rest({ session });
+        const nested = unflattenToNested(flatTranslationData);
+        const themeNumericId = themeId.toString().includes('/') ? themeId.toString().split('/').pop() : themeId;
+        const assetKey = `locales/${selectedLocaleCode}.json`;
+        console.log(`Uploading full locale asset first: ${assetKey} ...`);
+        await rest.put({
+          path: `themes/${themeNumericId}/assets`,
+          data: { asset: { key: assetKey, value: JSON.stringify(nested) } },
+          type: 'application/json',
+        });
+        console.log('Full locale asset uploaded successfully. Verifying...');
+
+        // Verify by fetching the asset and computing remaining missing keys
+        const getRes = await rest.get({
+          path: `themes/${themeNumericId}/assets`,
+          query: { 'asset[key]': assetKey }
+        });
+        const assetVal = getRes?.body?.asset?.value || '';
+        let parsed = {};
+        try { parsed = JSON.parse(assetVal); } catch {}
+        const flatFromTheme = flattenNested(parsed);
+        finalMissingCount = contentsToTranslate
+          .map(c => c.key)
+          .filter(k => flatFromTheme[k] === undefined).length;
+        translationCount = contentsToTranslate.length - finalMissingCount;
+        assetUploadSucceeded = true;
+      } catch (assetErr) {
+        console.error('Preferred asset upload failed; will attempt GraphQL registration:', assetErr?.message || assetErr);
+      }
+
+      // Register all translations (fallback) if asset upload did not succeed
+      if (!assetUploadSucceeded) {
       let translatedResourceId = themeId;
       if (!translatedResourceId.startsWith("gid://")) {
         translatedResourceId = `gid://shopify/Theme/${themeId
@@ -734,10 +769,11 @@ export const addSelectedLanguage = async (req, res) => {
         const foundInBatch = translations.some((t) => t.key === key);
         console.log(
           `Critical key "${key}": ${
-            foundInBatch ? "✅ Registered" : "❌ Not found in translations"
+            foundInBatch ? "✅ Registered" : "❌ Not found in translations" 
           }`
         );
       });
+      }
     } catch (fileError) {
       console.error(`Error processing translation file: ${fileError.message}`);
       return res.status(500).json({
