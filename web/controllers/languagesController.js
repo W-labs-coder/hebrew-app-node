@@ -8,7 +8,7 @@ import path from "path";
 
 export const addSelectedLanguage = async (req, res) => {
   try {
-    const { language, fast = false, skipAi = false } = req.body || {};
+    const { language, fast = false, skipAi = false, debugMissing = false } = req.body || {};
     const session = res.locals.shopify.session;
 
     if (!session) {
@@ -407,6 +407,7 @@ export const addSelectedLanguage = async (req, res) => {
     let untranslatedKeys = [];
     let finalMissingCount = undefined;
     let assetUploadSucceeded = false;
+    let finalMissingKeysList = [];
     try {
       // Define file path for translation file
       const translationFilePath = path.join(
@@ -652,6 +653,7 @@ export const addSelectedLanguage = async (req, res) => {
           .map(c => sanitizeLocaleKey(c.key))
           .filter(k => flatFromTheme[k] === undefined);
         finalMissingCount = stillMissingAfterUpload.length;
+        finalMissingKeysList = stillMissingAfterUpload;
         if (stillMissingAfterUpload.length > 0) {
           console.log(`Asset verify (fast path): ${stillMissingAfterUpload.length} keys missing; patching and re-uploading...`);
           const nestedPatched = unflattenToNested({
@@ -674,6 +676,9 @@ export const addSelectedLanguage = async (req, res) => {
           finalMissingCount = contentsToTranslate
             .map(c => sanitizeLocaleKey(c.key))
             .filter(k => flat2[k] === undefined).length;
+          finalMissingKeysList = contentsToTranslate
+            .map(c => sanitizeLocaleKey(c.key))
+            .filter(k => flat2[k] === undefined);
           translationCount = contentsToTranslate.length - finalMissingCount;
         } else {
           translationCount = contentsToTranslate.length - finalMissingCount;
@@ -830,6 +835,7 @@ export const addSelectedLanguage = async (req, res) => {
               .map(c => sanitizeLocaleKey(c.key))
               .filter(k => flatFromTheme[k] === undefined);
             finalMissingCount = stillMissingAfterUpload.length;
+            finalMissingKeysList = stillMissingAfterUpload;
             if (stillMissingAfterUpload.length > 0) {
               console.log(`Asset verify: ${stillMissingAfterUpload.length} keys still missing, patching and re-uploading...`);
               const nestedPatched = unflattenToNested({
@@ -854,6 +860,9 @@ export const addSelectedLanguage = async (req, res) => {
               finalMissingCount = contentsToTranslate
                 .map(c => sanitizeLocaleKey(c.key))
                 .filter(k => flat2[k] === undefined).length;
+              finalMissingKeysList = contentsToTranslate
+                .map(c => sanitizeLocaleKey(c.key))
+                .filter(k => flat2[k] === undefined);
               translationCount = contentsToTranslate.length - finalMissingCount;
             } else {
               translationCount = contentsToTranslate.length - finalMissingCount;
@@ -997,6 +1006,8 @@ export const addSelectedLanguage = async (req, res) => {
         missingKeysCount: (typeof finalMissingCount === 'number' ? finalMissingCount : (typeof missingKeys !== 'undefined' ? missingKeys.length : undefined)),
         untranslatedKeysCount: (typeof untranslatedKeys !== 'undefined' ? untranslatedKeys.length : undefined),
         placeholdersApplied,
+        missingKeysSample: Array.isArray(finalMissingKeysList) ? finalMissingKeysList.slice(0, 50) : undefined,
+        missingKeys: debugMissing ? finalMissingKeysList : undefined,
       },
     });
   } catch (error) {
@@ -1005,6 +1016,116 @@ export const addSelectedLanguage = async (req, res) => {
       message: "Error adding language or translating theme",
       error: error.message,
     });
+  }
+};
+
+// GET /api/settings/inspect-missing-translations
+// Returns counts and samples of missing translation keys for the selected theme + locale
+export const inspectMissingTranslations = async (req, res) => {
+  try {
+    const session = res.locals.shopify.session;
+    if (!session) {
+      return res.status(401).json({ success: false, error: "Unauthorized: Session not found" });
+    }
+
+    // Resolve user and theme
+    const shopId = session.shop;
+    const user = await User.findOne({ shop: shopId });
+    if (!user || !user.selectedTheme) {
+      return res.status(400).json({ success: false, error: "No theme selected for this shop" });
+    }
+
+    let themeId = user.selectedTheme; // can be gid or numeric
+    const client = new shopify.api.clients.Graphql({ session });
+
+    // Determine locale from query or user selection
+    const { language, locale, full } = req.query || {};
+    const selectedLanguage = language || user.selectedLanguage || 'hebrew';
+    const selectedLocaleCode = (locale || (selectedLanguage.toLowerCase() === 'hebrew' ? 'he' : selectedLanguage.toLowerCase())).trim();
+
+    // Helpers (local to this function)
+    const sanitizeLocaleKey = (key) => (typeof key === 'string' && key.startsWith('t:') ? key.slice(2) : key);
+    const flattenNested = (obj, prefix = '') => {
+      const out = {};
+      if (!obj || typeof obj !== 'object') return out;
+      const recurse = (node, pref) => {
+        for (const [k, v] of Object.entries(node)) {
+          const kk = pref ? `${pref}.${k}` : k;
+          if (v && typeof v === 'object' && !Array.isArray(v)) recurse(v, kk);
+          else out[kk] = v;
+        }
+      };
+      recurse(obj, prefix);
+      return out;
+    };
+
+    // Confirm theme exists and get name
+    const themeResp = await client.query({
+      data: `query { theme(id: "${themeId}") { id name } }`,
+    });
+    const theme = themeResp?.body?.data?.theme;
+    if (!theme) return res.status(404).json({ success: false, error: 'Theme not found' });
+
+    // Fetch Shopify translatable keys and already-applied translations
+    const transResp = await client.query({
+      data: `query { translatableResource(resourceId: "${themeId}") { resourceId translatableContent { key } translations(locale: "${selectedLocaleCode}") { key value } } }`,
+    });
+    const resource = transResp?.body?.data?.translatableResource || {};
+    const shopifyKeys = (resource.translatableContent || []).map(c => c.key);
+    const appliedTranslations = (resource.translations || []).map(t => t.key);
+
+    // Fetch current locale asset (REST)
+    const rest = new shopify.api.clients.Rest({ session });
+    const themeNumericId = theme.id ? theme.id.toString().split('/').pop() : (themeId.toString().includes('/') ? themeId.toString().split('/').pop() : themeId);
+    const assetKey = `locales/${selectedLocaleCode}.json`;
+
+    let assetFlat = {};
+    try {
+      const getRes = await rest.get({ path: `themes/${themeNumericId}/assets`, query: { 'asset[key]': assetKey } });
+      const assetVal = getRes?.body?.asset?.value || '';
+      try { assetFlat = flattenNested(JSON.parse(assetVal)); } catch { assetFlat = {}; }
+    } catch (e) {
+      // If asset missing, keep empty map
+      assetFlat = {};
+    }
+
+    // Build sets
+    const setFrom = (arr) => new Set(arr);
+    const diff = (a, bSet) => a.filter(k => !bSet.has(k));
+
+    // Compare against asset (sanitize keys from Shopify)
+    const shopifyKeysSan = shopifyKeys.map(sanitizeLocaleKey);
+    const assetKeys = Object.keys(assetFlat);
+    const missingFromAsset = diff(shopifyKeysSan, setFrom(assetKeys));
+
+    // Compare against GraphQL translations list (no sanitize, since it returns raw keys)
+    const missingFromGraphql = diff(shopifyKeys, setFrom(appliedTranslations));
+
+    // Response
+    const wantFullAsset = full === 'asset' || full === 'both' || full === '1' || full === 'true';
+    const wantFullGraphql = full === 'graphql' || full === 'both' || full === '1' || full === 'true';
+
+    return res.status(200).json({
+      success: true,
+      theme: { id: theme.id, name: theme.name },
+      locale: selectedLocaleCode,
+      counts: {
+        totalTranslatable: shopifyKeys.length,
+        missingFromAsset: missingFromAsset.length,
+        missingFromGraphql: missingFromGraphql.length,
+      },
+      samples: {
+        missingFromAsset: missingFromAsset.slice(0, 50),
+        missingFromGraphql: missingFromGraphql.slice(0, 50),
+      },
+      lists: {
+        missingFromAsset: wantFullAsset ? missingFromAsset : undefined,
+        missingFromGraphql: wantFullGraphql ? missingFromGraphql : undefined,
+      }
+    });
+  } catch (error) {
+    console.error('inspectMissingTranslations error:', error);
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
 

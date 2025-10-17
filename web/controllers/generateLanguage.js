@@ -140,10 +140,9 @@ export const generateAllThemeTranslations = async (req, res) => {
           const translatableContent = 
             translatableResourcesResponse?.body?.data?.translatableResource?.translatableContent || [];
 
-          // Filter out empty content
-          const contentsToTranslate = translatableContent.filter(
-            content => content.value && content.value.trim() !== ""
-          );
+          // Include ALL keys (even those with empty source values)
+          // Shopify may mark keys as missing if absent in the locale
+          const contentsToTranslate = translatableContent;
 
           if (contentsToTranslate.length === 0) {
             results.push({ theme: theme.name, file: fileName, status: 'skipped', reason: 'no content' });
