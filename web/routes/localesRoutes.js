@@ -72,11 +72,10 @@ router.get('/:locale.json', async (req, res) => {
     const base = await loadBaseDictionary(locale);
     const store = shop ? await loadStoreDictionary(shop, themeName, locale) : {};
     const merged = { ...base, ...store };
-    res.status(200).json({ success: true, locale, count: Object.keys(merged).length, data: merged });
+    res.status(200).json({ success: true, locale, count: Object.keys(merged).length, data: merged, dev: 'ife' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: err.message, dev: 'ife' });
   }
 });
 
 export default router;
-

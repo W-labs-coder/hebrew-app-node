@@ -14,7 +14,7 @@ export const addSelectedLanguage = async (req, res) => {
     const session = res.locals.shopify.session;
 
     if (!session) {
-      return res.status(401).json({ error: "Unauthorized: Session not found" });
+      return res.status(401).json({ error: "Unauthorized: Session not found", dev: 'ife' });
     }
 
     const shopId = session.shop;
@@ -49,7 +49,7 @@ export const addSelectedLanguage = async (req, res) => {
 
     const theme = themeResponse?.body?.data?.theme;
     if (!theme) {
-      return res.status(404).json({ error: "Theme not found" });
+      return res.status(404).json({ error: "Theme not found", dev: 'ife' });
     }
 
     console.log("Theme found:", theme);
@@ -120,6 +120,7 @@ export const addSelectedLanguage = async (req, res) => {
         return res.status(400).json({
           error: "Locale could not be enabled for translation",
           details: userErrors,
+          dev: 'ife',
         });
       }
 
@@ -143,6 +144,7 @@ export const addSelectedLanguage = async (req, res) => {
           return res.status(404).json({
             success: false,
             message: "Fast mode: prebuilt translation file not found",
+            dev: 'ife',
           });
         }
 
@@ -186,6 +188,7 @@ export const addSelectedLanguage = async (req, res) => {
             uploadedKeys: Object.keys(sanitizedFlat).length,
             verification: 'skipped',
           },
+          dev: 'ife',
         });
       } catch (fastErr) {
         console.error('[FAST] Failed', fastErr?.message || fastErr);
@@ -977,7 +980,7 @@ export const addSelectedLanguage = async (req, res) => {
     if (!subscription) {
       return res
         .status(404)
-        .json({ success: false, message: "No subscription found" });
+        .json({ success: false, message: "No subscription found", dev: 'ife' });
     }
 
     const currentDate = new Date();
@@ -986,6 +989,7 @@ export const addSelectedLanguage = async (req, res) => {
       return res.status(403).json({
         success: false,
         message: "Subscription has expired",
+        dev: 'ife',
       });
     }
 
@@ -1002,12 +1006,14 @@ export const addSelectedLanguage = async (req, res) => {
         missingKeysSample: Array.isArray(finalMissingKeysList) ? finalMissingKeysList.slice(0, 50) : undefined,
         missingKeys: debugMissing ? finalMissingKeysList : undefined,
       },
+      dev: 'ife',
     });
   } catch (error) {
     console.error("Error adding language or translating theme:", error);
     res.status(500).json({
       message: "Error adding language or translating theme",
       error: error.message,
+      dev: 'ife',
     });
   }
 };
@@ -1018,14 +1024,14 @@ export const inspectMissingTranslations = async (req, res) => {
   try {
     const session = res.locals.shopify.session;
     if (!session) {
-      return res.status(401).json({ success: false, error: "Unauthorized: Session not found" });
+      return res.status(401).json({ success: false, error: "Unauthorized: Session not found", dev: 'ife' });
     }
 
     // Resolve user and theme
     const shopId = session.shop;
     const user = await User.findOne({ shop: shopId });
     if (!user || !user.selectedTheme) {
-      return res.status(400).json({ success: false, error: "No theme selected for this shop" });
+      return res.status(400).json({ success: false, error: "No theme selected for this shop", dev: 'ife' });
     }
 
     let themeId = user.selectedTheme; // can be gid or numeric
@@ -1057,7 +1063,7 @@ export const inspectMissingTranslations = async (req, res) => {
       data: `query { theme(id: "${themeId}") { id name } }`,
     });
     const theme = themeResp?.body?.data?.theme;
-    if (!theme) return res.status(404).json({ success: false, error: 'Theme not found' });
+    if (!theme) return res.status(404).json({ success: false, error: 'Theme not found', dev: 'ife' });
 
     // Fetch Shopify translatable keys and already-applied translations
     const transResp = await client.query({
@@ -1114,11 +1120,12 @@ export const inspectMissingTranslations = async (req, res) => {
       lists: {
         missingFromAsset: wantFullAsset ? missingFromAsset : undefined,
         missingFromGraphql: wantFullGraphql ? missingFromGraphql : undefined,
-      }
+      },
+      dev: 'ife'
     });
   } catch (error) {
     console.error('inspectMissingTranslations error:', error);
-    return res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message, dev: 'ife' });
   }
 };
 

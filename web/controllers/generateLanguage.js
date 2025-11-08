@@ -26,7 +26,7 @@ export const generateAllThemeTranslations = async (req, res) => {
     const outputDir = path.join(process.cwd(), 'translations');
     const session = res.locals.shopify.session;
     if (!session) {
-      return res.status(401).json({ error: "Unauthorized: Session not found" });
+      return res.status(401).json({ error: "Unauthorized: Session not found", dev: 'ife' });
     }
     
     // Initialize AI client (Grok by default, falls back to OpenAI)
@@ -35,7 +35,7 @@ export const generateAllThemeTranslations = async (req, res) => {
       openai = createTranslationClient();
       console.log(`[Translations] Provider: ${getAIProvider()}`);
     } catch (e) {
-      return res.status(400).json({ error: e.message });
+      return res.status(400).json({ error: e.message, dev: 'ife' });
     }
 
     // Create output directory if it doesn't exist
@@ -216,7 +216,8 @@ export const generateAllThemeTranslations = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Theme translations generated successfully",
-      results
+      results,
+      dev: 'ife'
     });
     
   } catch (error) {
@@ -224,7 +225,8 @@ export const generateAllThemeTranslations = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error generating theme translations",
-      error: error.message
+      error: error.message,
+      dev: 'ife'
     });
   }
 };
@@ -539,7 +541,8 @@ export const downloadTranslationsZip = async (req, res) => {
     } catch (error) {
       return res.status(404).json({
         success: false,
-        message: "Translations directory not found"
+        message: "Translations directory not found",
+        dev: 'ife'
       });
     }
     
@@ -604,7 +607,8 @@ export const downloadTranslationsZip = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error creating translations zip",
-      error: error.message
+      error: error.message,
+      dev: 'ife'
     });
   }
 };
