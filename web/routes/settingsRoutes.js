@@ -98,4 +98,22 @@ router.post("/order-cancellation", updateOrderCancellationSettings);
 router.post("/transaction-cancellation/submit", submitCancellationRequest);
 router.get("/transaction-cancellation/list", getCancellations);
 
+// Toggle hybrid mode (admin setting per shop)
+router.post('/toggle-hybrid-mode', async (req, res) => {
+  try {
+    const session = res.locals.shopify?.session;
+    if (!session?.shop) return res.status(401).json({ success: false, message: 'Unauthorized' });
+    const enable = !!req.body?.enable;
+    const User = (await import('../models/User.js')).default;
+    const updated = await User.findOneAndUpdate(
+      { shop: session.shop },
+      { $set: { enableHybridMode: enable } },
+      { new: true, upsert: true }
+    );
+    res.json({ success: true, enableHybridMode: !!updated.enableHybridMode });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 export default router;

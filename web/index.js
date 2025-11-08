@@ -19,6 +19,8 @@ import { validateIsraeliPostalCode } from './controllers/postalController.js'; /
 import { Session } from "@shopify/shopify-api"; // Add this import at the top of your file
 import { generateAllThemeTranslations } from "./controllers/generateLanguage.js";
 import { startTranslationWorker } from "./workers/translationWorker.js";
+import { startSyncWorker } from "./workers/syncWorker.js";
+import localesRoutes from "./routes/localesRoutes.js";
 
 // Update the mutation at the top of the file
 const UPDATE_ORDER_ZIP_MUTATION = `
@@ -446,6 +448,8 @@ app.use("/api/billing", shopify.validateAuthenticatedSession(),billingRoutes);
 app.use("/api/settings", shopify.validateAuthenticatedSession(), settingsRoutes);
 app.use("/api/translations", shopify.validateAuthenticatedSession(), translationsRoutes);
 app.use("/api/store-details", storeDetails);
+// Public locales endpoint (no auth) used by hybrid snippet
+app.use("/api/locales", localesRoutes);
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 
@@ -606,6 +610,16 @@ app.post("/set-rtl", async (req, res) => {
 });
 
 app.use('/assets', express.static(join(__dirname, 'frontend/assets')));
+// Serve public hybrid snippet asset if enabled
+const hybridEnabled = (() => {
+  const v = (process.env.ENABLE_HYBRID_MODE || '').toLowerCase();
+  return ['1','true','yes','on','y'].includes(v);
+})();
+if (hybridEnabled) {
+  app.get('/translation-snippet.js', (req, res) => {
+    res.sendFile(join(__dirname, 'public', 'translation-snippet.js'));
+  });
+}
 
 app.get("/debug", (req, res) => {
   console.log("Shopify Session:", res.locals.shopify);
@@ -719,3 +733,4 @@ app.listen(PORT);
 
 // Start background workers
 startTranslationWorker();
+startSyncWorker();

@@ -1,9 +1,12 @@
 import shopify from '../shopify.js';
 import TranslationJob from '../models/TranslationJob.js';
-import { asyncPool, normalize, translateBatchWithCache } from '../services/translationUtils.js';
+import { asyncPool, normalize, translateBatchWithCacheExt, loadStoreCatalog, diffTranslatableContent } from '../services/translationUtils.js';
 import path from 'path';
 import fs from 'fs/promises';
 import { createTranslationClient, getAIProvider } from '../services/aiProvider.js';
+import ThemeSourceDigest from '../models/ThemeSourceDigest.js';
+import SyncJob from '../models/SyncJob.js';
+import { emitProgress } from '../services/progressBus.js';
 
 let running = false;
 
@@ -82,6 +85,9 @@ async function processJob(jobDoc) {
         processed++;
         const progress = Math.round((processed / Math.max(freeThemes.length, 1)) * 100);
         await TranslationJob.findByIdAndUpdate(jobId, { $set: { 'totals.processedThemes': processed, progress } });
+        // Enqueue sync of existing file
+        await SyncJob.create({ shop, themeId: theme.id, locale, filePath, status: 'queued' });
+        emitProgress({ jobType: 'translate', type: 'enqueue-sync', jobId, shop, themeId: theme.id, locale, message: 'Existing file found; sync enqueued', progress });
         continue;
       } catch {}
 
@@ -91,7 +97,17 @@ async function processJob(jobDoc) {
           data: `query { translatableResource(resourceId: "${theme.id}") { translatableContent { key value digest } } }`
         });
         const content = translatable?.body?.data?.translatableResource?.translatableContent || [];
-        const contentsToTranslate = content.filter(c => c.value && c.value.trim() !== '');
+
+        // Load previous digests and previous translations file (if any)
+        const prev = await ThemeSourceDigest.findOne({ shop, themeId: theme.id, locale: 'en' }).lean();
+        const prevDigests = prev?.digests || {};
+        const { toTranslate: diffItems, unchangedCount, nextDigests } = diffTranslatableContent(content, prevDigests);
+
+        // Load previous output file to reuse unchanged translations
+        let prevObj = {};
+        try { const rawPrev = await fs.readFile(filePath, 'utf8'); prevObj = JSON.parse(rawPrev); } catch (_) {}
+
+        const contentsToTranslate = diffItems.filter(c => c.value && c.value.trim() !== '');
 
         const values = contentsToTranslate.map(c => c.value);
         const keys = contentsToTranslate.map(c => c.key);
@@ -110,13 +126,21 @@ async function processJob(jobDoc) {
         });
 
         const metrics = { cacheHits: 0, providerCalls: 0 };
-        const translations = await translateBatchWithCache(openai, uniques, locale, metrics);
+        const storeCatalog = await loadStoreCatalog(shop, locale).catch(() => ({}));
+        const translations = await translateBatchWithCacheExt(openai, uniques, locale, metrics, { storeCatalog });
 
         // Rebuild object
-        const obj = {};
-        keys.forEach((k, i) => { obj[k] = translations[remap[i]] || ''; });
+        const obj = { ...prevObj };
+        keys.forEach((k, i) => { obj[k] = translations[remap[i]] || (prevObj[k] ?? ''); });
 
         await fs.writeFile(filePath, JSON.stringify(obj, null, 2), 'utf8');
+
+        // Save updated digests snapshot
+        await ThemeSourceDigest.updateOne(
+          { shop, themeId: theme.id, locale: 'en' },
+          { $set: { digests: nextDigests } },
+          { upsert: true }
+        );
 
         processed++;
         const progress = Math.round((processed / Math.max(freeThemes.length, 1)) * 100);
@@ -131,6 +155,10 @@ async function processJob(jobDoc) {
             'totals.providerCalls': (jobDoc.totals?.providerCalls || 0) + metrics.providerCalls,
           }
         });
+
+        // Enqueue Shopify sync job for this theme
+        await SyncJob.create({ shop, themeId: theme.id, locale, filePath, status: 'queued' });
+        emitProgress({ jobType: 'translate', type: 'theme-complete', jobId, shop, themeId: theme.id, locale, message: `Theme translated (${theme.name}); sync enqueued`, progress, meta: { unchangedCount } });
       } catch (err) {
         console.error(`Theme translation failed (${theme.name}):`, err);
         processed++;

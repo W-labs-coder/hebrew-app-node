@@ -1,6 +1,8 @@
 import shopify from "../shopify.js";
 import User from "../models/User.js";
 import { createTranslationClient, getAIProvider } from "../services/aiProvider.js";
+import SyncJob from "../models/SyncJob.js";
+import TranslationKeyStatus from "../models/TranslationKeyStatus.js";
 import { translateBatchWithCache } from "../services/translationUtils.js";
 import UserSubscription from "../models/UserSubscription.js";
 import fs from "fs/promises";
@@ -654,41 +656,30 @@ export const addSelectedLanguage = async (req, res) => {
           .filter(k => flatFromTheme[k] === undefined);
         finalMissingCount = stillMissingAfterUpload.length;
         finalMissingKeysList = stillMissingAfterUpload;
+        translationCount = contentsToTranslate.length - finalMissingCount;
+
+        // If there are still missing keys, requeue them for background sync instead of patching again here
         if (stillMissingAfterUpload.length > 0) {
-          console.log(`Asset verify (fast path): ${stillMissingAfterUpload.length} keys missing; patching and re-uploading...`);
-          const nestedPatched = unflattenToNested({
-            ...flatFromTheme,
-            ...Object.fromEntries(stillMissingAfterUpload.map(k => [k, sanitizedFlat[k] ?? ' ']))
-          });
-          await rest.put({
-            path: `themes/${themeNumericId}/assets`,
-            data: { asset: { key: assetKey, value: JSON.stringify(nestedPatched) } },
-            type: 'application/json',
-          });
-          // Recalculate after patch
-          const getRes2 = await rest.get({
-            path: `themes/${themeNumericId}/assets`,
-            query: { 'asset[key]': assetKey }
-          });
-          let parsed2 = {};
-          try { parsed2 = JSON.parse(getRes2?.body?.asset?.value || ''); } catch {}
-          const flat2 = flattenNested(parsed2);
-          finalMissingCount = contentsToTranslate
-            .map(c => sanitizeLocaleKey(c.key))
-            .filter(k => flat2[k] === undefined).length;
-          finalMissingKeysList = contentsToTranslate
-            .map(c => sanitizeLocaleKey(c.key))
-            .filter(k => flat2[k] === undefined);
-          translationCount = contentsToTranslate.length - finalMissingCount;
-        } else {
-          translationCount = contentsToTranslate.length - finalMissingCount;
+          const missingPairs = stillMissingAfterUpload.map((k) => ({ key: k, value: sanitizedFlat[k] ?? ' ' }));
+          try {
+            // Update per-key statuses
+            await Promise.all(missingPairs.map(p =>
+              TranslationKeyStatus.updateOne(
+                { shop: user.shop, themeId, locale: selectedLocaleCode, key: p.key },
+                { $set: { status: 'requeued', error: '' } },
+                { upsert: true }
+              )
+            ));
+          } catch {}
+          await SyncJob.create({ shop: user.shop, themeId, locale: selectedLocaleCode, keys: missingPairs, status: 'queued' });
+          console.log(`Enqueued ${missingPairs.length} missing keys for background sync`);
         }
         assetUploadSucceeded = true;
       } catch (assetErr) {
         console.error('Preferred asset upload failed; will attempt GraphQL registration:', assetErr?.message || assetErr);
       }
 
-      // Register all translations (fallback) if asset upload did not succeed
+      // Register missing translations (fallback) if asset upload did not succeed
       if (!assetUploadSucceeded) {
       let translatedResourceId = themeId;
       if (!translatedResourceId.startsWith("gid://")) {
@@ -790,14 +781,16 @@ export const addSelectedLanguage = async (req, res) => {
             };
           });
 
-          const secondResult = await registerTranslations(
-            client,
-            translatedResourceId,
-            secondPass,
-            selectedLocaleCode
-          );
-          console.log(`Second pass registered: ${secondResult.success}/${secondResult.total}`);
-          translationCount += secondResult.success;
+          // Instead of registering immediately, enqueue second pass keys for background sync and mark statuses
+          await Promise.all(secondPass.map(p =>
+            TranslationKeyStatus.updateOne(
+              { shop: user.shop, themeId, locale: selectedLocaleCode, key: p.key },
+              { $set: { status: 'requeued', error: '' } },
+              { upsert: true }
+            )
+          ));
+          await SyncJob.create({ shop: user.shop, themeId, locale: selectedLocaleCode, keys: secondPass, status: 'queued' });
+          console.log(`Second pass requeued: ${secondPass.length} keys`);
         }
 
         // If some keys are still missing after second pass, push the full locale file as a last resort

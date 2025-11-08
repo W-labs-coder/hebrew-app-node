@@ -13,6 +13,7 @@ import {
   translateBatchWithCache,
   THEMES_CONCURRENCY,
 } from "../services/translationUtils.js";
+import SyncJob from "../models/SyncJob.js";
 
 // (flattenJSON/unflattenJSON were unused in this flow and removed)
 
@@ -189,6 +190,12 @@ export const generateAllThemeTranslations = async (req, res) => {
           );
 
           console.log(`Saved cleaned translations for ${theme.name} to ${filePath}`);
+          try {
+            // Enqueue background sync for this theme
+            await SyncJob.create({ shop: session.shop, themeId: theme.id, locale: selectedLocaleCode, filePath, status: 'queued' });
+          } catch (e) {
+            console.warn('Failed to enqueue SyncJob for generated file:', e?.message || e);
+          }
           results.push({
             theme: theme.name,
             file: fileName,

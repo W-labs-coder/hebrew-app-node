@@ -1,5 +1,6 @@
 import express from 'express';
 import TranslationJob from '../models/TranslationJob.js';
+import { progressBus } from '../services/progressBus.js';
 
 const router = express.Router();
 
@@ -52,3 +53,27 @@ router.post('/jobs/:id/cancel', async (req, res) => {
 
 export default router;
 
+// SSE progress stream (mounted path controls access)
+router.get('/progress', async (req, res) => {
+  try {
+    const live = (process.env.ENABLE_LIVE_PROGRESS || '').toLowerCase();
+    const enabled = ['1','true','yes','on','y'].includes(live);
+    if (!enabled) return res.status(404).end();
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders && res.flushHeaders();
+
+    const onEvent = (evt) => {
+      try { res.write(`data: ${JSON.stringify(evt)}\n\n`); } catch (_) {}
+    };
+    progressBus.on('progress', onEvent);
+
+    req.on('close', () => {
+      progressBus.off('progress', onEvent);
+    });
+  } catch (err) {
+    res.status(500).end();
+  }
+});
