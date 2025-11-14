@@ -248,7 +248,7 @@ const AlertSection = ({ notificationTypes }) => {
                       לניהול ההתראות, שם תדביקו את הטקסט:
                     </p>
                     <Button onClick={navigateToNotificationManager} style={{ padding: "10px 20px", borderRadius: "8px", marginTop: "200px", display: 'block', width: 'max-content' }}>
-                      ניהול התראות
+                      ניהול התראותcheck me
                     </Button>
                   </div>
                 </div>
