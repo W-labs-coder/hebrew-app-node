@@ -106,137 +106,148 @@ export default function OrderCancellation() {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "40px" }}>
-        <div className="spinner-border" role="status">
-          <span className="visually-hidden">טוען...</span>
+      <section className="rtl-section order-cancel-page">
+        <div className="container-narrow" style={{ textAlign: "center", padding: "20px" }}>
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">טוען...</span>
+          </div>
+          <p className="fs14 fw500" style={{ marginTop: 12 }}>טוען פרטי חנות...</p>
         </div>
-        <p>טוען פרטי חנות...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{ textAlign: "center", padding: "40px", color: "red" }}>
-        <p>{error}</p>
-        <p>אנא וודא שהקישור כולל את פרמטר החנות הנכון.</p>
-      </div>
+      </section>
     );
   }
 
   return (
-    <section style={{ maxWidth: "600px", margin: "0 auto", padding: "20px", direction: "rtl" }}>
-      <h1 className="fs18 fw700" style={{ marginBottom: "20px" }}>ביטול עסקה</h1>
-      
-      {storeDetails && (
-        <div style={{ marginBottom: "20px", padding: "15px", border: "1px solid #ddd", borderRadius: "8px", backgroundColor: "#f9f9f9" }}>
-          <h2 className="fs16 fw700" style={{ marginBottom: "10px" }}>פרטי החנות</h2>
-          <p className="fs14 fw500" style={{ margin: "5px 0" }}>שם החנות: {storeDetails.storeName}</p>
-          <p className="fs14 fw500" style={{ margin: "5px 0" }}>אימייל: {storeDetails.email}</p>
-          <p className="fs14 fw500" style={{ margin: "5px 0" }}>טלפון: {storeDetails.phone}</p>
-          <p className="fs14 fw500" style={{ margin: "5px 0" }}>כתובת: {storeDetails.address}</p>
+    <section className="rtl-section order-cancel-page">
+      <div className="container-narrow">
+        {error && (
+          <div className="settings-card" style={{ marginBottom: 16 }}>
+            <div className="card-body">
+              <p className="fs14 fw700" style={{ color: "#CE2C60", margin: 0 }}>{error}</p>
+              <p className="fs14" style={{ color: "#777", marginTop: 8 }}>אנא וודאו שהקישור כולל את פרמטר החנות הנכון.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="rtl-header">
+          <h2 className="rtl-title">ביטול עסקה</h2>
+          <p className="rtl-description">מלאו את הפרטים כדי להגיש בקשה לביטול עסקה. נעדכן אתכם לאחר הטיפול בבקשה.</p>
         </div>
-      )}
-      
-      <p className="fs14 fw500" style={{ color: "#666", marginBottom: "20px" }}>
-        מלאו את הפרטים בטופס הבא כדי להגיש בקשה לביטול עסקה.
-      </p>
-      
-      <form onSubmit={handleSubmit}>
-        <Input
-          type="text"
-          label="שם מלא"
-          id="fullName"
-          name="fullName"
-          value={formData.fullName}
-          onChange={handleInputChange}
-          placeholder="הקלד את שמך המלא כאן..."
-          required
-        />
-        
-        <Input
-          type="email"
-          label="דואר אלקטרוני"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          placeholder="הקלד את כתובת האימייל שלך כאן..."
-          required
-        />
-        
-        <Input
-          type="text"
-          label="מספר טלפון"
-          id="phone"
-          name="phone"
-          value={formData.phone}
-          onChange={handleInputChange}
-          placeholder="הקלד את מספר הטלפון שלך כאן..."
-          required
-        />
-        
-        <Input
-          type="text"
-          label="מספר הזמנה"
-          id="orderNumber"
-          name="orderNumber"
-          value={formData.orderNumber}
-          onChange={handleInputChange}
-          placeholder="הקלד את מספר ההזמנה שלך כאן..."
-          required
-        />
-        
-        <div style={{ marginBottom: "20px" }}>
-          <label htmlFor="message" className="form-label fs14 fw700">
-            הודעה
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            value={formData.message}
-            onChange={handleInputChange}
-            placeholder="הקלד כאן הודעה נוספת..."
-            style={{ 
-              width: "100%", 
-              height: "150px", 
-              resize: "vertical",
-              padding: "10px",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-              fontSize: "14px"
-            }}
-          ></textarea>
-        </div>
-        
-        <div className="mt-4">
-          <Button
-            type="submit"
-            className="primary-button"
-            disabled={isSubmitting}
-            style={{
-              minWidth: "120px",
-              height: "45px",
-              borderRadius: "8px",
-              backgroundColor: "#25D366",
-              border: "none",
-              color: "#FFFFFF",
-              fontSize: "16px",
-              fontWeight: "500",
-              padding: "0 20px"
-            }}
-          >
-            {isSubmitting ? (
-              <div className="d-flex align-items-center gap-2 justify-content-center">
-                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span>שולח...</span>
+
+        {storeDetails && (
+          <div className="settings-card" style={{ marginBottom: 16 }}>
+            <div className="card-header">
+              <p className="fw700 fs14" style={{ margin: 0 }}>פרטי החנות</p>
+            </div>
+            <div className="card-body">
+              <div className="details-grid">
+                <div className="label fs14 fw700" style={{ color: '#777' }}>שם החנות</div>
+                <div className="fs14 fw500">{storeDetails.storeName}</div>
+                <div className="label fs14 fw700" style={{ color: '#777' }}>אימייל</div>
+                <div className="fs14 fw500">{storeDetails.email}</div>
+                <div className="label fs14 fw700" style={{ color: '#777' }}>טלפון</div>
+                <div className="fs14 fw500">{storeDetails.phone}</div>
+                <div className="label fs14 fw700" style={{ color: '#777' }}>כתובת</div>
+                <div className="fs14 fw500">{storeDetails.address}</div>
               </div>
-            ) : (
-              "שלח בקשה"
-            )}
-          </Button>
-        </div>
-      </form>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="settings-card">
+          <div className="card-header">
+            <p className="fw700 fs14" style={{ margin: 0 }}>טופס בקשה לביטול עסקה</p>
+          </div>
+          <div className="card-body">
+            <div className="form-grid">
+              <Input
+                type="text"
+                label="שם מלא"
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleInputChange}
+                placeholder="הקלד את שמך המלא כאן..."
+                required
+              />
+
+              <Input
+                type="email"
+                label="דואר אלקטרוני"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="הקלד את כתובת האימייל שלך כאן..."
+                required
+              />
+
+              <Input
+                type="text"
+                label="מספר טלפון"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="הקלד את מספר הטלפון שלך כאן..."
+                required
+              />
+
+              <Input
+                type="text"
+                label="מספר הזמנה"
+                id="orderNumber"
+                name="orderNumber"
+                value={formData.orderNumber}
+                onChange={handleInputChange}
+                placeholder="הקלד את מספר ההזמנה שלך כאן..."
+                required
+              />
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label htmlFor="message" className="form-label fs14 fw700">הודעה</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  placeholder="הקלד כאן הודעה נוספת..."
+                  className="form-textarea"
+                  dir="rtl"
+                  style={{ minHeight: 120 }}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <Button
+                type="submit"
+                className="primary-button"
+                disabled={isSubmitting}
+                style={{
+                  minWidth: "140px",
+                  height: "44px",
+                  borderRadius: "8px",
+                  backgroundColor: "#25D366",
+                  border: "none",
+                  color: "#FFFFFF",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                {isSubmitting ? (
+                  <div className="d-flex align-items-center gap-2 justify-content-center">
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>שולח...</span>
+                  </div>
+                ) : (
+                  "שלח בקשה"
+                )}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </div>
     </section>
   );
 }

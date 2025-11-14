@@ -959,10 +959,11 @@ textarea.form-control {
   margin-top: 24px;
 }
 
+/* Generic settings card used in settings pages */
 .settings-card {
-  background: #FFFFFF;
-  border: 1px solid #E5E5E5;
-  border-radius: 8px;
+  background: #FBFBFB;
+  border: 1px solid #C6C6C6;
+  border-radius: 16px;
   overflow: hidden;
 }
 
@@ -978,6 +979,35 @@ textarea.form-control {
 
 .card-body {
   padding: 24px;
+}
+
+/* Accessibility page layout */
+.accessibility-page .page-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  align-items: start;
+}
+
+.accessibility-page .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.settings-card.preview-card .card-body {
+  display: flex;
+  justify-content: center;
+}
+
+@media screen and (max-width: 900px) {
+  .accessibility-page .page-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .accessibility-page .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .custom-radio {
@@ -1434,4 +1464,41 @@ textarea.form-control {
 .payment-processor-item img {
   width: 35px;
   height: 35px;
+}
+
+/* Order cancellation page */
+.order-cancel-page .container-narrow {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.order-cancel-page .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.order-cancel-page .details-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  row-gap: 8px;
+  column-gap: 12px;
+}
+
+.order-cancel-page .form-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #C6C6C6;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+@media screen and (max-width: 768px) {
+  .order-cancel-page .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .order-cancel-page .details-grid {
+    grid-template-columns: 1fr;
+  }
 }

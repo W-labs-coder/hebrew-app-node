@@ -366,302 +366,288 @@ const AccessibilitySettings = () => {
   );
 
   return (
-    <section>
-      <div>
-        <p className="fw700 fs18">נגישות</p>
-        <p className="fs14 fw500" style={{ color: "#777" }}>
+    <section className="rtl-section accessibility-page">
+      <div className="rtl-header">
+        <h2 className="rtl-title">נגישות</h2>
+        <p className="rtl-description">
           שפר את הנגישות של החנות שלך כדי ליצור חוויה מכילה עבור כל המשתמשים.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        {/* Section 1 */}
-        <div
-          className="d-flex flex-column jcs"
-          style={{
-            margin: "16px 0",
-            border: "1px solid #C6C6C6",
-            borderRadius: "16px",
-            padding: "16px",
-            gap: "16px",
-            backgroundColor: "#FBFBFB",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#FBFBFB",
-              lineHeight: "21px",
-              border: "1px solid #C6C6C6",
-              borderRadius: "10px",
-              padding: "16px",
-            }}
-          >
+      <div className="page-grid">
+        {/* Left: Settings Card */}
+        <form onSubmit={handleSubmit} className="settings-card">
+          <div className="card-body">
+            {/* Note Banner */}
             <div
               style={{
                 background: "#021341",
                 borderRadius: "10px",
                 padding: "16px",
+                margin: "8px 0 20px",
               }}
-              className="my-4"
             >
               <div className="d-flex jcb aic">
                 <div className="d-flex aic gap-2">
                   <AlertIcon3 />
                   <div>
                     <p className="fs14 fw700" style={{ color: "#FBFBFB" }}>
-                      שימו לב: האפליקציה בעברית אינה מתחייבת או מתחייבת לעמוד
-                      בתקן כלשהו, ​​והיא מיועדת אך ורק ככלי המציע יכולות לשיפור
-                      נגישות האתר וכן הצהרת נגישות המבוססת על תבנית שכתבנו.
+                      שימו לב: האפליקציה בעברית אינה מתחייבת לעמוד בתקן כלשהו.
+                      היא משמשת כלי לשיפור נגישות האתר וליצירת הצהרת נגישות
+                      המבוססת על תבנית.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="d-flex jcb gap-2 ">
-              <div style={{ width: "100%" }}>
-                <div>
-                  <div className="d-flex flex-column justify-content-end align-items-start mb-2">
-                    <div className="rtl" style={{ width: "100%" }}>
-                      <Input
-                        type="select"
-                        label="מיקום האייקון:"
-                        id="iconLocation"
-                        name="iconLocation"
-                        options={iconLocation}
-                        value={formData.iconLocation}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        type="text"
-                        label="כותרת עזרה (מופיעה בעת מעבר עכבר):"
-                        id="helpTitle"
-                        name="helpTitle"
-                        value={formData.helpTitle}
-                        onChange={handleInputChange}
-                        placeholder="כלי נגישות"
-                      />
-                      <div>
-                        <p className="fw500 fs14">טקסט הצהרת נגישות:</p>
-                        <textarea
-                          id="helpText"
-                          name="helpText"
-                          value={formData.helpText}
-                          onChange={handleInputChange}
-                          placeholder="הזן את הצהרת הנגישות כאן..."
-                          style={{
-                            minHeight: "100px",
-                            resize: "vertical",
-                            direction: "rtl",
-                            width: "100%",
-                          }}
-                          dir="rtl"
-                        ></textarea>
-                      </div>
-                      <Input
-                        type="email"
-                        label="דואר אלקטרוני של בעל האתר:"
-                        id="ownerEmail"
-                        name="ownerEmail"
-                        value={formData.ownerEmail}
-                        onChange={handleInputChange}
-                        placeholder="הקלד את האימייל שלך כאן..."
-                      />
-                      <Input
-                        type="select"
-                        label="צורת האייקון:"
-                        id="iconShape"
-                        name="iconShape"
-                        options={iconShape}
-                        value={formData.iconShape}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        type="select"
-                        label="גודל האייקון:"
-                        id="iconSize"
-                        name="iconSize"
-                        options={iconSize}
-                        value={formData.iconSize}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        type="select"
-                        label="סוג האייקון:"
-                        id="icon_type"
-                        name="icon_type"
-                        options={iconTypes}
-                        value={formData.iconType}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        type="number"
-                        label="ריווח האייקון ימין-שמאל (בפיקסלים):"
-                        id="leftIconSpacing"
-                        name="leftIconSpacing"
-                        value={formData.leftIconSpacing}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        type="number"
-                        label="ריווח האייקון למעלה-למטה (בפיקסלים):"
-                        id="topBottomSpacing"
-                        name="topBottomSpacing"
-                        value={formData.topBottomSpacing}
-                        onChange={handleInputChange}
-                      />
-                      <Input
-                        type="number"
-                        label="רמת שכבה (z-Index):"
-                        id="zIndex"
-                        name="zIndex"
-                        value={formData.zIndex}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
+            {/* Form Fields */}
+            <div className="form-grid">
+              <Input
+                type="select"
+                label="מיקום האייקון:"
+                id="iconLocation"
+                name="iconLocation"
+                options={iconLocation}
+                value={formData.iconLocation}
+                onChange={handleInputChange}
+              />
+              <Input
+                type="select"
+                label="צורת האייקון:"
+                id="iconShape"
+                name="iconShape"
+                options={iconShape}
+                value={formData.iconShape}
+                onChange={handleInputChange}
+              />
 
-                  <div className="color-pickers-container mt-4">
-                    <p className="fw700 fs14 mb-3">התאמת צבעים:</p>
-                    <div className="d-flex gap-1 flex-wrap">
-                      <div className="color-picker-group rtl">
-                        <label
-                          htmlFor="accessibilityButtonBgColor"
-                          className="form-label fs14 mb-2"
-                        >
-                          רקע כפתור
-                        </label>
-                        <div className="color-picker-wrapper">
-                          <span className="color-value">
-                            {formData.accessibilityButtonBgColor.toUpperCase()}
-                          </span>
-                          <input
-                            type="color"
-                            className="form-control form-control-color"
-                            id="accessibilityButtonBgColor"
-                            name="accessibilityButtonBgColor"
-                            value={formData.accessibilityButtonBgColor}
-                            onChange={handleInputChange}
-                            title="בחר צבע רקע"
-                          />
-                        </div>
-                      </div>
+              <Input
+                type="select"
+                label="גודל האייקון:"
+                id="iconSize"
+                name="iconSize"
+                options={iconSize}
+                value={formData.iconSize}
+                onChange={handleInputChange}
+              />
+              <Input
+                type="select"
+                label="סוג האייקון:"
+                id="iconType"
+                name="iconType"
+                options={iconTypes}
+                value={formData.iconType}
+                onChange={handleInputChange}
+              />
 
-                      <div className="color-picker-group rtl">
-                        <label
-                          htmlFor="accessibilityButtonIconColor"
-                          className="form-label fs14 mb-2"
-                        >
-                          צבע אייקון הכפתור
-                        </label>
-                        <div className="color-picker-wrapper">
-                          <span className="color-value">
-                            {formData.accessibilityButtonIconColor.toUpperCase()}
-                          </span>
-                          <input
-                            type="color"
-                            className="form-control form-control-color"
-                            id="accessibilityButtonIconColor"
-                            name="accessibilityButtonIconColor"
-                            value={formData.accessibilityButtonIconColor}
-                            onChange={handleInputChange}
-                            title="בחר צבע אייקון"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="primary-button"
-                      style={{
-                        minWidth: "120px",
-                        height: "40px",
-                        borderRadius: "8px",
-                        backgroundColor: "#25D366",
-                        border: "none",
-                        color: "#FFFFFF",
-                        fontSize: "14px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {isSubmitting ? (
-                        <div className="d-flex align-items-center gap-2">
-                          <span
-                            className="spinner-border spinner-border-sm"
-                            role="status"
-                            aria-hidden="true"
-                          ></span>
-                          שומר...
-                        </div>
-                      ) : (
-                        "שמור"
-                      )}
-                    </Button>
-                  </div>
+              <Input
+                type="number"
+                label="ריווח האייקון ימין-שמאל (בפיקסלים):"
+                id="leftIconSpacing"
+                name="leftIconSpacing"
+                value={formData.leftIconSpacing}
+                onChange={handleInputChange}
+              />
+              <Input
+                type="number"
+                label="ריווח האייקון למעלה-למטה (בפיקסלים):"
+                id="topBottomSpacing"
+                name="topBottomSpacing"
+                value={formData.topBottomSpacing}
+                onChange={handleInputChange}
+              />
 
-                  {isSubmitSuccessful && (
-                    <div className="mt-3">
-                      <a
-                        href={getWhatsAppEditorUrl()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="d-block text-center mt-3"
-                        style={{
-                          padding: "10px 20px",
-                          backgroundColor: "#FFC107",
-                          color: "#0D0D0D",
-                          textDecoration: "none",
-                          borderRadius: "5px",
-                          fontWeight: "bold",
-                          width: "fit-content",
-                          // margin: "0 auto",
-                        }}
-                      >
-                        עבור לערכת הנושא
-                      </a>
-                    </div>
-                  )}
+              <Input
+                type="text"
+                label="כותרת עזרה (מופיעה בעת מעבר עכבר):"
+                id="helpTitle"
+                name="helpTitle"
+                value={formData.helpTitle}
+                onChange={handleInputChange}
+                placeholder="כלי נגישות"
+              />
+              <Input
+                type="email"
+                label="דואר אלקטרוני של בעל האתר:"
+                id="ownerEmail"
+                name="ownerEmail"
+                value={formData.ownerEmail}
+                onChange={handleInputChange}
+                placeholder="הקלד את האימייל שלך כאן..."
+              />
+
+              <div style={{ gridColumn: "1 / -1" }}>
+                <p className="fw500 fs14">טקסט הצהרת נגישות:</p>
+                <textarea
+                  id="helpText"
+                  name="helpText"
+                  value={formData.helpText}
+                  onChange={handleInputChange}
+                  placeholder="הזן את הצהרת הנגישות כאן..."
+                  style={{
+                    minHeight: "100px",
+                    resize: "vertical",
+                    direction: "rtl",
+                    width: "100%",
+                  }}
+                  dir="rtl"
+                ></textarea>
+              </div>
+
+              <Input
+                type="number"
+                label="רמת שכבה (z-Index):"
+                id="zIndex"
+                name="zIndex"
+                value={formData.zIndex}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            {/* Colors */}
+            <div className="color-pickers-container mt-4">
+              <p className="fw700 fs14 mb-3">התאמת צבעים:</p>
+              <div className="d-flex gap-1 flex-wrap">
+                <div className="color-picker-group rtl">
+                  <label
+                    htmlFor="accessibilityButtonBgColor"
+                    className="form-label fs14 mb-2"
+                  >
+                    רקע כפתור
+                  </label>
+                  <div className="color-picker-wrapper">
+                    <span className="color-value">
+                      {formData.accessibilityButtonBgColor.toUpperCase()}
+                    </span>
+                    <input
+                      type="color"
+                      className="form-control form-control-color"
+                      id="accessibilityButtonBgColor"
+                      name="accessibilityButtonBgColor"
+                      value={formData.accessibilityButtonBgColor}
+                      onChange={handleInputChange}
+                      title="בחר צבע רקע"
+                    />
+                  </div>
+                </div>
+
+                <div className="color-picker-group rtl">
+                  <label
+                    htmlFor="accessibilityButtonIconColor"
+                    className="form-label fs14 mb-2"
+                  >
+                    צבע אייקון הכפתור
+                  </label>
+                  <div className="color-picker-wrapper">
+                    <span className="color-value">
+                      {formData.accessibilityButtonIconColor.toUpperCase()}
+                    </span>
+                    <input
+                      type="color"
+                      className="form-control form-control-color"
+                      id="accessibilityButtonIconColor"
+                      name="accessibilityButtonIconColor"
+                      value={formData.accessibilityButtonIconColor}
+                      onChange={handleInputChange}
+                      title="בחר צבע אייקון"
+                    />
+                  </div>
                 </div>
               </div>
-              {/* Preview */}
-              <div>
-                <p className="fw700 fs14">תצוגה מקדימה חיה</p>
-                {renderPreview()}
-              </div>
-              {/* End preview */}
             </div>
+
+            {/* Actions */}
+            <div className="mt-4">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="primary-button"
+                style={{
+                  minWidth: "120px",
+                  height: "40px",
+                  borderRadius: "8px",
+                  backgroundColor: "#25D366",
+                  border: "none",
+                  color: "#FFFFFF",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                {isSubmitting ? (
+                  <div className="d-flex align-items-center gap-2">
+                    <span
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    שומר...
+                  </div>
+                ) : (
+                  "שמור"
+                )}
+              </Button>
+            </div>
+
+            {isSubmitSuccessful && (
+              <div className="mt-3">
+                <a
+                  href={getWhatsAppEditorUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="d-block text-center mt-3"
+                  style={{
+                    padding: "10px 20px",
+                    backgroundColor: "#FFC107",
+                    color: "#0D0D0D",
+                    textDecoration: "none",
+                    borderRadius: "5px",
+                    fontWeight: "bold",
+                    width: "fit-content",
+                  }}
+                >
+                  עבור לערכת הנושא
+                </a>
+              </div>
+            )}
+          </div>
+        </form>
+
+        {/* Right: Preview Card */}
+        <div className="settings-card preview-card">
+          <div className="card-header">
+            <p className="fw700 fs14 m-0">תצוגה מקדימה</p>
+          </div>
+          <div className="card-body">
+            {renderPreview()}
           </div>
         </div>
-        {/* End Section 1 */}
+      </div>
 
-        {/* steps */}
-        <div className="steps mt-4">
-          <h4>הדרכה לשימוש במסך זה:</h4>
-          {[
-            "שלב 1 - עצבו את כפתור הנגישות באמצעות האפשרויות למעלה.",
-            'שלב 2 - לחצו על כפתור "הצהרת נגישות" כדי ליצור את תבנית ההצרה שלכם.',
-            'שלב 3 - מלאו את הפרטים הנדרשים, אשרו את התנאים ולחצו על "יצירת תוכן דף".',
-            'שלב 4 - בשלב זה המערכת יצרה עבורכם את תוכן הצהרת הנגישות, כעת לחצו על "העתק טקסט" כדי להעתיק את התוכן ולאחר מכן לחצו על "מעבר ליצירת עמוד" כדי ליצור עמוד חדש בשופיפיי.',
-            "שלב 5 - הדביקו ביצירת העמוד את תוכן הצהרת הנגישות, צרו את העמוד ושמרו את הקישור שלו.",
-            'שלב 6 - הדביקו את הקישור לעמוד ההצהרה בהגדרות הנגישות באפליקציה ולחצו על כפתור "שמירה"',
-            'שלב 7 - הכנסו ל"הגדרות האפליקציה בערכת הנושא"',
-            'שלב 8 - וודאו שהאפליקציה מופעלת וש"Activate accessibility" מסומן.',
-          ].map((item) => (
-            <div
-              className="d-flex aic gap-3 mb-2"
-              style={{ justifyContent: "flex-start" }}
-              key={item}
-            >
-              <CheckLightIcon />
-              <p className="fs14">{item}</p>
-            </div>
-          ))}
-        </div>
-        {/* End steps */}
-      </form>
+      {/* steps */}
+      <div className="steps mt-4">
+        <h4>הדרכה לשימוש במסך זה:</h4>
+        {[
+          "שלב 1 - עצבו את כפתור הנגישות באמצעות האפשרויות למעלה.",
+          'שלב 2 - לחצו על כפתור "הצהרת נגישות" כדי ליצור את תבנית ההצרה שלכם.',
+          'שלב 3 - מלאו את הפרטים הנדרשים, אשרו את התנאים ולחצו על "יצירת תוכן דף".',
+          'שלב 4 - בשלב זה המערכת יצרה עבורכם את תוכן הצהרת הנגישות, כעת לחצו על "העתק טקסט" כדי להעתיק את התוכן ולאחר מכן לחצו על "מעבר ליצירת עמוד" כדי ליצור עמוד חדש בשופיפיי.',
+          "שלב 5 - הדביקו ביצירת העמוד את תוכן הצהרת הנגישות, צרו את העמוד ושמרו את הקישור שלו.",
+          'שלב 6 - הדביקו את הקישור לעמוד ההצהרה בהגדרות הנגישות באפליקציה ולחצו על כפתור "שמירה"',
+          'שלב 7 - הכנסו ל"הגדרות האפליקציה בערכת הנושא"',
+          'שלב 8 - וודאו שהאפליקציה מופעלת וש"Activate accessibility" מסומן.',
+        ].map((item) => (
+          <div
+            className="d-flex aic gap-3 mb-2"
+            style={{ justifyContent: "flex-start" }}
+            key={item}
+          >
+            <CheckLightIcon />
+            <p className="fs14">{item}</p>
+          </div>
+        ))}
+      </div>
+      {/* End steps */}
     </section>
   );
 };
