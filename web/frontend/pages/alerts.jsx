@@ -152,7 +152,7 @@ const AlertSection = ({ notificationTypes }) => {
   return (
     <section className="rtl-section">
       <div className="rtl-header">
-        <h2 className="rtl-title">תקשורת עם לקוחות</h2>
+        <h2 className="rtl-title">התראות</h2>
         <p className="rtl-description">
           התאימו את ההתראות שלכם כדי לעדכן את הלקוחות בכל שלב במסע שלהם.
         </p>
@@ -247,7 +247,7 @@ const AlertSection = ({ notificationTypes }) => {
                       לאחר שערכתם את הטקסט בחלון למעלה, לחצו "העתקת טקסט" והכנסו
                       לניהול ההתראות, שם תדביקו את הטקסט:
                     </p>
-                    <Button onClick={navigateToNotificationManager}>
+                    <Button onClick={navigateToNotificationManager} style={{ padding: "10px 20px", borderRadius: "8px", marginTop: "12px" }}>
                       ניהול התראות
                     </Button>
                   </div>

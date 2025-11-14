@@ -279,8 +279,12 @@ const SabbathSection = ({ themes }) => {
       // Set submit successful to show theme editor link
       setIsSubmitSuccessful(true);
 
-      // Show success message
-      toast.success(isSabbathMode ? 'Sabbath mode activated' : 'Sabbath mode deactivated');
+      // Show success message (Hebrew per client request)
+      toast.success(
+        isSabbathMode
+          ? 'ההגדרות נשמרו ומצב שבת פעיל'
+          : 'מצב שבת כבוי'
+      );
       
     } catch (error) {
       console.error(error);

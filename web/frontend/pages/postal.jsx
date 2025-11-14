@@ -78,7 +78,7 @@ const PostalSettings = () => {
       }
 
       setIsSubmitSuccessful(true);
-      toast.success("Postal settings updated successfully");
+      toast.success("ההגדרות נשמרו בהצלחה");
     } catch (error) {
       console.error("Error:", error);
       toast.error(error.message || "Failed to update postal settings");
@@ -103,12 +103,12 @@ const PostalSettings = () => {
   };
 
   const [autofocusDetections, setAutofocusDetections] = useState([
-    // { id: "enabled", name: "לְאַפשֵׁר" },
-    { id: "disabled", name: "כבוי" }, //off
+    { id: "enabled", name: "דולק" },
+    { id: "disabled", name: "כבוי" },
   ]);
   const [autofocusCorrections, setAutofocusCorrections] = useState([
-    // { id: "enabled", name: "לְאַפשֵׁר" },
-    { id: "disabled", name: "כבוי" }, //off
+    { id: "enabled", name: "דולק" },
+    { id: "disabled", name: "כבוי" },
   ]);
 
   return (

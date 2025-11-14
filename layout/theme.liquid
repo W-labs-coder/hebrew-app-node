@@ -14,3 +14,66 @@
 >
 <!-- DEBUG: enable_rtl = {{ shop.metafields.custom.enable_rtl }} -->
 <!-- DEBUG: enable_rtl.value = {{ shop.metafields.custom.enable_rtl.value }} -->
+
+{%- comment -%}
+  Global Sabbath overlay fallback (full-screen countdown only)
+{%- endcomment -%}
+{% assign is_sabbath_mode = shop.metafields.custom.sabbath_mode.value | default: false %}
+{% assign opening_day = shop.metafields.custom.opening_day.value | default: 'Saturday' %}
+{% assign opening_time = shop.metafields.custom.opening_time.value | default: '20:00' %}
+
+{% if is_sabbath_mode %}
+  <style>
+    #global-sabbath-overlay { position: fixed; inset:0; z-index:2147483000; display:flex; align-items:center; justify-content:center; background:#FBFBFB; color:#0D0D0D; }
+    #global-sabbath-overlay .countdown-wrapper { text-align:center; }
+    #global-sabbath-overlay h3 { font-size:18px; font-weight:800; margin-bottom:10px; }
+    #global-sabbath-overlay .countdown { display:flex; gap:12px; }
+    #global-sabbath-overlay .time-box { background:#fff; border:1px solid #E5E5E5; border-radius:12px; padding:10px 16px; min-width:60px; }
+    #global-sabbath-overlay .time-box .number { display:block; font-weight:900; font-size:20px; }
+    #global-sabbath-overlay .time-box .label { display:block; font-size:12px; color:#777; }
+  </style>
+  <div id="global-sabbath-overlay" aria-hidden="true">
+    <div class="countdown-wrapper">
+      <h3>החנות נפתחת ב</h3>
+      <div class="countdown" data-opening-day="{{ opening_day }}" data-opening-time="{{ opening_time }}">
+        <div class="time-box"><span class="number">0</span><span class="label">Days</span></div>
+        <div class="time-box"><span class="number">0</span><span class="label">Hours</span></div>
+        <div class="time-box"><span class="number">0</span><span class="label">Minutes</span></div>
+        <div class="time-box"><span class="number">0</span><span class="label">Seconds</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      function lockScroll(){ try{ document.documentElement.style.overflow='hidden'; document.body.style.overflow='hidden'; }catch(e){} }
+      lockScroll();
+      var mo = new MutationObserver(lockScroll);
+      mo.observe(document.documentElement,{attributes:true, attributeFilter:['style','class']});
+      mo.observe(document.body,{attributes:true, attributeFilter:['style','class']});
+      function calculateTimeLeft(openingDay, openingTime){
+        try{
+          var now=new Date();
+          var parts=openingTime.split(':'); var hours=parseInt(parts[0]||'0',10), minutes=parseInt(parts[1]||'0',10);
+          var target=new Date(now);
+          var map={ 'Saturday':6,'Sunday':0,'Monday':1,'Tuesday':2,'Wednesday':3,'Thursday':4,'Friday':5 };
+          var targetDay = map[openingDay] != null ? map[openingDay] : 6;
+          var daysUntil = targetDay - now.getDay();
+          if(daysUntil<=0) daysUntil += 7;
+          target.setDate(now.getDate()+daysUntil); target.setHours(hours, minutes, 0, 0);
+          var diff = target - now; if(diff<=0) return null;
+          return { days: Math.floor(diff/86400000), hours: Math.floor((diff/3600000)%24), minutes: Math.floor((diff/60000)%60), seconds: Math.floor((diff/1000)%60) };
+        }catch(e){ return null; }
+      }
+      function update(){
+        var el = document.querySelector('#global-sabbath-overlay .countdown'); if(!el) return;
+        var od=el.getAttribute('data-opening-day'); var ot=el.getAttribute('data-opening-time');
+        var t = calculateTimeLeft(od, ot); if(!t) return;
+        el.innerHTML = '<div class="time-box"><span class="number">'+t.days+'</span><span class="label">Days</span></div>'+
+                       '<div class="time-box"><span class="number">'+t.hours+'</span><span class="label">Hours</span></div>'+
+                       '<div class="time-box"><span class="number">'+t.minutes+'</span><span class="label">Minutes</span></div>'+
+                       '<div class="time-box"><span class="number">'+t.seconds+'</span><span class="label">Seconds</span></div>';
+      }
+      update(); setInterval(update, 1000);
+    })();
+  </script>
+{% endif %}

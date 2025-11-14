@@ -1,11 +1,6 @@
 import React from 'react'
+import send from './paper-plane-svg.svg'
 
 export default function SendIcon() {
-  return (
-    <img
-      src="https://cdn-icons-png.flaticon.com/512/3471/3471653.png"
-      width="30px"
-      alt="paper plane"
-    />
-  );
+  return <img src={send} width="30px" alt="paper plane" />
 }

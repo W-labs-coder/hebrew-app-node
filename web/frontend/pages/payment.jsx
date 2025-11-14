@@ -168,7 +168,7 @@ const PaymentSection = () => {
       const data = await response.json();
       dispatch(login({ user: data.user, subscription: data.subscription }));
       setIsSubmitSuccessful(true);
-      toast.success("אמצעי תשלום נוספו בהצלחה");
+      toast.success("ההגדרות נשמרו בהצלחה");
     } catch (error) {
       console.error("שגיאה בשליחת הטופס:", error);
       toast.error("לא ניתן להוסיף אמצעי תשלום");
@@ -300,9 +300,9 @@ const PaymentSection = () => {
                 {/* <p className="fw700 fs14">בחירת אמצעי תשלום:</p> */}
                 <div className="row">
                   {processors.map((processor) => (
-                    <div className="col-4" key={processor.name}>
+                    <div className="col-6" key={processor.name}>
                       <label
-                        className="fs14 fw500"
+                        className="fs14 fw500 payment-processor-item"
                         style={{ color: "#0D0D0D", width: "100px" }}
                       >
                         {processor.icon}
@@ -388,7 +388,7 @@ const PaymentSection = () => {
 
                 <div className="row jcs w-100">
                   {features.map((feature) => (
-                    <div className="col-3" key={feature.name}>
+                    <div className="col-6" key={feature.name}>
                       <label
                         className="fs14 fw500 d-flex gap-2"
                         style={{ color: "#0D0D0D", width: "60px" }}
@@ -450,40 +450,25 @@ const PaymentSection = () => {
                 </div>
               </div>
               <div className="mt-5">
+                {/* Client request: hide calendar style and warranty input on shopping page */}
+                {/*
                 <p className="fw700 fs14">משלוח חינם מ:</p>
                 <p className="my-2 fs14">בחר כל סגנון סמל</p>
-
                 <div className="row jcs w-100">
                   {calendars.map((calendar) => (
-                    <div className="col-3" key={calendar.name}>
-                      <label
-                        className="fs14 fw500 d-flex gap-2"
-                        style={{ color: "#0D0D0D", width: "60px" }}
-                      >
-                        <input
-                          type="checkbox"
-                          name="calendar"
-                          value={calendar.name}
-                          checked={formData.selectedCalendars.includes(
-                            calendar.name
-                          )}
-                          onChange={handleInputChange}
-                        />
+                    <div className="col-6" key={calendar.name}>
+                      <label className="fs14 fw500 d-flex gap-2" style={{ color: "#0D0D0D", width: "60px" }}>
+                        <input type="checkbox" name="calendar" value={calendar.name}
+                          checked={formData.selectedCalendars.includes(calendar.name)} onChange={handleInputChange} />
                         {calendar.icon}
                       </label>
                     </div>
                   ))}
                 </div>
+                <Input type="text" label="כמה ימי אחריות יש?" id="warranty" name="warranty"
+                  placeholder="הקלד מספר ימי אחריות להחזר כספי כאן..." onChange={handleInputChange} value={formData.warranty} />
+                */}
                 <div>
-                  <Input
-                    type="text"
-                    label="כמה ימי אחריות יש?"
-                    id="warranty"
-                    name="warranty"
-                    placeholder="הקלד מספר ימי אחריות להחזר כספי כאן..."
-                    onChange={handleInputChange}
-                    value={formData.warranty}
-                  />
 
                   <Button
                     type="submit"
@@ -506,7 +491,7 @@ const PaymentSection = () => {
                           textAlign: "center",
                         }}
                       >
-                        הגדרות התשלום נשמרו בהצלחה!
+                        ההגדרות נשמרו בהצלחה
                       </div>
                     </>
                   )}

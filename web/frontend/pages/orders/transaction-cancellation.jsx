@@ -83,7 +83,7 @@ const TransactionCancellationSettings = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update postal settings");
+        throw new Error(errorData.message || "שמירת ההגדרות נכשלה");
       }
 
       const data = await response.json();
@@ -93,10 +93,10 @@ const TransactionCancellationSettings = () => {
       }
 
       setIsSubmitSuccessful(true);
-      toast.success("Postal settings updated successfully");
+      toast.success("ההגדרות נשמרו בהצלחה");
     } catch (error) {
       console.error("Error:", error);
-      toast.error(error.message || "Failed to update postal settings");
+      toast.error(error.message || "שמירת ההגדרות נכשלה");
 
       if (error.message.includes("Unauthorized") || error.message.includes("session")) {
         window.location.href = "/auth";

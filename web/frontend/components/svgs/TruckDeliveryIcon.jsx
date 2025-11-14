@@ -1,11 +1,6 @@
 import React from 'react'
+import delivery from './delivery-svg.svg'
 
 export default function TruckDeliveryIcon() {
-  return (
-    <img
-      src="https://cdn-icons-png.flaticon.com/512/726/726455.png"
-      width="30px"
-      alt="truck delivery"
-    />
-  );
+  return <img src={delivery} width="30px" alt="truck delivery" />
 }

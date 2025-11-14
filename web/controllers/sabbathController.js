@@ -168,7 +168,7 @@ export const updateSabbathSettings = async (req, res) => {
     res.json({
       success: true,
       data: user,
-      message: 'Settings updated successfully'
+      message: 'ההגדרות נשמרו בהצלחה'
     });
 
   } catch (error) {
@@ -447,7 +447,7 @@ export const toggleSabbathTheme = async (req, res) => {
 
     res.status(200).json({ 
       success: true, user, subscription,
-      message: isSabbathMode ? 'Sabbath mode activated' : 'Sabbath mode deactivated'
+      message: isSabbathMode ? 'ההגדרות נשמרו ומצב שבת פעיל' : 'מצב שבת כבוי'
     });
     
   } catch (error) {

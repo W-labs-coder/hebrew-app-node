@@ -2,10 +2,11 @@ import React from 'react'
 
 export default function BitIcon() {
   return (
-    <img
-      src="https://pub-ece2f518b9504c2884b29ab98d7f6283.r2.dev/bit_pay.png"
-      alt="bit pay"
-      width="100%"
-    />
-  );
+    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-label="Bit">
+      <circle cx="20" cy="20" r="18" fill="#1A73E8" />
+      <text x="20" y="24" fontSize="12" textAnchor="middle" fill="#ffffff" fontFamily="Arial, sans-serif">
+        BIT
+      </text>
+    </svg>
+  )
 }

@@ -183,7 +183,7 @@ export const updatePostalSettings = async (req, res) => {
                 }
 
     res.status(200).json({ 
-      message: 'Postal settings updated successfully',
+      message: 'ההגדרות נשמרו בהצלחה',
       user, subscription 
     });
   } catch (error) {
@@ -384,7 +384,8 @@ export const handleCheckoutUpdate = async (checkoutData, context) => {
 
 // Helper function to update checkout with new address
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyB13R3UWtrNb4qmYJphR8IfwZ0XsWTrBEI";
+// Use env var for Google Maps API key; avoid hardcoding
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || "";
 // Unified AI client (Grok by default; falls back to OpenAI if configured)
 let aiClient;
 try {
@@ -398,22 +399,24 @@ export const validateIsraeliPostalCode = async (address, city) => {
   try {
     // First try Google Maps
     const formattedQuery = encodeURIComponent(`${address}, ${city}, Israel`);
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${formattedQuery}&key=${GOOGLE_MAPS_API_KEY}`;
+    if (GOOGLE_MAPS_API_KEY) {
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${formattedQuery}&key=${GOOGLE_MAPS_API_KEY}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.status === "OK" && data.results.length > 0) {
+        const result = data.results[0];
+        const components = result.address_components;
+        const postalCodeComponent = components.find((c) => c.types.includes("postal_code"));
 
-    const res = await fetch(url);
-    const data = await res.json();
-
-    if (data.status === "OK" && data.results.length > 0) {
-      const result = data.results[0];
-      const components = result.address_components;
-      const postalCodeComponent = components.find((c) => c.types.includes("postal_code"));
-
-      if (postalCodeComponent) {
-        console.log("✅ Postal code found via Google Maps:", postalCodeComponent.long_name);
-        return postalCodeComponent.long_name;
+        if (postalCodeComponent) {
+          console.log("✅ Postal code found via Google Maps:", postalCodeComponent.long_name);
+          return postalCodeComponent.long_name;
+        }
       }
-      
       console.log("⚠️ No postal code found in Google Maps, trying OpenAI...");
+    } else {
+      console.log("⚠️ GOOGLE_MAPS_API_KEY not set; skipping Google Maps lookup");
+    }
     }
 
     // If Google Maps fails, try AI model with updated prompt
@@ -456,7 +459,5 @@ export const validateIsraeliPostalCode = async (address, city) => {
     return null;
   }
 };
-
-
 
 

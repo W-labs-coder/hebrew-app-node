@@ -1428,3 +1428,10 @@ textarea.form-control {
     display: none;
   }
 }
+
+/* Ensure payment processor icons in admin match storefront size */
+.payment-processor-item svg,
+.payment-processor-item img {
+  width: 35px;
+  height: 35px;
+}
