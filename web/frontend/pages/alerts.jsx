@@ -247,7 +247,7 @@ const AlertSection = ({ notificationTypes }) => {
                       לאחר שערכתם את הטקסט בחלון למעלה, לחצו "העתקת טקסט" והכנסו
                       לניהול ההתראות, שם תדביקו את הטקסט:
                     </p>
-                    <Button onClick={navigateToNotificationManager} style={{ padding: "10px 20px", borderRadius: "8px", marginTop: "12px" }}>
+                    <Button onClick={navigateToNotificationManager} style={{ padding: "10px 20px", borderRadius: "8px", marginTop: "200px", display: 'block', width: 'max-content' }}>
                       ניהול התראות
                     </Button>
                   </div>
