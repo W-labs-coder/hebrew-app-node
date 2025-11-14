@@ -101,14 +101,14 @@ const WhatsappSettings = () => {
 
   const validateForm = () => {
     if (!formData.whatsappNumber) {
-      toast.error("WhatsApp number is required");
+      toast.error("נדרש מספר WhatsApp");
       return false;
     }
 
     const phoneNumberRegex = /^\+?[1-9]\d{1,14}$/;
     if (!phoneNumberRegex.test(formData.whatsappNumber.replace(/\s+/g, ""))) {
       toast.error(
-        "Invalid WhatsApp number format. Please use international format (e.g. +972501234567)"
+        "פורמט מספר WhatsApp שגוי. השתמשו בפורמט בינלאומי (לדוגמה +972501234567)"
       );
       return false;
     }
@@ -156,7 +156,7 @@ const WhatsappSettings = () => {
   
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update WhatsApp settings');
+          throw new Error(errorData.message || 'שמירת הגדרות WhatsApp נכשלה');
       }
   
       const data = await response.json();
@@ -171,7 +171,7 @@ const WhatsappSettings = () => {
   
     } catch (error) {
       console.error('Error:', error);
-      toast.error(error.message || 'Failed to update WhatsApp settings');
+      toast.error(error.message || 'שמירת הגדרות WhatsApp נכשלה');
       
       // Handle session expiration
       if (error.message.includes('Unauthorized') || error.message.includes('session')) {
@@ -212,7 +212,7 @@ const WhatsappSettings = () => {
       window.open(url, "_blank");
     } catch (error) {
       console.error("WhatsApp redirect error:", error);
-      toast.error("Could not open WhatsApp. Please check the phone number format.");
+      toast.error("לא ניתן לפתוח WhatsApp. בדקו את פורמט מספר הטלפון.");
     }
   };
 
@@ -268,7 +268,7 @@ const WhatsappSettings = () => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to delete contact");
+          throw new Error(errorData.message || "מחיקת איש קשר נכשלה");
         }
 
         const data = await response.json();
@@ -323,7 +323,7 @@ const WhatsappSettings = () => {
       try {
         // Basic validation
         if (!newContact.name || !newContact.role || !newContact.phone) {
-          toast.error("All fields are required");
+          toast.error("כל השדות נדרשים");
           return false;
         }
 
@@ -360,7 +360,7 @@ const WhatsappSettings = () => {
 
         // Handle session expiration
         if (response.status === 401) {
-          toast.error("Session expired. Redirecting to login...");
+          toast.error("תוקף ההתחברות פג. מפנה לעמוד ההתחברות...");
           // Redirect to auth page or trigger re-authentication
           window.location.href = "/auth"; // Adjust this URL as needed
           return;
@@ -368,7 +368,7 @@ const WhatsappSettings = () => {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+          throw new Error(errorData.message || `שגיאת רשת (סטטוס ${response.status})`);
         }
 
         const text = await response.text();
@@ -401,7 +401,7 @@ const WhatsappSettings = () => {
         }
         
         if (error.message.includes('authentication') || error.message.includes('session')) {
-          toast.error("Authentication error. Please try logging in again.");
+          toast.error("שגיאת אימות. אנא התחברו שוב.");
           window.location.href = "/auth";
           return;
         }

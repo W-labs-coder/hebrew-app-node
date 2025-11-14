@@ -98,7 +98,7 @@ export default function Confirmation() {
           )}
           {status === "error" && (
             <p>
-              There was an error confirming your subscription. Please try again.
+              אירעה שגיאה באישור המנוי. אנא נסו שוב.
             </p>
           )}
         </Layout.Section>
@@ -106,5 +106,4 @@ export default function Confirmation() {
     </Page>
   );
 };
-
 

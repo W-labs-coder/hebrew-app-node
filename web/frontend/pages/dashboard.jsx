@@ -121,7 +121,7 @@ export default function dashboard() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      toast.error("You are not authenticated!");
+      toast.error("אינך מחובר/ת!");
       navigate("/");
     }
     // if (!userPermissions || !userPermissions.includes("dashboard")) {
@@ -145,7 +145,7 @@ export default function dashboard() {
           const subscription = data.subscription;
           dispatch(login({ user:data.user, subscription }));
           if(!subscription){
-             toast.warning("No Subscription Found!");
+             toast.warning("לא נמצא מנוי פעיל");
             navigate('/')
           }
           

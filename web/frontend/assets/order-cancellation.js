@@ -14,7 +14,7 @@
     console.error('Error parsing store data:', err);
     const container = document.getElementById('order-cancellation-app');
     if (container) {
-      container.innerHTML = '<p style="color: red; padding: 20px;">Error loading store configuration. Please try again later.</p>';
+      container.innerHTML = '<p style="color: red; padding: 20px;">שגיאה בטעינת תצורת החנות. אנא נסו שוב מאוחר יותר.</p>';
     }
     return;
   }
@@ -49,7 +49,7 @@
   const buttonColor = container.getAttribute('data-button-color') || '#25D366';
 
   if (!store) {
-    container.innerHTML = '<p style="color: red;">Error: Shop information not found.</p>';
+    container.innerHTML = '<p style="color: red;">שגיאה: פרטי החנות לא נמצאו.</p>';
     return;
   }
 
@@ -182,7 +182,7 @@
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Network response was not ok");
+            throw new Error("תגובת הרשת נכשלה");
           }
           return response.json();
         })

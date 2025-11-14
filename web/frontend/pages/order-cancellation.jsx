@@ -83,7 +83,7 @@ export default function OrderCancellation() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to submit cancellation request");
+        throw new Error(errorData.message || "שליחת בקשת הביטול נכשלה");
       }
 
       toast.success("בקשת הביטול נשלחה בהצלחה!");

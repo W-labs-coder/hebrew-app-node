@@ -181,7 +181,7 @@ const SabbathSection = ({ themes }) => {
 
       } catch (error) {
         console.error("Error loading settings:", error);
-        toast.error("Error loading settings");
+        toast.error("שגיאה בטעינת ההגדרות");
 
         if (error.message.includes("Unauthorized") || error.message.includes("session")) {
           window.location.href = "/auth";
@@ -231,7 +231,7 @@ const SabbathSection = ({ themes }) => {
         uploadedFileUrl = await uploadFile(file);
         setSelectedFile(uploadedFileUrl);
         if (!uploadedFileUrl) {
-          toast.error("Error uploading file");
+          toast.error("שגיאה בהעלאת הקובץ");
           return;
         }
       }
@@ -257,7 +257,7 @@ const SabbathSection = ({ themes }) => {
         }),
       });
 
-      if (!settingsResponse.ok) throw new Error("Failed to update settings");
+      if (!settingsResponse.ok) throw new Error("שמירת ההגדרות נכשלה");
 
       // Then toggle theme with proper theme ID
       const themeResponse = await fetch("/api/settings/toggle-sabbath-theme", {
@@ -273,7 +273,7 @@ const SabbathSection = ({ themes }) => {
 
       if (!themeResponse.ok) {
         const errorData = await themeResponse.json();
-        throw new Error(errorData.message || "Failed to toggle theme");
+        throw new Error(errorData.message || "שינוי ערכת הנושא נכשל");
       }
 
       // Set submit successful to show theme editor link
@@ -288,7 +288,7 @@ const SabbathSection = ({ themes }) => {
       
     } catch (error) {
       console.error(error);
-      toast.error(error.message || "Failed to update settings");
+      toast.error(error.message || "שמירת ההגדרות נכשלה");
     } finally {
       setIsSubmitting(false);
     }

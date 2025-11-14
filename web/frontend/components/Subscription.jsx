@@ -323,7 +323,7 @@ const Subscription = ({ subscriptions }) => {
                     {subscription._id == userSubscription?._id ? (
                       "פעיל"
                     ) : selected === subscription._id && loading ? (
-                      "Loading... Please wait"
+                      "טוען... נא להמתין"
                     ) : (
                       "התחל ניסיון של 8 ימים בחינם"
                     )}

@@ -243,13 +243,13 @@ const saveLanguage = async (e) => {
       console.error("Failed to add theme");
       setIsLanguageSubmitSuccessful(false);
       setIsLanguageLoading(false);
-      toast.error("Error Adding Language");
+      toast.error("שגיאה בהוספת שפה");
     }
   } catch (error) {
     console.error("Error adding theme:", error);
     setIsLanguageSubmitSuccessful(false);
     setIsLanguageLoading(false)
-    toast.error("Error Adding Language");
+    toast.error("שגיאה בהוספת שפה");
   }
 };
 
@@ -573,7 +573,7 @@ const Fonts = ({fonts, hasPermission, setShowPermissionModal}) => {
       }
     } catch (error) {
       console.error("Error updating Font:", error);
-      toast.error("Could not add Font, " + error.response.data.message);
+      toast.error("לא ניתן להוסיף פונט, " + error.response.data.message);
     } finally {
       setIsFontLoading(false);
     }

@@ -43,7 +43,7 @@ const CancellationHistorySettings = () => {
   const fetchCancellations = async () => {
     try {
       const response = await fetch(`/api/settings/transaction-cancellation/list?page=${currentPage}&limit=10`);
-      if (!response.ok) throw new Error('Failed to fetch cancellations');
+      if (!response.ok) throw new Error('שליפת ביטולים נכשלה');
       
       const data = await response.json();
       
@@ -61,7 +61,7 @@ const CancellationHistorySettings = () => {
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching cancellations:', error);
-      toast.error('Failed to load cancellation history');
+      toast.error('טעינת היסטוריית הביטולים נכשלה');
       setIsLoading(false);
     }
   };

@@ -136,7 +136,7 @@ const AccessibilitySettings = () => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || "Failed to update accessibility settings"
+          errorData.message || "שמירת ההגדרות נכשלה"
         );
       }
 
@@ -148,10 +148,10 @@ const AccessibilitySettings = () => {
       }
 
       setIsSubmitSuccessful(true);
-      toast.success("Accessibility settings updated successfully");
+      toast.success("ההגדרות נשמרו בהצלחה");
     } catch (error) {
       console.error("Error:", error);
-      toast.error(error.message || "Failed to update accessibility settings");
+      toast.error(error.message || "שמירת ההגדרות נכשלה");
 
       // Handle session expiration
       if (
@@ -194,9 +194,7 @@ const AccessibilitySettings = () => {
       window.open(url, "_blank");
     } catch (error) {
       console.error("WhatsApp redirect error:", error);
-      toast.error(
-        "Could not open WhatsApp. Please check the phone number format."
-      );
+      toast.error("לא ניתן לפתוח WhatsApp. בדקו את פורמט מספר הטלפון.");
     }
   };
 
