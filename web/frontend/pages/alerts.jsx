@@ -243,7 +243,7 @@ const AlertSection = ({ notificationTypes }) => {
                 <div className="d-flex aic gap-2">
                   <AlertIcon3 />
                   <div>
-                    <p className="fs14 fw700" style={{ color: "#FBFBFB", marginBottom: '50px' }}>
+                    <p className="fs14 fw700" style={{ color: "#FBFBFB", marginBottom: '20px' }}>
                       לאחר שערכתם את הטקסט בחלון למעלה, לחצו "העתקת טקסט" והכנסו
                       לניהול ההתראות, שם תדביקו את הטקסט:
                     </p>
