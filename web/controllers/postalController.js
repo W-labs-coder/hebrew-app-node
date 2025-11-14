@@ -417,8 +417,6 @@ export const validateIsraeliPostalCode = async (address, city) => {
     } else {
       console.log("⚠️ GOOGLE_MAPS_API_KEY not set; skipping Google Maps lookup");
     }
-    }
-
     // If Google Maps fails, try AI model with updated prompt
     if (!aiClient) {
       console.warn('AI client not available; skipping AI postal code lookup');
@@ -459,5 +457,4 @@ export const validateIsraeliPostalCode = async (address, city) => {
     return null;
   }
 };
-
 

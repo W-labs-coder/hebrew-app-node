@@ -7,11 +7,13 @@
     "debug": "node --inspect-brk index.js",
     "dev": "cross-env NODE_ENV=development nodemon index.js --ignore ./frontend",
     "serve": "cross-env NODE_ENV=production node index.js",
+    "start": "cross-env NODE_ENV=production node index.js",
+    "build": "echo 'No build step required'",
     "test:r2": "node scripts/test-r2-connection.js"
   },
   "type": "module",
   "engines": {
-    "node": ">=23.6.0"
+    "node": ">=18.17.0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.758.0",
