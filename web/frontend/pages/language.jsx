@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
-import { Frame, Layout, Page, Modal } from "@shopify/polaris";
+import { Frame, Layout, Page, Modal, Spinner } from "@shopify/polaris";
 import Input from "../components/form/Input";
 import Button from "../components/form/Button";
 import CheckLightIcon from "../components/svgs/CheckLightIcon";
@@ -206,6 +206,7 @@ const LanguageSection = ({  languages, hasPermission, setShowPermissionModal }) 
   const [shop, setShop] = useState("");
   const [isLanguageSubmitSuccessful, setIsLanguageSubmitSuccessful] = useState(false);
   const [isLangaugeLoading, setIsLanguageLoading] = useState(false)
+  const [showLanguageLoadingModal, setShowLanguageLoadingModal] = useState(false);
 
   const handleLanguageChange = (e) => {
     setSelectedLanguage(e.target.value);
@@ -221,6 +222,7 @@ const saveLanguage = async (e) => {
   }
   setIsLanguageLoading(true)
   try {
+    setShowLanguageLoadingModal(true);
     toast.info("אנא המתן בזמן שאנו מעבדים את התרגום");
     const response = await fetch("/api/settings/add-selected-language", {
       method: "POST",
@@ -250,6 +252,8 @@ const saveLanguage = async (e) => {
     setIsLanguageSubmitSuccessful(false);
     setIsLanguageLoading(false)
     toast.error("שגיאה בהוספת שפה");
+  } finally {
+    setShowLanguageLoadingModal(false);
   }
 };
 
@@ -324,10 +328,10 @@ const getLanguageEditorUrl = () => {
                 onChange={handleLanguageChange}
               />
 
-              <Button type="submit" loading={isLangaugeLoading}>
-                שמור
-              </Button>
-            </form>
+            <Button type="submit" loading={isLangaugeLoading}>
+              שמור
+            </Button>
+          </form>
             {isLanguageSubmitSuccessful && (
               <a
                 href={getLanguageEditorUrl()}
@@ -372,6 +376,20 @@ const getLanguageEditorUrl = () => {
           </div>
         </div>
       </div>
+
+      {/* Loading Modal for language translation */}
+      <Modal
+        open={showLanguageLoadingModal}
+        onClose={() => {}}
+        title=""
+      >
+        <Modal.Section>
+          <div className="d-flex flex-column aic jcc" style={{ gap: "12px", textAlign: "center" }}>
+            <Spinner size="large" />
+            <p className="fs14 fw500">זה עשוי לקחת כמה דקות. אנא המתן</p>
+          </div>
+        </Modal.Section>
+      </Modal>
     </section>
   );
 };
