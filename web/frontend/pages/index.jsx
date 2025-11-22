@@ -157,7 +157,6 @@ export default function HomePage() {
     generateLanguage();
     checkSubscription();
     fetchSubscriptions();
-    downloadTranslations();
     // eslint-disable-next-line
   }, []);
 
