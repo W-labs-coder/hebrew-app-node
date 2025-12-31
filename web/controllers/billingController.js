@@ -16,13 +16,13 @@ const host = process.env.HOST || process.env.APP_URL;
     return res.status(400).send({ error: "Missing host parameter" });
   }
 
+  const shop = session.shop;
+
   try {
     const subscription = await Subscription.findById(subscriptionId);
     if (!subscription) {
       return res.status(404).send({ error: "Subscription not found" });
     }
-
-    const shop = session.shop;
 
     const mutation = `
       mutation createAppSubscription($name: String!, $lineItems: [AppSubscriptionLineItemInput!]!, $returnUrl: URL!, $test: Boolean!) {
