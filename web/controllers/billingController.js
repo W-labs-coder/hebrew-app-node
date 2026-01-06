@@ -6,8 +6,10 @@ import { setupWebhooks } from '../webhooks/webhooks.js';
 
 export const createSubscription = async (req, res) => {
   const session = res.locals.shopify.session;
-  const { subscriptionId } = req.body; // Get host from request body
-const host = process.env.HOST || process.env.APP_URL;
+  const { subscriptionId } = req.body;
+  const host = process.env.HOST || process.env.APP_URL;
+  const bypassBilling = process.env.BYPASS_BILLING === "true";
+
   if (!session) {
     return res.status(401).send({ error: "Unauthorized" });
   }
@@ -24,6 +26,54 @@ const host = process.env.HOST || process.env.APP_URL;
       return res.status(404).send({ error: "Subscription not found" });
     }
 
+    // Bypass Shopify billing for dev stores
+    if (bypassBilling) {
+      const startDate = new Date();
+      const trialEndDate = new Date(startDate.getTime() + 8 * 24 * 60 * 60 * 1000);
+
+      let endDate;
+      if (subscription.duration === "monthly") {
+        endDate = new Date(trialEndDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+      } else if (subscription.duration === "yearly") {
+        endDate = new Date(trialEndDate.getTime() + 365 * 24 * 60 * 60 * 1000);
+      } else {
+        throw new Error("Invalid subscription duration");
+      }
+
+      await UserSubscription.create({
+        shop,
+        subscription: subscription._id,
+        status: "ACTIVE",
+        startDate,
+        endDate,
+        trialEndDate,
+        chargeId: `dev_${Date.now()}`,
+      });
+
+      // Ensure user exists
+      const existingUser = await User.findOne({ shop });
+      if (!existingUser) {
+        await User.create({ shop });
+      }
+
+      // Register webhooks
+      try {
+        await setupWebhooks({
+          session,
+          accessToken: session.accessToken,
+          isOnline: false,
+        });
+      } catch (webhookError) {
+        console.error("Webhook setup failed:", webhookError);
+      }
+
+      return res.status(200).send({
+        success: true,
+        confirmationUrl: `https://${shop}/admin/apps/${process.env.APP_NAME}?shop=${shop}&host=${host}&subscriptionActive=true`,
+      });
+    }
+
+    // Normal Shopify billing flow
     const mutation = `
       mutation createAppSubscription($name: String!, $lineItems: [AppSubscriptionLineItemInput!]!, $returnUrl: URL!, $test: Boolean!, $trialDays: Int) {
         appSubscriptionCreate(
