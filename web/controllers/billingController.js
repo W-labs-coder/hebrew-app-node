@@ -70,7 +70,7 @@ export const createSubscription = async (req, res) => {
       const encodedHost = Buffer.from(`${shop}/admin`).toString('base64');
       return res.status(200).send({
         success: true,
-        confirmationUrl: `https://${shop}/admin/apps/${process.env.APP_NAME}?shop=${shop}&host=${encodedHost}`,
+        confirmationUrl: `${host}?shop=${shop}&host=${encodedHost}`,
       });
     }
 
