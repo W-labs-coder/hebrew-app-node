@@ -25,12 +25,13 @@ const host = process.env.HOST || process.env.APP_URL;
     }
 
     const mutation = `
-      mutation createAppSubscription($name: String!, $lineItems: [AppSubscriptionLineItemInput!]!, $returnUrl: URL!, $test: Boolean!) {
+      mutation createAppSubscription($name: String!, $lineItems: [AppSubscriptionLineItemInput!]!, $returnUrl: URL!, $test: Boolean!, $trialDays: Int) {
         appSubscriptionCreate(
           name: $name
           lineItems: $lineItems
           returnUrl: $returnUrl
           test: $test
+          trialDays: $trialDays
         ) {
           appSubscription {
             id
@@ -55,7 +56,7 @@ const host = process.env.HOST || process.env.APP_URL;
               interval:
                 subscription.duration.toUpperCase() === "MONTHLY"
                   ? "EVERY_30_DAYS"
-                  : subscription.duration.toUpperCase(),
+                  : "ANNUAL",
             },
           },
         },
