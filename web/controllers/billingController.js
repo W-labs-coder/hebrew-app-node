@@ -67,10 +67,11 @@ export const createSubscription = async (req, res) => {
         console.error("Webhook setup failed:", webhookError);
       }
 
+      const storeHandle = shop.replace('.myshopify.com', '');
       const encodedHost = Buffer.from(`${shop}/admin`).toString('base64');
       return res.status(200).send({
         success: true,
-        confirmationUrl: `${host}?shop=${shop}&host=${encodedHost}`,
+        confirmationUrl: `https://admin.shopify.com/store/${storeHandle}/apps/${process.env.APP_NAME}/dashboard?shop=${shop}&host=${encodedHost}`,
       });
     }
 
