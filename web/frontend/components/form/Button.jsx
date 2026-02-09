@@ -8,7 +8,8 @@ const Button = ({
   variant = "primary",
   type = "button",
   disabled = false,
-  loading = false
+  loading = false,
+  style = {}
 }) => {
   const baseStyle =
     "transition-colors duration-200";
@@ -29,6 +30,7 @@ const Button = ({
       onClick={onClick}
       type={type}
       disabled={disabled || loading}
+      style={style}
     >
       {loading ? (
         <div class="spinner-border spinner-border-sm" role="status">

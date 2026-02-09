@@ -20,6 +20,7 @@ import { Session } from "@shopify/shopify-api"; // Add this import at the top of
 import { generateAllThemeTranslations } from "./controllers/generateLanguage.js";
 import { startTranslationWorker } from "./workers/translationWorker.js";
 import { startSyncWorker } from "./workers/syncWorker.js";
+import { startSabbathWorker } from "./workers/sabbathWorker.js";
 import localesRoutes from "./routes/localesRoutes.js";
 
 // Update the mutation at the top of the file
@@ -734,3 +735,4 @@ app.listen(PORT);
 // Start background workers
 startTranslationWorker();
 startSyncWorker();
+startSabbathWorker();

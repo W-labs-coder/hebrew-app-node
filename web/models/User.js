@@ -251,6 +251,7 @@ const userSchema = new mongoose.Schema(
     accessibilityButtonBgColor:String,
     accessibilityButtonTextColor:String,
     accessibilityButtonIconColor:String,
+    timezone: { type: String, default: "" },
   },
   { timestamps: true }
 );
