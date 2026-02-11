@@ -68,6 +68,7 @@ function getNowInTimezone(timezone) {
     hour: 'numeric',
     minute: 'numeric',
     hour12: false,
+    hourCycle: 'h23',
   });
   const parts = formatter.formatToParts(new Date());
   const weekday = parts.find(p => p.type === 'weekday').value;

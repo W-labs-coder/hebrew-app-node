@@ -684,13 +684,15 @@ flex-direction: column;
 }
 
   .sabbath-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #FBFBFB;
-    z-index: 999999;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #FBFBFB !important;
+    z-index: 999999 !important;
     overflow-y: auto;
   }
 
@@ -717,10 +719,12 @@ flex-direction: column;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0;
+    padding: 0 16px;
     gap: 10px;
-    width: 730px;
+    width: 100%;
+    max-width: 730px;
     margin: 0 auto;
+    box-sizing: border-box;
   }
 
   .sabbath-title {
@@ -851,6 +855,25 @@ flex-direction: column;
   .social-link svg {
     width: 24px;
     height: 24px;
+  }
+
+  @media (max-width: 600px) {
+    .sabbath-header {
+      padding: 20px 16px;
+    }
+    .time-box {
+      width: 70px;
+      height: 70px;
+    }
+    .time-box .number {
+      font-size: 32px;
+    }
+    .countdown {
+      gap: 12px;
+    }
+    .social-links-container {
+      width: 100%;
+    }
   }
 
   .remote-img[src^="http"] {
@@ -1179,8 +1202,10 @@ flex-direction: column;
 /* Ensure fixed elements stay fixed */
 .accessibility-widget-container,
 .whatsapp-button,
-.whatsapp-bubble-btn,
 .whatsapp-bubble-widget {
     position: fixed !important;
+    z-index: 999999 !important;
+}
+.whatsapp-bubble-btn {
     z-index: 999999 !important;
 } 
