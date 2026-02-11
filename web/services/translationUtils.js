@@ -329,6 +329,25 @@ export async function translateBatchWithCacheExt(openai, values, locale, metrics
   return translated;
 }
 
+// Convert flat dot-separated keys to nested JSON object
+export function unflattenToNested(flat) {
+  const out = {};
+  for (const [k, v] of Object.entries(flat || {})) {
+    const parts = k.split('.');
+    let node = out;
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i];
+      if (i === parts.length - 1) {
+        node[p] = v;
+      } else {
+        if (!node[p] || typeof node[p] !== 'object') node[p] = {};
+        node = node[p];
+      }
+    }
+  }
+  return out;
+}
+
 // Compute diff between current translatable content and previous digests
 // content: array of { key, value, digest }
 // prevDigests: Map-like { key -> digest }

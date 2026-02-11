@@ -2,6 +2,7 @@ import shopify from '../shopify.js';
 import SyncJob from '../models/SyncJob.js';
 import TranslationKeyStatus from '../models/TranslationKeyStatus.js';
 import { progressBus, emitProgress } from '../services/progressBus.js';
+import { unflattenToNested } from '../services/translationUtils.js';
 import fs from 'fs/promises';
 
 let running = false;
@@ -41,23 +42,25 @@ async function processSyncJob(jobDoc) {
     const assetKey = `locales/${locale}.json`;
 
     let keys = jobDoc.keys || [];
-    // If no specific keys provided, try uploading the whole asset file
-    if (!keys.length && jobDoc.filePath) {
+
+    // 1. If filePath exists, upload as nested locale asset (best-effort)
+    if (jobDoc.filePath) {
       try {
         const raw = await fs.readFile(jobDoc.filePath, 'utf8');
-        await rest.put({ path: `themes/${themeNumericId}/assets`, data: { asset: { key: assetKey, value: raw } }, type: 'application/json' });
-        await SyncJob.findByIdAndUpdate(jobId, { status: 'completed', progress: 100, 'totals.total': 0 });
-        emitProgress({ jobType: 'sync', type: 'complete', jobId, shop, themeId, locale, message: 'Asset uploaded', progress: 100 });
-        return;
+        const flat = JSON.parse(raw);
+        // Convert flat keys to nested JSON (required for locale files)
+        const nested = unflattenToNested(flat);
+        await rest.put({ path: `themes/${themeNumericId}/assets`, data: { asset: { key: assetKey, value: JSON.stringify(nested) } }, type: 'application/json' });
+        console.log(`[SyncWorker] Locale asset uploaded for ${locale}`);
       } catch (e) {
-        console.warn('Asset upload failed; falling back to translationsRegister:', e?.message || e);
+        console.warn('[SyncWorker] Asset upload failed:', e?.message || e);
       }
     }
 
-    // If we still have no keys to register, nothing to do
+    // 2. If no keys to register via API, we're done
     if (!keys.length) {
-      await SyncJob.findByIdAndUpdate(jobId, { status: 'completed', progress: 100 });
-      emitProgress({ jobType: 'sync', type: 'complete', jobId, shop, themeId, locale, message: 'No keys to sync', progress: 100 });
+      await SyncJob.findByIdAndUpdate(jobId, { status: 'completed', progress: 100, 'totals.total': 0 });
+      emitProgress({ jobType: 'sync', type: 'complete', jobId, shop, themeId, locale, message: 'Sync completed (asset only)', progress: 100 });
       return;
     }
 
@@ -84,7 +87,15 @@ async function processSyncJob(jobDoc) {
                 userErrors { field message }
               }
             }`,
-            variables: { resourceId, translations: batch.map(k => ({ key: k.key, locale, value: k.value })) },
+            variables: {
+              resourceId,
+              translations: batch.map(k => ({
+                key: k.key,
+                locale,
+                value: k.value,
+                ...(k.digest ? { translatableContentDigest: k.digest } : {})
+              }))
+            },
           },
         });
         const errs = response?.body?.data?.translationsRegister?.userErrors || [];
@@ -141,7 +152,7 @@ async function processSyncJob(jobDoc) {
       const dedup = Array.from(new Set(failedKeysAll));
       const failedPairs = dedup.map(k => {
         const found = keys.find(it => it.key === k);
-        return found ? { key: found.key, value: found.value } : { key: k, value: ' ' };
+        return found ? { key: found.key, value: found.value, digest: found.digest || '' } : { key: k, value: ' ' };
       });
       await SyncJob.create({ shop, themeId, locale, keys: failedPairs, status: 'queued', meta: { attempt: attempt + 1 } });
       emitProgress({ jobType: 'sync', type: 'requeue', jobId, shop, themeId, locale, message: `Requeued ${failedPairs.length} keys (attempt ${attempt + 1})`, progress: 100 });

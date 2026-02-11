@@ -312,7 +312,7 @@ export const addSelectedLanguage = async (req, res) => {
       let errorCount = 0;
       let errorSamples = [];
 
-      const CONCURRENCY = 1; // Sequential: ensure one batch completes before the next
+      const CONCURRENCY = 3; // Parallel: 3 concurrent batches for faster registration
 
       // Define batch processor
       async function processBatch(batch, batchIndex) {
@@ -537,10 +537,12 @@ export const addSelectedLanguage = async (req, res) => {
 
       // Create a set of Shopify keys for faster lookup
       const shopifyKeys = new Set(contentsToTranslate.map((c) => c.key));
-      // Create a digest map for faster access
+      // Create a digest map for faster access (index by both raw and sanitized key)
       const digestMap = {};
       contentsToTranslate.forEach((content) => {
         digestMap[content.key] = content.digest;
+        const sanitized = sanitizeLocaleKey(content.key);
+        if (sanitized !== content.key) digestMap[sanitized] = content.digest;
       });
 
       let translations = [];
@@ -663,7 +665,11 @@ export const addSelectedLanguage = async (req, res) => {
 
         // If there are still missing keys, requeue them for background sync instead of patching again here
         if (stillMissingAfterUpload.length > 0) {
-          const missingPairs = stillMissingAfterUpload.map((k) => ({ key: k, value: sanitizedFlat[k] ?? ' ' }));
+          const missingPairs = stillMissingAfterUpload.map((k) => ({
+            key: k,
+            value: sanitizedFlat[k] ?? ' ',
+            digest: digestMap[k] || ''
+          }));
           try {
             // Update per-key statuses
             await Promise.all(missingPairs.map(p =>
@@ -682,8 +688,9 @@ export const addSelectedLanguage = async (req, res) => {
         console.error('Preferred asset upload failed; will attempt GraphQL registration:', assetErr?.message || assetErr);
       }
 
-      // Register missing translations (fallback) if asset upload did not succeed
-      if (!assetUploadSucceeded) {
+      // Always register via API — asset upload handles locale strings,
+      // translationsRegister handles theme content translations (sections, blocks, settings)
+      {
       let translatedResourceId = themeId;
       if (!translatedResourceId.startsWith("gid://")) {
         translatedResourceId = `gid://shopify/Theme/${themeId
@@ -780,7 +787,7 @@ export const addSelectedLanguage = async (req, res) => {
               key: content.key,
               locale: selectedLocaleCode,
               value: val,
-              // no translatableContentDigest to avoid digest mismatch blocking
+              digest: content.digest || digestMap[content.key] || ''
             };
           });
 

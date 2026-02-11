@@ -77,18 +77,12 @@ async function processJob(jobDoc) {
       const fileName = `${themeNameClean}_${locale}.json`;
       const filePath = path.join(outputDir, fileName);
 
+      // Load existing translations file if available (used as base for diff)
+      let existingFileData = null;
       try {
         await fs.access(filePath);
-        await TranslationJob.findByIdAndUpdate(jobId, {
-          $push: { results: { theme: theme.name, file: fileName, uniqueItems: 0, totalItems: 0, error: '' } },
-        });
-        processed++;
-        const progress = Math.round((processed / Math.max(freeThemes.length, 1)) * 100);
-        await TranslationJob.findByIdAndUpdate(jobId, { $set: { 'totals.processedThemes': processed, progress } });
-        // Enqueue sync of existing file
-        await SyncJob.create({ shop, themeId: theme.id, locale, filePath, status: 'queued' });
-        emitProgress({ jobType: 'translate', type: 'enqueue-sync', jobId, shop, themeId: theme.id, locale, message: 'Existing file found; sync enqueued', progress });
-        continue;
+        const raw = await fs.readFile(filePath, 'utf8');
+        existingFileData = JSON.parse(raw);
       } catch {}
 
       try {
@@ -103,9 +97,8 @@ async function processJob(jobDoc) {
         const prevDigests = prev?.digests || {};
         const { toTranslate: diffItems, unchangedCount, nextDigests } = diffTranslatableContent(content, prevDigests);
 
-        // Load previous output file to reuse unchanged translations
-        let prevObj = {};
-        try { const rawPrev = await fs.readFile(filePath, 'utf8'); prevObj = JSON.parse(rawPrev); } catch (_) {}
+        // Reuse already-loaded file data instead of reading again
+        let prevObj = existingFileData || {};
 
         const contentsToTranslate = diffItems.filter(c => c.value && c.value.trim() !== '');
 
@@ -156,8 +149,13 @@ async function processJob(jobDoc) {
           }
         });
 
-        // Enqueue Shopify sync job for this theme
-        await SyncJob.create({ shop, themeId: theme.id, locale, filePath, status: 'queued' });
+        // Enqueue Shopify sync job for this theme — include keys+digests for translationsRegister
+        const syncKeys = content.map(c => ({
+          key: c.key,
+          value: obj[c.key] || '',
+          digest: c.digest || ''
+        }));
+        await SyncJob.create({ shop, themeId: theme.id, locale, filePath, keys: syncKeys, status: 'queued' });
         emitProgress({ jobType: 'translate', type: 'theme-complete', jobId, shop, themeId: theme.id, locale, message: `Theme translated (${theme.name}); sync enqueued`, progress, meta: { unchangedCount } });
       } catch (err) {
         console.error(`Theme translation failed (${theme.name}):`, err);
